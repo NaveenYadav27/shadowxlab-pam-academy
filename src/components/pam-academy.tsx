@@ -533,6 +533,20 @@ const EMPTY_ACCOUNT: PamAccount = {
   lastReconcile: "Never",
 };
 
+export const PVWA_NAV_ITEMS: { id: SectionId; label: string; icon: typeof Activity }[] = [
+  { id: "overview", label: "Dashboard", icon: LayoutDashboard },
+  { id: "accounts", label: "Accounts", icon: KeyRound },
+  { id: "safes", label: "Safes", icon: Boxes },
+  { id: "cpm", label: "CPM Operations", icon: Activity },
+  { id: "psm", label: "PSM Operations", icon: MonitorPlay },
+  { id: "policies", label: "Policies", icon: SlidersHorizontal },
+  { id: "access", label: "Administration", icon: UsersRound },
+  { id: "audit", label: "Reports & Audit", icon: FileClock },
+  { id: "discovery", label: "Discovery", icon: SearchCheck },
+  { id: "academy", label: "Learning Academy", icon: GraduationCap },
+  { id: "troubleshooting", label: "Troubleshooting", icon: LifeBuoy },
+];
+
 function titleFor(section: SectionId): string {
   return (
     NAV_GROUPS.flatMap((group) => group.items).find((item) => item.id === section)?.title ??
@@ -1523,213 +1537,110 @@ export function PamAcademy() {
       </div>
     );
   if (!sessionUser) return renderAuthGate();
-
   return (
-    <div className="app-shell">
-      {mobileMenuOpen && (
-        <div
-          className="mobile-overlay"
-          onClick={() => setMobileMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-      <aside
-        className={cx(
-          "sidebar",
-          mobileMenuOpen && "sidebar-open",
-          sidebarCollapsed && "sidebar-collapsed",
-        )}
-      >
-        <div className="sidebar-brand">
-          <span className="brand-mark">
-            <Shield size={18} />
+    <div className="pvwa-app">
+      {/* CLASSIC PVWA TOP HEADER (44px) */}
+      <header className="pvwa-top-header">
+        <div className="pvwa-brand">
+          <Shield size={16} color="#00A8E8" />
+          <span className="pvwa-brand-title">SHADOWXLAB PAM ACADEMY</span>
+          <span className="pvwa-brand-sub">PVWA CLASSIC v12.6</span>
+        </div>
+        <div className="pvwa-top-stats">
+          <span className="pvwa-vault-pill">
+            <span className="pvwa-vault-dot" />
+            VAULT: CORP-PAM-VAULT01 (ONLINE)
           </span>
-          <div>
-            <strong>SHADOWXLAB</strong>
-            <small>PAM ACADEMY</small>
-          </div>
-          <span className="brand-code">SX</span>
+          <span className="pvwa-vault-pill">CPM: ACTIVE</span>
+          <span className="pvwa-vault-pill">PSM: CONNECTED</span>
         </div>
-        <div className="workspace-switch">
-          <span className="workspace-dot" />
-          <div>
-            <strong>GFS · OPERATIONS LAB</strong>
-            <span>CORP-PAM-LAB</span>
-          </div>
-          <ChevronDown size={14} />
-        </div>
-        <nav className="main-nav" aria-label="Main navigation">
-          {NAV_GROUPS.map((group) => (
-            <div className="nav-group" key={group.label}>
-              <p className="nav-label">{group.label}</p>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Button
-                    key={item.id}
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setActive(item.id)}
-                    className={cx("nav-item", active === item.id && "nav-item-active")}
-                  >
-                    <Icon size={16} />
-                    <span>{item.title}</span>
-                    {item.id === "cpm" && failedCount > 0 && <i className="nav-alert" />}
-                    {item.id === "academy" && completionCount > 0 && (
-                      <span className="nav-count">{completionCount}</span>
-                    )}
-                  </Button>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="connection">
-            <span className="pulse-dot" />
-            <div>
-              <strong>{IS_PAM_DEMO_MODE ? "Demo Mode Active" : "All systems operational"}</strong>
-              <small>
-                {IS_PAM_DEMO_MODE ? "Local Demo Storage · RLS Safe" : "Last sync just now"}
-              </small>
-            </div>
-          </div>
-          <div className="sidebar-user">
-            <div className="user-avatar">{initials(sessionUser.email)}</div>
-            <div className="sidebar-user-info">
-              <strong>{userDisplay}</strong>
-              <small>{IS_PAM_DEMO_MODE ? "DEMO OPERATOR" : "LEARNER ACCOUNT"}</small>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              title={IS_PAM_DEMO_MODE ? "Reset demo session" : "Sign out"}
-              aria-label={IS_PAM_DEMO_MODE ? "Reset demo session" : "Sign out"}
-              onClick={() => void handleSignOut()}
-            >
-              <LogOut size={15} />
-            </Button>
-          </div>
-        </div>
-      </aside>
-      <main className="main-area">
-        <header className="topbar">
-          <div className="topbar-left">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="mobile-menu-toggle"
-              aria-label="Toggle navigation menu"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-            >
-              <Menu size={18} />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="hidden md:inline-flex"
-              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              onClick={() => setSidebarCollapsed((prev) => !prev)}
-            >
-              <PanelLeftClose size={17} className={sidebarCollapsed ? "rotate-180" : ""} />
-            </Button>
-            <span className="topbar-title">
-              ShadowXLab <span>/</span> PAM Academy
+        <div className="pvwa-top-user">
+          {IS_PAM_DEMO_MODE && (
+            <span className="pvwa-demo-badge">
+              <span className="pvwa-demo-pulse" />
+              DEMO MODE
             </span>
-            <span className="environment-chip">
-              <span />
-              CORP-PAM-LAB
-            </span>
-            {IS_PAM_DEMO_MODE && (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                DEMO MODE · AUTH BYPASS
-              </span>
-            )}
-          </div>
-          <div className="topbar-right">
-            <span className="topbar-save">
-              <span className={saving ? "save-dot busy" : "save-dot"} />
-              {saving ? "Saving" : stateLoaded ? "Progress saved" : "Loading"}
-            </span>
-            <div className="topbar-separator" />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Help"
-              title="Training help"
-              onClick={() => {
-                setActive("knowledge");
-              }}
-            >
-              <CircleHelp size={17} />
-            </Button>
-            <div className="learner-control">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setShowLearnerPicker(!showLearnerPicker)}
-                className="learner-button"
-              >
-                <span className="user-avatar small">{initials(sessionUser.email)}</span>
-                <span className="learner-identity">
-                  <strong>{userDisplay}</strong>
-                  <small>Training mode ({learner})</small>
-                </span>
-                <ChevronDown size={13} />
-              </Button>
-              {showLearnerPicker && (
-                <div className="learner-menu">
-                  <p>SIMULATED OPERATING IDENTITY</p>
-                  {LEARNERS.map((identity) => (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      key={identity}
-                      onClick={() => {
-                        setLearner(identity);
-                        setShowLearnerPicker(false);
-                        toast.info(`Operating as ${identity}`);
-                      }}
-                      className={cx(
-                        "learner-option",
-                        learner === identity && "learner-option-active",
-                      )}
-                    >
-                      <span>{identity}</span>
-                      {learner === identity && <Check size={14} />}
-                    </Button>
-                  ))}
-                  <small>Identity changes affect simulated Safe permissions.</small>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-        <div className="breadcrumb">
-          <span>ShadowXLab</span>
-          <ChevronRight size={13} />
-          <span>{breadcrumbFor(active).group}</span>
-          <ChevronRight size={13} />
-          <strong>{breadcrumbFor(active).title}</strong>
-        </div>
-        <div className="workspace-content">
-          {authIssue && (
-            <div className="inline-warning">
-              <AlertTriangle size={16} />
-              <span>{authIssue}</span>
-              <Button size="sm" variant="ghost" onClick={() => setAuthIssue("")}>
-                Dismiss
-              </Button>
-            </div>
           )}
-          {renderWorkspace()}
+          <span className="pvwa-user-id">{userDisplay}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="pvwa-btn-sm"
+            onClick={() => void handleSignOut()}
+            title={IS_PAM_DEMO_MODE ? "Reset demo session" : "Sign out"}
+          >
+            <LogOut size={13} style={{ marginRight: 4 }} />
+            {IS_PAM_DEMO_MODE ? "Reset" : "Sign out"}
+          </Button>
         </div>
+      </header>
+
+      {/* CLASSIC PVWA HORIZONTAL NAVIGATION BAR (38px) */}
+      <nav className="pvwa-nav-bar" aria-label="PVWA Primary Navigation">
+        {PVWA_NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isActive = active === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={cx("pvwa-nav-tab", isActive && "active")}
+              onClick={() => setActive(item.id)}
+            >
+              <Icon size={14} />
+              <span>{item.label}</span>
+              {item.id === "cpm" && failedCount > 0 && (
+                <span className="pvwa-tab-alert">{failedCount}</span>
+              )}
+              {item.id === "academy" && completionCount > 0 && (
+                <span className="pvwa-tab-count">{completionCount}/8</span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* CLASSIC PVWA SUBNAV / BREADCRUMB STRIP (34px) */}
+      <div className="pvwa-subnav-bar">
+        <div className="pvwa-breadcrumbs">
+          <span>PAM Administration</span>
+          <span className="pvwa-breadcrumb-sep">&gt;</span>
+          <span>{breadcrumbFor(active).group}</span>
+          <span className="pvwa-breadcrumb-sep">&gt;</span>
+          <span className="pvwa-breadcrumb-current">{breadcrumbFor(active).title}</span>
+        </div>
+        <div className="pvwa-subnav-actions">
+          <span className="pvwa-subnav-info">
+            Vault Engine: 10 Accounts · {state.safes.length} Safes · {state.sessions.length}{" "}
+            Recorded Sessions
+          </span>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+            onClick={() => {
+              updateState(resetPamState());
+              toast.success("Simulator reset to baseline");
+            }}
+            title="Reset simulation data to default training baseline"
+          >
+            Reset Simulator
+          </button>
+        </div>
+      </div>
+
+      {/* PVWA MAIN CONTENT AREA */}
+      <main className="pvwa-main-content">
+        {authIssue && (
+          <div className="inline-warning" style={{ margin: "12px 16px 0 16px" }}>
+            <AlertTriangle size={16} />
+            <span>{authIssue}</span>
+            <Button size="sm" variant="ghost" onClick={() => setAuthIssue("")}>
+              Dismiss
+            </Button>
+          </div>
+        )}
+        <div style={{ padding: 16 }}>{renderWorkspace()}</div>
         <footer className="app-footer">
           <span>SHADOWXLAB PAM ADMINISTRATOR ACADEMY</span>
           <span>SIMULATED ENVIRONMENT · NO PRODUCTION ACCESS</span>
@@ -2050,6 +1961,45 @@ function QuickActions({ setActive }: { setActive: (section: SectionId) => void }
   );
 }
 
+function topicDetail(classId: string, idx: number): string {
+  const descriptions: Record<string, string[]> = {
+    "class-01": [
+      "Vault server architecture, CPM/PSM component roles, and tamper-resistant storage.",
+      "Privileged credential risks, lateral movement vectors, and attack path mitigation.",
+      "Enterprise operational workflow: request, approve, connect, record, and rotate.",
+    ],
+    "class-02": [
+      "Safe segregation strategies: environment, department, system tiers, and sensitivity.",
+      "RBAC model, granular Safe permissions, and delegation hierarchy.",
+      "Applying least privilege access principles to administrative groups and individuals.",
+    ],
+    "class-03": [
+      "Target platform selection (Windows, Linux, DB) and authentication protocols.",
+      "Account properties: address, username, platform ID, and Safe assignment.",
+      "Pre-onboarding verification, credential validation, and health checks.",
+    ],
+    "class-04": [
+      "Distinguishing human users from service, application, and cloud identities.",
+      "Account tiering, privileged vs non-privileged classification, and risk scoring.",
+      "Identity lifecycle management from provisioning to automated offboarding.",
+    ],
+    "class-05": [
+      "Central Policy Manager architecture, heartbeat verification, and policy schedules.",
+      "Automated and manual password rotation workflows across platforms.",
+      "Diagnosing rotation failures, desynchronized credentials, and reconciliation.",
+    ],
+    "class-06": [
+      "Privileged Session Manager gateway architecture and protocol isolation.",
+      "Dual-control approval workflows, ticketing integration, and preflight checks.",
+      "Transparent credential injection, keystroke recording, and session termination.",
+    ],
+  };
+  return (
+    descriptions[classId]?.[idx] ??
+    "Comprehensive technical mastery, operational lab exercises, and practical assessment."
+  );
+}
+
 function AcademyView({
   classes,
   selectedClass,
@@ -2061,6 +2011,7 @@ function AcademyView({
   markLabComplete,
   resetLab,
   labFeedback,
+  setActive,
 }: {
   classes: typeof CLASSES;
   selectedClass: string;
@@ -2072,6 +2023,7 @@ function AcademyView({
   markLabComplete: (score?: number) => void;
   resetLab: () => void;
   labFeedback: string;
+  setActive?: (section: SectionId) => void;
 }) {
   const current = activeClass ?? classes[0];
   const topics = CLASS_TOPICS[current?.id ?? "class-01"] ?? [];
@@ -2092,323 +2044,258 @@ function AcademyView({
 
   return (
     <>
-      <SectionHeading
-        eyebrow="LEARNER DEVELOPMENT · SIX-CLASS PATH"
-        title="Learning academy"
-        description="Operational training built around real administrator responsibilities, from credential onboarding through session evidence."
-        actions={
-          <span className="academy-progress">
-            <strong>{state.completedLabs.length}/8</strong>
-            <small>LABS COMPLETE</small>
+      {/* Academy Header */}
+      <div className="pvwa-page-header">
+        <div className="pvwa-page-title-block">
+          <h1>
+            <GraduationCap size={20} className="text-[#00A8E8]" />
+            Learning Academy
+          </h1>
+          <p>SHADOWXLAB PAM ADMINISTRATOR ACADEMY · Six-Class Enterprise Operations Curriculum</p>
+        </div>
+        <div className="pvwa-toolbar">
+          <span style={{ fontSize: 12, color: "#8E9EB2", marginRight: 8 }}>
+            Curriculum Progress: <strong>{state.completedLabs.length}/8</strong> Labs Complete
           </span>
-        }
-      />
-      <div className="academy-shell">
-        <div className="class-list">
-          {classes.map((course, index) => {
-            const completedInClass = course.labs.filter((lab) =>
-              state.completedLabs.includes(lab),
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+            onClick={resetLab}
+            title="Reset training simulation state"
+          >
+            <RotateCcw size={13} />
+            Reset State
+          </button>
+        </div>
+      </div>
+
+      {/* Two-Column Dedicated Academy Layout */}
+      <div className="pvwa-academy-layout">
+        {/* Left Class Navigator */}
+        <div className="pvwa-academy-classes">
+          <div className="pvwa-academy-classes-head">
+            <h3>Training Curriculum</h3>
+          </div>
+          {classes.map((course) => {
+            const completedCount = course.labs.filter((l) =>
+              state.completedLabs.includes(l),
             ).length;
-            const Icon =
-              [Shield, Boxes, KeyRound, Fingerprint, Activity, MonitorPlay][index] ?? BookOpen;
+            const isSelected = selectedClass === course.id;
             return (
-              <Button
-                type="button"
-                variant="ghost"
+              <button
                 key={course.id}
+                type="button"
+                className={cx("pvwa-class-item", isSelected && "active")}
                 onClick={() => {
                   setSelectedClass(course.id);
                   const first = course.labs[0];
                   if (first) setSelectedLabId(first);
                 }}
-                className={cx("class-row", selectedClass === course.id && "class-row-active")}
               >
-                <span className="class-icon">
-                  <Icon size={17} />
-                </span>
-                <span className="class-row-copy">
+                <div className="pvwa-class-copy" style={{ flex: 1 }}>
                   <small>{course.label} · 1H 20M</small>
                   <strong>{course.title}</strong>
                   <span>
-                    {completedInClass}/{course.labs.length} labs
+                    {completedCount}/{course.labs.length} labs complete
                   </span>
-                </span>
-                {completedInClass === course.labs.length && (
-                  <CheckCircle2 className="class-complete" size={16} />
+                </div>
+                {completedCount === course.labs.length && (
+                  <CheckCircle2 size={16} className="text-emerald-400" />
                 )}
-              </Button>
+              </button>
             );
           })}
-          <div className="academy-credential">
-            <Shield size={18} />
-            <div>
-              <strong>Operations readiness</strong>
-              <span>Complete all 6 classes and labs to earn readiness certification.</span>
-            </div>
-            <div className="readiness-track">
-              <i style={{ width: `${Math.round((state.completedLabs.length / 8) * 100)}%` }} />
-            </div>
-          </div>
         </div>
 
-        <div className="class-content">
-          <div className="class-content-head">
-            <div>
-              <p className="eyebrow">{current?.label} · CORE SESSION</p>
-              <h2>{current?.title}</h2>
-              <p>{current?.subtitle}</p>
+        {/* Right Active Class & Lab Area */}
+        <div className="pvwa-academy-main">
+          {/* Active Class Header Card */}
+          <div className="pvwa-academy-card">
+            <div
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#00A8E8",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {current?.label} · CORE MODULE
+                </span>
+                <h2 style={{ margin: "4px 0", fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>
+                  {current?.title}
+                </h2>
+                <p style={{ margin: 0, fontSize: 12, color: "#8E9EB2" }}>{current?.subtitle}</p>
+              </div>
+              <span className="pvwa-status-pill managed">INTERACTIVE SESSION</span>
             </div>
-            <StatusBadge tone="blue">INTERACTIVE SESSION</StatusBadge>
+
+            {/* Quick jump to relevant PAM console */}
+            <div
+              style={{
+                marginTop: 12,
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                borderTop: "1px solid #1C2633",
+                paddingTop: 10,
+              }}
+            >
+              <span style={{ fontSize: 11, color: "#8E9EB2", alignSelf: "center" }}>
+                Jump to Console:
+              </span>
+              <button
+                type="button"
+                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                onClick={() => setActive?.("safes")}
+              >
+                Safes Console
+              </button>
+              <button
+                type="button"
+                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                onClick={() => setActive?.("accounts")}
+              >
+                Accounts Console
+              </button>
+              <button
+                type="button"
+                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                onClick={() => setActive?.("cpm")}
+              >
+                CPM Console
+              </button>
+              <button
+                type="button"
+                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                onClick={() => setActive?.("psm")}
+              >
+                PSM Console
+              </button>
+            </div>
           </div>
 
-          {/* Objective Evaluation Panel for Active Lab */}
-          <Panel
-            title={`Active Lab: ${currentLab}`}
-            note="OBJECTIVE-DRIVEN VALIDATION ENGINE"
-            action={
-              <div className="flex gap-2 items-center">
-                <Button
+          {/* Interactive Lab Validation Card */}
+          <div className="pvwa-academy-card">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <div>
+                <strong style={{ fontSize: 14, color: "#FFFFFF" }}>Active Lab: {currentLab}</strong>
+                <span className="block text-[11px] text-[#8E9EB2]">
+                  OBJECTIVE-DRIVEN VALIDATION ENGINE
+                </span>
+              </div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#FFFFFF" }}>
+                  Score: {evaluation.score}/100
+                </span>
+                <button
                   type="button"
-                  size="sm"
-                  variant={evaluation.completed ? "default" : "outline"}
+                  className={cx(
+                    "pvwa-btn pvwa-btn-sm",
+                    evaluation.completed ? "pvwa-btn-primary" : "pvwa-btn-secondary",
+                  )}
                   onClick={handleValidateLab}
                 >
-                  <ClipboardCheck size={14} />
+                  <ClipboardCheck size={13} />
                   Validate & Complete Lab
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={resetLab}
-                  title="Reset simulation state"
-                >
-                  <RotateCcw size={14} />
-                  Reset
-                </Button>
+                </button>
               </div>
-            }
-          >
-            <div className="objective-evaluation-card">
-              <div className="objective-meta-strip">
-                <div>
-                  <span>SCORE</span>
-                  <strong>{evaluation.score} / 100</strong>
-                </div>
-                <div>
-                  <span>STATUS</span>
-                  <StatusBadge tone={evaluation.completed ? "good" : "warn"}>
-                    {evaluation.completed ? "OBJECTIVES MET" : "IN PROGRESS"}
-                  </StatusBadge>
-                </div>
-                <div>
-                  <span>TASK PROGRESS</span>
-                  <strong>
-                    {evaluation.objectives.filter((o: LabObjective) => o.done).length} /{" "}
-                    {evaluation.objectives.length}
-                  </strong>
-                </div>
-              </div>
+            </div>
 
-              <div className="objective-checklist">
-                <p className="eyebrow">VERIFIED REQUIREMENTS</p>
-                {evaluation.objectives.map((obj: LabObjective) => (
-                  <div key={obj.id} className="objective-item">
-                    <span className={obj.done ? "obj-badge obj-met" : "obj-badge obj-pending"}>
-                      {obj.done ? <Check size={13} /> : <Clock3 size={13} />}
-                    </span>
-                    <div>
-                      <strong>{obj.description}</strong>
-                      {obj.evidence && <small>{obj.evidence}</small>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {evaluation.feedback && (
+            {/* Checklist of objectives */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+              {evaluation.objectives.map((obj: LabObjective) => (
                 <div
-                  className={cx(
-                    "eval-feedback-callout",
-                    evaluation.completed ? "feedback-ok" : "feedback-pending",
-                  )}
+                  key={obj.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 8,
+                    padding: 8,
+                    background: "#0B0F14",
+                    border: "1px solid #1C2633",
+                    borderRadius: 3,
+                    fontSize: 12,
+                  }}
                 >
-                  {evaluation.completed ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-                  <span>{evaluation.feedback}</span>
-                </div>
-              )}
-              {labFeedback && <p className="small-note">{labFeedback}</p>}
-            </div>
-          </Panel>
-
-          <div className="class-callout">
-            <div className="callout-symbol">
-              <Network size={19} />
-            </div>
-            <div>
-              <strong>Enterprise context</strong>
-              <p>
-                GLOBAL FINANCIAL SERVICES runs a hybrid Windows, Linux, database and payments
-                environment. Your work in CORP-PAM-LAB is tracked directly in the shared simulation
-                engine and audit evidence.
-              </p>
-            </div>
-          </div>
-          <div className="class-concepts">
-            <div className="concept-topline">
-              <h3>Session objectives & technical concepts</h3>
-              <span>{topics.length} LEARNING OBJECTIVES</span>
-            </div>
-            <div className="concept-grid">
-              {topics.map((topic, index) => (
-                <div className="concept-item" key={topic}>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <span style={{ color: obj.done ? "#34D399" : "#FBBF24", marginTop: 2 }}>
+                    {obj.done ? <Check size={14} /> : <Clock3 size={14} />}
+                  </span>
                   <div>
-                    <strong>{topic}</strong>
-                    <p>{topicDetail(current?.id ?? "", index)}</p>
+                    <strong style={{ color: "#E8EEF5" }}>{obj.description}</strong>
+                    {obj.evidence && <small className="block text-[#8E9EB2]">{obj.evidence}</small>}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-          <div className="class-explanation">
-            <div>
-              <p className="eyebrow">INSTRUCTOR EXPLANATION</p>
-              <h3>{instructorLine(current?.id ?? "")}</h3>
-            </div>
-            <p>{instructorCopy(current?.id ?? "")}</p>
+
+            {evaluation.feedback && (
+              <div
+                style={{
+                  padding: 8,
+                  borderRadius: 3,
+                  background: evaluation.completed
+                    ? "rgba(16, 185, 129, 0.12)"
+                    : "rgba(245, 158, 11, 0.12)",
+                  border: evaluation.completed
+                    ? "1px solid rgba(16, 185, 129, 0.3)"
+                    : "1px solid rgba(245, 158, 11, 0.3)",
+                  color: evaluation.completed ? "#34D399" : "#FBBF24",
+                  fontSize: 12,
+                }}
+              >
+                {evaluation.feedback}
+              </div>
+            )}
           </div>
 
-          <div className="lab-list-heading">
-            <div>
-              <h3>Class Labs</h3>
-              <p>Choose a lab to inspect its requirements and validate completion.</p>
-            </div>
-          </div>
-          <div className="lab-rows">
-            {current?.labs.map((lab, index) => {
-              const done = state.completedLabs.includes(lab);
-              const isSelected = lab === currentLab;
-              return (
-                <div className={cx("lab-row", isSelected && "lab-row-active")} key={lab}>
-                  <div className={cx("lab-state", done && "lab-state-done")}>
-                    {done ? <Check size={16} /> : <span>{index + 1}</span>}
-                  </div>
-                  <div className="lab-row-copy">
-                    <strong>{lab}</strong>
-                    <small>{PRACTICES[lab] ?? "Complete required operations."}</small>
-                  </div>
-                  {done && (
-                    <Badge className="badge-complete">
-                      COMPLETE · {state.scores[lab] ?? 100}/100
-                    </Badge>
-                  )}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={isSelected ? "default" : "outline"}
-                    onClick={() => setSelectedLabId(lab)}
-                  >
-                    {isSelected ? "Active Lab" : "Select Lab"}
-                    <ArrowRight size={14} />
-                  </Button>
+          {/* Technical Concepts */}
+          <div className="pvwa-academy-card">
+            <strong style={{ fontSize: 13, color: "#FFFFFF", display: "block", marginBottom: 8 }}>
+              Technical Concepts & Architecture Notes
+            </strong>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+                gap: 8,
+              }}
+            >
+              {topics.map((t, idx) => (
+                <div
+                  key={t}
+                  style={{
+                    padding: 8,
+                    background: "#0B0F14",
+                    border: "1px solid #1C2633",
+                    borderRadius: 3,
+                    fontSize: 11,
+                  }}
+                >
+                  <span style={{ color: "#00A8E8", fontWeight: 700, marginRight: 6 }}>
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
+                  <strong style={{ color: "#E8EEF5" }}>{t}</strong>
+                  <p style={{ margin: "2px 0 0 0", color: "#8E9EB2" }}>
+                    {topicDetail(current?.id ?? "", idx)}
+                  </p>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </>
-  );
-}
-
-function topicDetail(classId: string, index: number): string {
-  const snippets: Record<string, string[]> = {
-    "class-01": [
-      "An attacker who gains a powerful credential can move laterally beyond the original host; vaulting reduces standing exposure and improves accountability.",
-      "Track discovery, ownership, approval, onboarding, managed access, operation evidence, review and retirement as one accountable chain.",
-      "PVWA handles operator workflows; the Vault enforces protected storage and access; CPM manages credentials; PSM brokers and records sessions.",
-      "The first establishes who the requester is. The second determines which privileged account action that identity is allowed to perform.",
-      "The Vault protects credentials; CPM controls their target-side lifecycle; PSM provides mediated, reviewable command access.",
-      "A request should be attributable, policy checked, brokered through the correct component and closed with evidence.",
-    ],
-    "class-02": [
-      "A Safe is a permission boundary and lifecycle container, not merely a folder name. Its membership should map to operational need.",
-      "Retrieve, use and manage are separate capabilities; broad management permissions need explicit ownership and review.",
-      "The administrator who manages Safe configuration need not be the business approver or the account's session operator.",
-      "Separate platform-specific identities while keeping consistent owner, member, review and emergency-access practices.",
-      "Membership should reflect current duties; audit evidence makes additions, changes and removals reviewable.",
-      "Follow the identity, Safe, specific permission and attempted operation. Do not assume login failures imply a password problem.",
-    ],
-    "class-03": [
-      "A target account's type determines how it is discovered, managed and accessed.",
-      "Named responsibility plus a documented workload dependency prevents unmanaged credential changes from causing outages.",
-      "A platform defines supported account behavior; the Safe controls access; account properties identify the target and intended use.",
-      "Validate target reachability and account identity before enabling rotation; a wrong account can cause operational impact.",
-      "An account should appear in inventory, CPM status, reports and audit as one shared record.",
-      "Compare each field with the observed failure instead of changing platform or credentials blindly.",
-    ],
-    "class-04": [
-      "Human identities are tied to a person; non-human identities serve workloads and require dependency-aware control.",
-      "A custodian operates the account; a business owner is accountable for the supported service and continuing need.",
-      "Shared access weakens direct attribution; a brokered session plus ticket and recording can restore meaningful accountability.",
-      "Rank by privilege, exposure, business criticality, ownership and control coverage.",
-      "Map the consumer before scheduling changes; coordinated rotation must account for the workload's credential consumers.",
-      "Each lifecycle stage needs a decision, a control and evidence before advancing.",
-    ],
-    "class-05": [
-      "CPM selects platform-specific logic to reach and manage a target account; configuration and target behavior must align.",
-      "Verify tests whether the managed credential works on the target. It does not change the password.",
-      "A change must update the target and protected record as a coordinated operation; inspect outcome before retry.",
-      "Reconciliation is a recovery operation to restore the managed credential relationship, not a general retry button.",
-      "A schedule is meaningful only when complexity, target constraints and dependent services remain compatible.",
-      "Use operation codes and account context to distinguish connectivity, target rights, policy and dependency failures.",
-      "Record the original failure, corrective action, retry outcome and verification result.",
-    ],
-    "class-06": [
-      "PSM brokers the session between operator and target rather than giving the operator direct credential access.",
-      "A connection component supplies the supported target protocol and launch configuration.",
-      "Approval binds access to a specific business purpose, target and timeframe.",
-      "Events and recordings let a reviewer reconstruct who connected, what happened and when.",
-      "Separate permission denial from connector, target and session policy failures.",
-      "A completed session includes launch, activity, termination and evidence review.",
-    ],
-  };
-  return (
-    snippets[classId]?.[index] ??
-    "Translate the concept into a controlled operational decision and capture evidence for the next reviewer."
-  );
-}
-
-function instructorLine(classId: string): string {
-  const labels: Record<string, string> = {
-    "class-01": "The PAM control plane is a chain of responsibilities.",
-    "class-02": "A Safe boundary is only as strong as its least-privilege design.",
-    "class-03": "An account is not managed until identity, target and control state agree.",
-    "class-04": "Ownership and accountability are controls, not optional inventory fields.",
-    "class-05": "Treat every CPM outcome as a state transition with a failure boundary.",
-    "class-06": "A privileged session is a controlled and reviewable operation.",
-  };
-  return labels[classId] ?? "Keep every change attributable, scoped and reviewable.";
-}
-
-function instructorCopy(classId: string): string {
-  const copy: Record<string, string> = {
-    "class-01":
-      "Start by asking where the request is enforced, what identity enters each boundary, and what evidence proves the operation completed. A component outage and an authorization denial have different signatures and different owners.",
-    "class-02":
-      "Grant the smallest set that enables the task. For mediated administration, session permission does not imply password retrieval. Review dependencies before selecting permissions, and validate both an allowed and a denied operation.",
-    "class-03":
-      "Confirm account identity and target reachability first, then platform behavior, Safe placement, owner and verify result. Do not enable a rotation policy against an unverified target record.",
-    "class-04":
-      "Classify the account's function and dependencies before choosing control. Shared and service identities need an accountable owner, a consumer map and a planned rotation approach.",
-    "class-05":
-      "Verify, change and reconcile are distinct operations. A failed change leaves uncertainty about the target and Vault state; read the error, repair the identified condition, reconcile only when needed, then retry and verify.",
-    "class-06":
-      "Check approval and Safe session permission before testing the target path. Use the connection component and connector status to isolate launch failures; the session is not complete until it is terminated and evidence is reviewed.",
-  };
-  return (
-    copy[classId] ??
-    "Use the operational record and audit trail to establish what happened before changing configuration."
   );
 }
 
@@ -2672,6 +2559,11 @@ function SafesView({
 }) {
   const [safeSearch, setSafeSearch] = useState("");
   const [testPermission, setTestPermission] = useState<SafePermission>("Use accounts");
+  const [safeTab, setSafeTab] = useState<
+    "general" | "accounts" | "members" | "permissions" | "activities"
+  >("general");
+  const [showAddSafeModal, setShowAddSafeModal] = useState(false);
+
   const visibleSafes = state.safes.filter(
     (safe) =>
       safe.name.toLowerCase().includes(safeSearch.toLowerCase()) ||
@@ -2700,33 +2592,56 @@ function SafesView({
 
   return (
     <>
-      <SectionHeading
-        eyebrow="VAULT ADMINISTRATION · ACCESS BOUNDARIES"
-        title="Safe administration"
-        description="Create protection boundaries, assign members and validate least-privilege access against the shared enterprise inventory."
-        actions={
-          <Button
+      {/* Page Title & Context Toolbar */}
+      <div className="pvwa-page-header">
+        <div className="pvwa-page-title-block">
+          <h1>
+            <Boxes size={20} className="text-[#00A8E8]" />
+            Safes
+          </h1>
+          <p>
+            CyberArk PVWA Classic Safe boundaries, member authorizations, and least-privilege matrix
+          </p>
+        </div>
+        <div className="pvwa-toolbar">
+          <button
             type="button"
-            variant="outline"
-            onClick={() =>
-              document.getElementById("safe-create-form")?.scrollIntoView({ behavior: "smooth" })
-            }
+            className="pvwa-btn pvwa-btn-primary"
+            onClick={() => setShowAddSafeModal(true)}
           >
-            <Plus size={15} />
-            Create Safe
-          </Button>
-        }
-      />
-      <div className="inventory-stats">
-        <div>
-          <span>TOTAL SAFES</span>
+            <Plus size={14} />
+            Add Safe
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary"
+            onClick={() => {
+              setAccessResult({
+                allowed: true,
+                message: `${currentSafe?.name ?? selectedSafe} boundary reviewed. ${currentSafe?.members.length ?? 0} members · ${safeAccounts.length} accounts enrolled.`,
+              });
+              setSafeTab("permissions");
+            }}
+          >
+            <ClipboardCheck size={14} />
+            Review Access
+          </button>
+        </div>
+      </div>
+
+      {/* Summary Metrics Strip */}
+      <div className="pvwa-metrics-strip">
+        <div className="pvwa-metric-card">
+          <span>CONFIGURED SAFES</span>
           <strong>{state.safes.length}</strong>
+          <small>Vault boundaries</small>
         </div>
-        <div>
-          <span>ACCOUNTS STORED</span>
+        <div className="pvwa-metric-card">
+          <span>STORED ACCOUNTS</span>
           <strong>{state.accounts.length}</strong>
+          <small>Privileged identities</small>
         </div>
-        <div>
+        <div className="pvwa-metric-card">
           <span>SAFE ADMINISTRATORS</span>
           <strong>
             {state.safes.reduce(
@@ -2735,139 +2650,186 @@ function SafesView({
               0,
             )}
           </strong>
+          <small>Full administrative delegates</small>
         </div>
-        <div>
+        <div className="pvwa-metric-card">
           <span>POLICY ENFORCEMENT</span>
-          <strong>LEAST PRIVILEGE</strong>
+          <strong style={{ color: "#34D399" }}>LEAST PRIVILEGE</strong>
+          <small>Dual-control ready</small>
         </div>
       </div>
-      <div className="safe-workspace">
-        <aside className="safe-list-pane">
-          <div className="pane-title">
-            <div>
-              <strong>Safes</strong>
-              <span>{state.safes.length} configured</span>
+
+      {/* Filter and Search Bar */}
+      <div className="pvwa-filter-strip">
+        <div className="pvwa-search-box">
+          <Search size={14} className="text-[#6F8094]" />
+          <input
+            type="text"
+            aria-label="Search Safes"
+            placeholder="Search Safes by name or description..."
+            value={safeSearch}
+            onChange={(e) => setSafeSearch(e.target.value)}
+          />
+        </div>
+        <span className="pvwa-record-count">{visibleSafes.length} SAFES</span>
+      </div>
+
+      {/* Dense PVWA Safes Data Grid */}
+      <div className="pvwa-grid-wrap">
+        <table className="pvwa-grid">
+          <thead>
+            <tr>
+              <th>SAFE NAME</th>
+              <th>DESCRIPTION</th>
+              <th>ACCOUNTS</th>
+              <th>MEMBERS</th>
+              <th>SAFE OWNER</th>
+              <th>RETENTION</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visibleSafes.map((safe) => {
+              const isSelected = (currentSafe?.name ?? selectedSafe) === safe.name;
+              const accountsInSafe = state.accounts.filter((a) => a.safe === safe.name).length;
+              return (
+                <tr
+                  key={safe.name}
+                  onClick={() => {
+                    setSelectedSafe(safe.name);
+                    setAccessResult(null);
+                  }}
+                  className={isSelected ? "selected" : ""}
+                >
+                  <td>
+                    <strong>{safe.name}</strong>
+                  </td>
+                  <td>
+                    <span className="text-[#8E9EB2]">{safe.description}</span>
+                  </td>
+                  <td>
+                    <strong>{accountsInSafe}</strong>
+                  </td>
+                  <td>{safe.members.length} operators</td>
+                  <td>{safe.owner}</td>
+                  <td>7 days</td>
+                  <td>
+                    <span className="pvwa-status-pill managed">
+                      <i className="pvwa-pulse-dot" />
+                      ACTIVE
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSafe(safe.name);
+                        setSafeTab("permissions");
+                      }}
+                    >
+                      Permissions
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Classic Safe Details Panel (Lower Master-Detail) */}
+      {currentSafe && (
+        <div className="pvwa-detail-panel">
+          <div className="pvwa-detail-header">
+            <div className="pvwa-detail-title">
+              <Boxes size={16} className="text-[#00A8E8]" />
+              <h3>Safe Details: {currentSafe.name}</h3>
+              <span>· Owned by {currentSafe.owner}</span>
             </div>
-            <Button
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="pvwa-status-pill managed">ACTIVE VAULT SAFE</span>
+            </div>
+          </div>
+
+          {/* Master-Detail Tabs */}
+          <div className="pvwa-detail-tabs">
+            <button
               type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Create Safe"
-              onClick={() =>
-                document.getElementById("safe-create-form")?.scrollIntoView({ behavior: "smooth" })
-              }
+              className={cx("pvwa-tab-btn", safeTab === "general" && "active")}
+              onClick={() => setSafeTab("general")}
             >
-              <Plus size={16} />
-            </Button>
-          </div>
-          <div className="search-field">
-            <Search size={14} />
-            <Input
-              aria-label="Search Safes"
-              placeholder="Find a Safe"
-              value={safeSearch}
-              onChange={(event) => setSafeSearch(event.target.value)}
-            />
-          </div>
-          <div className="safe-list">
-            {visibleSafes.map((safe) => (
-              <Button
-                type="button"
-                variant="ghost"
-                key={safe.name}
-                onClick={() => {
-                  setSelectedSafe(safe.name);
-                  setAccessResult(null);
-                }}
-                className={cx("safe-list-item", selectedSafe === safe.name && "safe-list-active")}
-              >
-                <span className="safe-folder">
-                  <Boxes size={15} />
-                </span>
-                <span>
-                  <strong>{safe.name}</strong>
-                  <small>
-                    {safe.members.length} members ·{" "}
-                    {state.accounts.filter((account) => account.safe === safe.name).length} accounts
-                  </small>
-                </span>
-                <ChevronRight size={14} />
-              </Button>
-            ))}
-          </div>
-        </aside>
-        <div className="safe-detail-pane">
-          <div className="safe-detail-head">
-            <div className="safe-title-icon">
-              <Boxes size={19} />
-            </div>
-            <div>
-              <div className="safe-title-line">
-                <h2>{currentSafe?.name ?? selectedSafe}</h2>
-                <StatusBadge tone="good">ACTIVE</StatusBadge>
-              </div>
-              <p>{currentSafe?.description}</p>
-            </div>
-            <Button
+              General
+            </button>
+            <button
               type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setAccessResult({
-                  allowed: true,
-                  message: `${currentSafe?.name ?? selectedSafe} reviewed. ${currentSafe?.members.length ?? 0} members · ${safeAccounts.length} accounts.`,
-                })
-              }
+              className={cx("pvwa-tab-btn", safeTab === "accounts" && "active")}
+              onClick={() => setSafeTab("accounts")}
             >
-              Review access
-            </Button>
+              Accounts ({safeAccounts.length})
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", safeTab === "members" && "active")}
+              onClick={() => setSafeTab("members")}
+            >
+              Members ({currentSafe.members.length})
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", safeTab === "permissions" && "active")}
+              onClick={() => setSafeTab("permissions")}
+            >
+              Permission Matrix
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", safeTab === "activities" && "active")}
+              onClick={() => setSafeTab("activities")}
+            >
+              Activities ({safeAudits.length})
+            </button>
           </div>
-          <div className="safe-stats">
-            <div>
-              <span>SAFE OWNER</span>
-              <strong>{currentSafe?.owner ?? "—"}</strong>
-            </div>
-            <div>
-              <span>MEMBERS</span>
-              <strong>{currentSafe?.members.length ?? 0}</strong>
-            </div>
-            <div>
-              <span>ACCOUNT INVENTORY</span>
-              <strong>{safeAccounts.length}</strong>
-            </div>
-            <div>
-              <span>RETENTION</span>
-              <strong>7 DAYS</strong>
-            </div>
-          </div>
-          <Tabs defaultValue="overview" className="ops-tabs">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="accounts">Accounts ({safeAccounts.length})</TabsTrigger>
-              <TabsTrigger value="members">
-                Members ({currentSafe?.members.length ?? 0})
-              </TabsTrigger>
-              <TabsTrigger value="permissions">Permission Matrix</TabsTrigger>
-              <TabsTrigger value="audit">Audit Activity ({safeAudits.length})</TabsTrigger>
-            </TabsList>
-            <TabsContent value="overview">
-              <div className="detail-facts" style={{ padding: "16px 0" }}>
-                <Detail label="SAFE NAME" value={currentSafe?.name ?? selectedSafe} />
-                <Detail label="OWNER" value={currentSafe?.owner ?? "—"} />
-                <Detail label="DESCRIPTION" value={currentSafe?.description ?? "No description"} />
-                <Detail label="ACCOUNTS ENROLLED" value={`${safeAccounts.length} accounts`} />
-                <Detail
-                  label="MEMBERS ASSIGNED"
-                  value={`${currentSafe?.members.length ?? 0} operators`}
-                />
-                <Detail label="RETENTION POLICY" value="7 days version history" />
-                <Detail label="PROTECTION LEVEL" value="High security · Dual control ready" />
-                <Detail label="VAULT STATUS" value="Online · Synchronized" />
+
+          <div className="pvwa-detail-body">
+            {safeTab === "general" && (
+              <div className="pvwa-facts-grid">
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">SAFE NAME</span>
+                  <span className="pvwa-fact-value">{currentSafe.name}</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">SAFE OWNER</span>
+                  <span className="pvwa-fact-value">{currentSafe.owner}</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">ACCOUNTS STORED</span>
+                  <span className="pvwa-fact-value">{safeAccounts.length} accounts</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">ASSIGNED MEMBERS</span>
+                  <span className="pvwa-fact-value">{currentSafe.members.length} identities</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">RETENTION POLICY</span>
+                  <span className="pvwa-fact-value">7 days object history</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">SECURITY BOUNDARY</span>
+                  <span className="pvwa-fact-value">Least-privilege isolation</span>
+                </div>
+                <div className="pvwa-fact span-2">
+                  <span className="pvwa-fact-label">DESCRIPTION</span>
+                  <span className="pvwa-fact-value">{currentSafe.description}</span>
+                </div>
               </div>
-            </TabsContent>
-            <TabsContent value="accounts">
-              <div className="data-table-wrap">
-                <table className="data-table">
+            )}
+
+            {safeTab === "accounts" && (
+              <div className="pvwa-grid-wrap">
+                <table className="pvwa-grid">
                   <thead>
                     <tr>
                       <th>IDENTITY</th>
@@ -2883,135 +2845,151 @@ function SafesView({
                       <tr key={acc.id}>
                         <td>
                           <strong>{acc.username}</strong>
-                          <small>{acc.name}</small>
                         </td>
                         <td>{acc.address}</td>
                         <td>{acc.platform}</td>
                         <td>{acc.type}</td>
                         <td>
-                          <StatusBadge
-                            tone={
+                          <span
+                            className={cx(
+                              "pvwa-status-pill",
                               acc.status === "Managed"
-                                ? "good"
+                                ? "managed"
                                 : acc.status === "Rotation failed"
-                                  ? "bad"
-                                  : "warn"
-                            }
+                                  ? "failed"
+                                  : "verify",
+                            )}
                           >
                             {acc.status}
-                          </StatusBadge>
+                          </span>
                         </td>
                         <td>
-                          <Button
-                            size="sm"
-                            variant="outline"
+                          <button
+                            type="button"
+                            className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
                             onClick={() => {
                               setSelectedAccount?.(acc.id);
                               setActive?.("accounts");
                             }}
                           >
-                            View
-                          </Button>
+                            Inspect
+                          </button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
                 {safeAccounts.length === 0 && (
-                  <EmptyState
-                    title="No accounts in this Safe"
-                    detail="Onboard accounts to place them into this protection boundary."
-                    icon={KeyRound}
-                  />
+                  <p
+                    style={{
+                      padding: 16,
+                      textAlign: "center",
+                      color: "#6F8094",
+                      margin: 0,
+                      fontSize: 12,
+                    }}
+                  >
+                    No accounts currently enrolled in this Safe.
+                  </p>
                 )}
               </div>
-            </TabsContent>
-            <TabsContent value="members">
-              <div className="member-table">
-                <div className="member-table-head">
-                  <span>MEMBER</span>
-                  <span>PERMISSIONS</span>
-                  <span>ACTIONS</span>
-                </div>
-                {currentSafe?.members.map((member) => (
-                  <div className="member-table-row" key={member.username}>
-                    <span className="member-name">
-                      <span className="member-avatar">{initials(member.username)}</span>
-                      <span>
-                        <strong>{member.username}</strong>
-                        <small>
-                          {member.username === currentSafe.owner
-                            ? "Safe owner"
-                            : member.username === "auditor"
-                              ? "Read-only reviewer"
-                              : "Operations member"}
-                        </small>
-                      </span>
-                    </span>
-                    <span className="member-permissions">
-                      {member.permissions.map((permission) => (
-                        <span key={permission}>{permission}</span>
-                      ))}
-                    </span>
-                    <span className="member-actions">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedMember(member.username);
-                          setMemberPermissions(member.permissions);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      {member.username !== currentSafe.owner && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-danger"
-                          onClick={() => {
-                            const result = setSafeMember(state, selectedSafe, null, learner);
-                            if (result.error) {
-                              toast.error(result.error);
-                              return;
-                            }
-                            updateState(result.state);
-                            toast.success(`${member.username} removed from ${selectedSafe}.`);
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </span>
-                  </div>
-                ))}
+            )}
+
+            {safeTab === "members" && (
+              <div className="pvwa-grid-wrap">
+                <table className="pvwa-grid">
+                  <thead>
+                    <tr>
+                      <th>MEMBER IDENTITY</th>
+                      <th>ROLE</th>
+                      <th>PERMISSIONS COUNT</th>
+                      <th>ACTIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentSafe.members.map((member) => (
+                      <tr key={member.username}>
+                        <td>
+                          <strong>{member.username}</strong>
+                        </td>
+                        <td>
+                          <span className="text-[11px] text-[#8E9EB2]">
+                            {member.username === currentSafe.owner
+                              ? "Safe Owner"
+                              : member.username === "auditor"
+                                ? "Auditor"
+                                : "Operator"}
+                          </span>
+                        </td>
+                        <td>{member.permissions.length} permissions granted</td>
+                        <td>
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button
+                              type="button"
+                              className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                              onClick={() => {
+                                setSelectedMember(member.username);
+                                setMemberPermissions(member.permissions);
+                                setSafeTab("permissions");
+                              }}
+                            >
+                              Edit Permissions
+                            </button>
+                            {member.username !== currentSafe.owner && (
+                              <button
+                                type="button"
+                                className="pvwa-btn pvwa-btn-sm pvwa-btn-danger"
+                                onClick={() => {
+                                  const result = setSafeMember(state, selectedSafe, null, learner);
+                                  if (result.error) {
+                                    toast.error(result.error);
+                                    return;
+                                  }
+                                  updateState(result.state);
+                                  toast.success(`${member.username} removed from ${selectedSafe}.`);
+                                }}
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </TabsContent>
-            <TabsContent value="permissions">
-              <div className="member-editor">
-                <div className="member-editor-title">
+            )}
+
+            {safeTab === "permissions" && (
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 12,
+                  }}
+                >
                   <div>
-                    <h3>CyberArk Safe Permission Matrix</h3>
-                    <p>
-                      Enforce least privilege and review authorization dependencies for member
-                      identities.
+                    <strong style={{ fontSize: 13, color: "#FFFFFF" }}>
+                      CyberArk Classic Safe Permission Matrix
+                    </strong>
+                    <p style={{ margin: "2px 0 0 0", fontSize: 11, color: "#8E9EB2" }}>
+                      Configure administrative authorizations and dependency controls.
                     </p>
                   </div>
-                  <div className="field compact-field">
-                    <Label>Configured Member</Label>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <label style={{ fontSize: 11, color: "#8E9EB2" }}>Member:</label>
                     <Select
                       value={selectedMember}
                       onValueChange={(value) => {
                         setSelectedMember(value);
-                        const found = currentSafe?.members.find(
-                          (member) => member.username === value,
-                        );
+                        const found = currentSafe.members.find((m) => m.username === value);
                         if (found) setMemberPermissions(found.permissions);
                       }}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -3024,137 +3002,187 @@ function SafesView({
                     </Select>
                   </div>
                 </div>
-                <div className="permission-grid">
-                  {SAFE_PERMISSIONS.map((permission) => (
-                    <label key={permission} className="permission-toggle">
-                      <Checkbox
-                        checked={memberPermissions.includes(permission)}
-                        onCheckedChange={(checked) =>
-                          togglePermission(permission, Boolean(checked))
-                        }
-                      />
-                      <span>
-                        <strong>{permission}</strong>
-                        <small>
-                          {permission === "Initiate privileged sessions"
-                            ? "Requires Use accounts permission"
-                            : permission === "Update account properties"
-                              ? "Enables editing privileged metadata"
-                              : permission === "Manage Safe"
-                                ? "Full administrative control of Safe"
-                                : "Standard Safe permission boundary"}
-                        </small>
-                      </span>
-                    </label>
-                  ))}
-                </div>
+
+                <table className="pvwa-perm-matrix">
+                  <thead>
+                    <tr>
+                      <th style={{ width: 40 }}>GRANT</th>
+                      <th>PERMISSION</th>
+                      <th>AUTHORIZATION SCOPE</th>
+                      <th>DEPENDENCY RULES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {SAFE_PERMISSIONS.map((permission) => (
+                      <tr key={permission}>
+                        <td style={{ textAlign: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={memberPermissions.includes(permission)}
+                            onChange={(e) => togglePermission(permission, e.target.checked)}
+                            style={{ cursor: "pointer" }}
+                          />
+                        </td>
+                        <td>
+                          <strong>{permission}</strong>
+                        </td>
+                        <td>
+                          <small className="text-[#8E9EB2]">
+                            {permission === "List accounts" &&
+                              "Enables viewing account existence in inventory"}
+                            {permission === "Retrieve accounts" &&
+                              "Enables fetching credential content from Safe"}
+                            {permission === "Use accounts" &&
+                              "Enables utilizing credential via PSM or client"}
+                            {permission === "Manage Safe" &&
+                              "Full administrative ownership and configuration of Safe"}
+                            {permission === "Manage accounts" &&
+                              "Enables changing and reconciling account credentials"}
+                            {permission === "Add accounts" &&
+                              "Enables creating new account objects in this Safe"}
+                            {permission === "Update account properties" &&
+                              "Enables editing metadata, address, and platforms"}
+                            {permission === "Delete accounts" &&
+                              "Enables removing account records from Safe"}
+                            {permission === "Initiate privileged sessions" &&
+                              "Enables launching brokered PSM sessions"}
+                          </small>
+                        </td>
+                        <td>
+                          <small
+                            style={{
+                              color:
+                                permission === "Initiate privileged sessions"
+                                  ? "#FBBF24"
+                                  : "#6F8094",
+                            }}
+                          >
+                            {permission === "Initiate privileged sessions" &&
+                              "Requires Use accounts"}
+                            {permission === "Update account properties" && "Enables metadata edit"}
+                            {permission === "Manage Safe" && "Admin control"}
+                            {permission !== "Initiate privileged sessions" &&
+                              permission !== "Update account properties" &&
+                              permission !== "Manage Safe" &&
+                              "Standard Safe rule"}
+                          </small>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
                 {deps.length > 0 && (
-                  <div className="dependency-alert">
-                    <AlertTriangle size={15} />
-                    <div>
-                      <strong>Missing required permission dependencies</strong>
-                      <ul>
-                        {deps.map((issue) => (
-                          <li key={issue}>{issue}</li>
-                        ))}
-                      </ul>
-                    </div>
+                  <div
+                    style={{
+                      marginTop: 10,
+                      padding: 8,
+                      background: "rgba(245, 158, 11, 0.12)",
+                      border: "1px solid rgba(245, 158, 11, 0.3)",
+                      borderRadius: 4,
+                      color: "#FBBF24",
+                      fontSize: 12,
+                    }}
+                  >
+                    <strong>Missing required permission dependencies:</strong>
+                    <ul style={{ margin: "4px 0 0 16px", padding: 0 }}>
+                      {deps.map((issue) => (
+                        <li key={issue}>{issue}</li>
+                      ))}
+                    </ul>
                   </div>
                 )}
-                <div className="member-editor-actions">
-                  <Button type="button" onClick={onSaveMember}>
-                    Save permissions
-                  </Button>
-                  <Button
+
+                <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+                  <button
                     type="button"
-                    variant="outline"
+                    className="pvwa-btn pvwa-btn-primary"
+                    onClick={onSaveMember}
+                  >
+                    Save Permissions
+                  </button>
+                  <button
+                    type="button"
+                    className="pvwa-btn pvwa-btn-secondary"
                     onClick={() => {
-                      const found = currentSafe?.members.find(
-                        (member) => member.username === selectedMember,
-                      );
+                      const found = currentSafe.members.find((m) => m.username === selectedMember);
                       setMemberPermissions(found?.permissions ?? []);
                     }}
                   >
                     Reset
-                  </Button>
+                  </button>
                 </div>
-              </div>
 
-              <div
-                style={{
-                  marginTop: 24,
-                  padding: 16,
-                  background: "#10151D",
-                  borderRadius: 8,
-                  border: "1px solid #263241",
-                }}
-              >
-                <h4
-                  style={{ margin: "0 0 8px 0", fontSize: 13, color: "#E8EEF5", fontWeight: 700 }}
+                {/* Interactive Access Evaluation Sandbox */}
+                <div
+                  style={{
+                    marginTop: 18,
+                    padding: 12,
+                    background: "#0B0F14",
+                    border: "1px solid #263241",
+                    borderRadius: 4,
+                  }}
                 >
-                  Interactive Access Evaluation Sandbox
-                </h4>
-                <p style={{ margin: "0 0 12px 0", fontSize: 12, color: "#8E9EB2" }}>
-                  Simulate whether operating learner <strong>{learner}</strong> can execute a target
-                  PAM operation in <strong>{selectedSafe}</strong>.
-                </p>
-                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <Select
-                    value={testPermission}
-                    onValueChange={(val) => setTestPermission(val as SafePermission)}
-                  >
-                    <SelectTrigger style={{ width: 240 }}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SAFE_PERMISSIONS.map((perm) => (
-                        <SelectItem key={perm} value={perm}>
-                          {perm}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button type="button" variant="outline" onClick={testLearnerAccess}>
-                    Evaluate Access
-                  </Button>
-                </div>
-                {accessResult && (
-                  <div
-                    style={{
-                      marginTop: 12,
-                      padding: 10,
-                      borderRadius: 6,
-                      background: accessResult.allowed
-                        ? "rgba(16, 185, 129, 0.12)"
-                        : "rgba(239, 68, 68, 0.12)",
-                      border: accessResult.allowed
-                        ? "1px solid rgba(16, 185, 129, 0.3)"
-                        : "1px solid rgba(239, 68, 68, 0.3)",
-                      color: accessResult.allowed ? "#34D399" : "#F87171",
-                      fontSize: 12,
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                    }}
-                  >
-                    {accessResult.allowed ? (
-                      <CheckCircle2 size={16} />
-                    ) : (
-                      <AlertTriangle size={16} />
-                    )}
-                    <span>
+                  <strong style={{ fontSize: 12, color: "#FFFFFF" }}>
+                    Interactive Access Evaluation Simulator
+                  </strong>
+                  <p style={{ margin: "2px 0 8px 0", fontSize: 11, color: "#8E9EB2" }}>
+                    Simulate whether identity <strong>{learner}</strong> can execute a target PAM
+                    action in <strong>{selectedSafe}</strong>.
+                  </p>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <Select
+                      value={testPermission}
+                      onValueChange={(val) => setTestPermission(val as SafePermission)}
+                    >
+                      <SelectTrigger className="pvwa-select h-7 text-xs w-[220px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SAFE_PERMISSIONS.map((perm) => (
+                          <SelectItem key={perm} value={perm}>
+                            {perm}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                      onClick={testLearnerAccess}
+                    >
+                      Evaluate Access
+                    </button>
+                  </div>
+                  {accessResult && (
+                    <div
+                      style={{
+                        marginTop: 8,
+                        padding: 8,
+                        borderRadius: 4,
+                        background: accessResult.allowed
+                          ? "rgba(16, 185, 129, 0.12)"
+                          : "rgba(239, 68, 68, 0.12)",
+                        border: accessResult.allowed
+                          ? "1px solid rgba(16, 185, 129, 0.3)"
+                          : "1px solid rgba(239, 68, 68, 0.3)",
+                        color: accessResult.allowed ? "#34D399" : "#F87171",
+                        fontSize: 12,
+                      }}
+                    >
                       <strong>
-                        {accessResult.allowed ? "ACCESS PERMITTED" : "ACCESS DENIED"}:{" "}
+                        {accessResult.allowed ? "ACCESS PERMITTED: " : "ACCESS DENIED: "}
                       </strong>
                       {accessResult.message}
-                    </span>
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </TabsContent>
-            <TabsContent value="audit">
-              <div className="data-table-wrap">
-                <table className="data-table">
+            )}
+
+            {safeTab === "activities" && (
+              <div className="pvwa-grid-wrap">
+                <table className="pvwa-grid">
                   <thead>
                     <tr>
                       <th>TIME</th>
@@ -3175,94 +3203,114 @@ function SafesView({
                         <td>{a.action}</td>
                         <td>{a.target}</td>
                         <td>
-                          <StatusBadge
-                            tone={
+                          <span
+                            className={cx(
+                              "pvwa-status-pill",
                               a.result === "Success"
-                                ? "good"
+                                ? "managed"
                                 : a.result === "Warning"
-                                  ? "warn"
-                                  : "bad"
-                            }
+                                  ? "verify"
+                                  : "failed",
+                            )}
                           >
                             {a.result}
-                          </StatusBadge>
+                          </span>
                         </td>
                         <td>
-                          <small>{a.detail}</small>
+                          <small className="text-[#8E9EB2]">{a.detail}</small>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {safeAudits.length === 0 && (
-                  <EmptyState
-                    title="No audit activity recorded"
-                    detail="Safe events will appear here when permissions or accounts change."
-                    icon={FileClock}
-                  />
-                )}
               </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </div>
-      </div>
-      <div id="safe-create-form">
-        <Panel
-          title="Create a new Safe"
-          note="Vault boundary creation · assigns ownership and initial permissions"
-        >
-          <form className="safe-form" onSubmit={onCreateSafe}>
-            <div className="form-grid">
-              <div className="field">
-                <Label>Safe name</Label>
-                <Input
-                  required
-                  value={newSafe.name}
-                  onChange={(event) =>
-                    setNewSafe({ ...newSafe, name: event.target.value.toUpperCase() })
-                  }
-                  placeholder="APP-DATA-SAFE"
-                />
-              </div>
-              <div className="field">
-                <Label>Owner</Label>
-                <Select
-                  value={newSafe.owner}
-                  onValueChange={(owner) => setNewSafe({ ...newSafe, owner })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LEARNERS.map((owner) => (
-                      <SelectItem key={owner} value={owner}>
-                        {owner}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field span-two">
-                <Label>Description</Label>
-                <Textarea
-                  required
-                  rows={2}
-                  value={newSafe.description}
-                  onChange={(event) => setNewSafe({ ...newSafe, description: event.target.value })}
-                  placeholder="Enterprise responsibility and system scope for this Safe"
-                />
-              </div>
-              <div className="form-end">
-                <Button type="submit">
-                  <Plus size={15} />
-                  Create Safe
-                </Button>
-                <span>The Safe creator is granted Safe owner permissions automatically.</span>
-              </div>
+      )}
+
+      {/* Add Safe Modal */}
+      {showAddSafeModal && (
+        <div className="pvwa-modal-backdrop" onClick={() => setShowAddSafeModal(false)}>
+          <div className="pvwa-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pvwa-modal-header">
+              <h3>Create Safe Boundary</h3>
+              <button
+                type="button"
+                className="text-[#8E9EB2] hover:text-white"
+                onClick={() => setShowAddSafeModal(false)}
+              >
+                <X size={16} />
+              </button>
             </div>
-          </form>
-        </Panel>
-      </div>
+            <form
+              onSubmit={(e) => {
+                onCreateSafe(e);
+                setShowAddSafeModal(false);
+              }}
+            >
+              <div className="pvwa-modal-body">
+                <div className="pvwa-form-grid">
+                  <div className="pvwa-field span-2">
+                    <label>Safe Name</label>
+                    <input
+                      required
+                      className="pvwa-input"
+                      value={newSafe.name}
+                      onChange={(e) =>
+                        setNewSafe({ ...newSafe, name: e.target.value.toUpperCase() })
+                      }
+                      placeholder="e.g. PAYMENT-GATEWAY-SAFE"
+                    />
+                  </div>
+                  <div className="pvwa-field span-2">
+                    <label>Safe Owner</label>
+                    <Select
+                      value={newSafe.owner}
+                      onValueChange={(owner) => setNewSafe({ ...newSafe, owner })}
+                    >
+                      <SelectTrigger className="pvwa-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LEARNERS.map((owner) => (
+                          <SelectItem key={owner} value={owner}>
+                            {owner}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="pvwa-field span-2">
+                    <label>Description & Scope</label>
+                    <textarea
+                      required
+                      rows={3}
+                      className="pvwa-textarea"
+                      value={newSafe.description}
+                      onChange={(e) => setNewSafe({ ...newSafe, description: e.target.value })}
+                      placeholder="Enterprise responsibility and system scope for this Safe"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="pvwa-modal-footer">
+                <button
+                  type="button"
+                  className="pvwa-btn pvwa-btn-secondary"
+                  onClick={() => setShowAddSafeModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="pvwa-btn pvwa-btn-primary">
+                  <Plus size={14} />
+                  Create Safe
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -3306,10 +3354,11 @@ function AccountsView({
   const [internalStatusFilter, setInternalStatusFilter] = useState("all");
   const [safeFilter, setSafeFilter] = useState("all");
   const [platformFilter, setPlatformFilter] = useState("all");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerTab, setDrawerTab] = useState<
-    "overview" | "properties" | "cpm" | "activities" | "sessions"
-  >("overview");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [accountTab, setAccountTab] = useState<
+    "general" | "management" | "activities" | "sessions"
+  >("general");
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const searchVal = externalSearch !== undefined ? externalSearch : internalSearch;
   const setFilterSearch = setExternalSearch ?? setInternalSearch;
@@ -3329,7 +3378,8 @@ function AccountsView({
     const matchesStatus = statusVal === "all" || acc.status === statusVal;
     const matchesSafe = safeFilter === "all" || acc.safe === safeFilter;
     const matchesPlatform = platformFilter === "all" || acc.platform === platformFilter;
-    return matchesSearch && matchesStatus && matchesSafe && matchesPlatform;
+    const matchesType = typeFilter === "all" || acc.type === typeFilter;
+    return matchesSearch && matchesStatus && matchesSafe && matchesPlatform && matchesType;
   });
 
   const focused =
@@ -3340,6 +3390,7 @@ function AccountsView({
   const owners = [...new Set(state.accounts.map((account) => account.owner))];
   const allSafes = [...new Set(state.safes.map((s) => s.name))];
   const allPlatforms = [...SUPPORTED_PLATFORMS];
+  const allTypes = [...new Set(state.accounts.map((a) => a.type))];
 
   const accountAudits = state.audit.filter(
     (a) =>
@@ -3356,101 +3407,126 @@ function AccountsView({
 
   return (
     <>
-      <SectionHeading
-        eyebrow="PRIVILEGED INVENTORY · ACCOUNT LIFECYCLE"
-        title="Account management"
-        description="Enterprise privileged account inventory modeled on CyberArk PVWA. Onboard, verify, rotate, and launch brokered sessions."
-        actions={
-          <span className="inventory-total">
-            <KeyRound size={15} />
-            <b>{state.accounts.length}</b> total accounts
-          </span>
-        }
-      />
-      <div className="inventory-stats">
-        <div>
-          <span>MANAGED</span>
-          <strong>{state.accounts.filter((a) => a.status === "Managed").length}</strong>
+      {/* Page Title & Context Toolbar */}
+      <div className="pvwa-page-header">
+        <div className="pvwa-page-title-block">
+          <h1>
+            <KeyRound size={20} className="text-[#00A8E8]" />
+            Accounts
+          </h1>
+          <p>CyberArk PVWA Classic privileged account administration and lifecycle operations</p>
         </div>
-        <div>
-          <span>VERIFY REQUIRED</span>
-          <strong>{state.accounts.filter((a) => a.status === "Verify required").length}</strong>
-        </div>
-        <div>
-          <span>ROTATION FAILED</span>
-          <strong
-            className={
-              state.accounts.some((a) => a.status === "Rotation failed") ? "metric-danger" : ""
-            }
+        <div className="pvwa-toolbar">
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-primary"
+            onClick={() => setShowAddModal(true)}
           >
-            {state.accounts.filter((a) => a.status === "Rotation failed").length}
-          </strong>
-        </div>
-        <div>
-          <span>UNMANAGED</span>
-          <strong>{state.accounts.filter((a) => a.status === "Unmanaged").length}</strong>
+            <Plus size={14} />
+            Add Account
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-connect"
+            disabled={!focused}
+            onClick={() => {
+              if (focused) {
+                if (onConnectPsm) onConnectPsm(focused);
+                else if (setActive) {
+                  setActive("psm");
+                  toast.info(`Connecting to ${focused.username} on ${focused.address}`);
+                }
+              }
+            }}
+          >
+            <MonitorPlay size={14} />
+            Connect (PSM)
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary"
+            disabled={!focused}
+            onClick={() => onCpmOperation?.("Verify")}
+          >
+            <SearchCheck size={14} />
+            Verify
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary"
+            disabled={!focused}
+            onClick={() => onCpmOperation?.("Change")}
+          >
+            <RotateCcw size={14} />
+            Change
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary"
+            disabled={!focused}
+            onClick={() => onCpmOperation?.("Reconcile")}
+          >
+            <Activity size={14} />
+            Reconcile
+          </button>
         </div>
       </div>
 
-      <Panel
-        className="account-inventory"
-        title="Enterprise Privileged Account Inventory"
-        note="GLOBAL FINANCIAL SERVICES · CyberArk PVWA Grid View"
-        action={
-          <Button
-            type="button"
-            size="sm"
-            onClick={() =>
-              document.getElementById("account-onboard")?.scrollIntoView({ behavior: "smooth" })
-            }
-          >
-            <Plus size={14} />
-            Onboard account
-          </Button>
-        }
-      >
-        <div className="table-toolbar" style={{ flexWrap: "wrap", gap: 10 }}>
-          <div className="search-field" style={{ minWidth: 260 }}>
-            <Search size={14} />
-            <Input
-              aria-label="Search accounts"
-              placeholder="Search identity, target, safe, platform..."
-              value={searchVal}
-              onChange={(event) => setFilterSearch(event.target.value)}
-            />
-          </div>
+      {/* Filter and Search Bar */}
+      <div className="pvwa-filter-strip">
+        <div className="pvwa-search-box">
+          <Search size={14} className="text-[#6F8094]" />
+          <input
+            type="text"
+            aria-label="Search accounts"
+            placeholder="Search username, target, safe, platform, owner..."
+            value={searchVal}
+            onChange={(e) => setFilterSearch(e.target.value)}
+          />
+        </div>
+        <div className="pvwa-filter-dropdowns">
           <Select value={safeFilter} onValueChange={setSafeFilter}>
-            <SelectTrigger className="filter-select" style={{ minWidth: 140 }}>
-              <Boxes size={14} />
+            <SelectTrigger className="pvwa-select h-7 text-xs w-[130px]">
               <SelectValue placeholder="All Safes" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Safes</SelectItem>
-              {allSafes.map((safe) => (
-                <SelectItem key={safe} value={safe}>
-                  {safe}
+              {allSafes.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={platformFilter} onValueChange={setPlatformFilter}>
-            <SelectTrigger className="filter-select" style={{ minWidth: 150 }}>
-              <Server size={14} />
+            <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
               <SelectValue placeholder="All Platforms" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Platforms</SelectItem>
-              {allPlatforms.map((plat) => (
-                <SelectItem key={plat} value={plat}>
-                  {plat}
+              {allPlatforms.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Account Types</SelectItem>
+              {allTypes.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
           <Select value={statusVal} onValueChange={setFilterStatus}>
-            <SelectTrigger className="filter-select" style={{ minWidth: 160 }}>
-              <SlidersHorizontal size={14} />
-              <SelectValue placeholder="All states" />
+            <SelectTrigger className="pvwa-select h-7 text-xs w-[150px]">
+              <SelectValue placeholder="All States" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Management States</SelectItem>
@@ -3461,56 +3537,78 @@ function AccountsView({
               ))}
             </SelectContent>
           </Select>
-          <span className="result-count">{accounts.length} RECORDS</span>
+          {(safeFilter !== "all" ||
+            platformFilter !== "all" ||
+            typeFilter !== "all" ||
+            statusVal !== "all" ||
+            searchVal) && (
+            <button
+              type="button"
+              className="text-xs text-[#00A8E8] hover:underline px-2 py-1"
+              onClick={() => {
+                setSafeFilter("all");
+                setPlatformFilter("all");
+                setTypeFilter("all");
+                setFilterStatus("all");
+                setFilterSearch("");
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
+        <span className="pvwa-record-count">{accounts.length} ACCOUNTS</span>
+      </div>
 
-        <div className="data-table-wrap">
-          <table className="data-table account-table">
-            <thead>
-              <tr>
-                <th>PRIVILEGED IDENTITY</th>
-                <th>TARGET SYSTEM</th>
-                <th>PLATFORM</th>
-                <th>SAFE</th>
-                <th>ACCOUNT TYPE</th>
-                <th>OWNER</th>
-                <th>CPM STATUS</th>
-                <th>LAST VERIFIED</th>
-                <th>LAST CHANGE</th>
-                <th>ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((account) => (
+      {/* Dense PVWA Accounts Data Grid */}
+      <div className="pvwa-grid-wrap">
+        <table className="pvwa-grid">
+          <thead>
+            <tr>
+              <th>USERNAME</th>
+              <th>TARGET SYSTEM</th>
+              <th>PLATFORM</th>
+              <th>SAFE</th>
+              <th>ACCOUNT TYPE</th>
+              <th>OWNER</th>
+              <th>CPM STATUS</th>
+              <th>LAST VERIFIED</th>
+              <th>LAST CHANGE</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((account) => {
+              const isSelected = focused?.id === account.id;
+              return (
                 <tr
                   key={account.id}
-                  onClick={() => {
-                    setSelectedAccount(account.id);
-                    setDrawerOpen(true);
-                  }}
-                  className={cx("click-row", selectedAccount === account.id && "row-selected")}
+                  onClick={() => setSelectedAccount(account.id)}
+                  className={isSelected ? "selected" : ""}
                 >
                   <td>
                     <strong>{account.username}</strong>
-                    <small>{account.name}</small>
+                    {account.name && account.name !== account.username && (
+                      <span className="block text-[11px] text-[#8E9EB2]">{account.name}</span>
+                    )}
                   </td>
                   <td>{account.address}</td>
                   <td>
-                    <Badge variant="outline" style={{ fontSize: 11, borderColor: "#263241" }}>
+                    <span className="text-[11px] text-[#9AA9BA] bg-[#141C26] px-1.5 py-0.5 rounded border border-[#263241]">
                       {account.platform}
-                    </Badge>
+                    </span>
                   </td>
                   <td>
-                    <span className="code-cell">{account.safe}</span>
+                    <span className="pvwa-code-cell">{account.safe}</span>
                   </td>
                   <td>
-                    <small>{account.type}</small>
+                    <span className="text-[#9AA9BA]">{account.type}</span>
                   </td>
                   <td>{account.owner}</td>
                   <td>
                     <span
                       className={cx(
-                        "status-pill",
+                        "pvwa-status-pill",
                         account.status === "Managed"
                           ? "managed"
                           : account.status === "Verify required"
@@ -3520,30 +3618,21 @@ function AccountsView({
                               : "unmanaged",
                       )}
                     >
-                      <i
-                        className={cx(
-                          "pulse-dot",
-                          account.status === "Managed" ? "pulse-good" : "",
-                        )}
-                      />
+                      <i className="pvwa-pulse-dot" />
                       {account.status}
                     </span>
                   </td>
                   <td>
-                    <small>{account.lastVerify}</small>
+                    <small className="text-[#8E9EB2]">{account.lastVerify}</small>
                   </td>
                   <td>
-                    <small>{account.lastChange}</small>
+                    <small className="text-[#8E9EB2]">{account.lastChange}</small>
                   </td>
                   <td>
-                    <div
-                      className="table-actions"
-                      onClick={(e) => e.stopPropagation()}
-                      style={{ display: "flex", gap: 4 }}
-                    >
-                      <Button
-                        size="sm"
-                        className="btn-connect"
+                    <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-sm pvwa-btn-connect"
                         title="Connect with PSM"
                         onClick={() => {
                           setSelectedAccount(account.id);
@@ -3555,11 +3644,10 @@ function AccountsView({
                         }}
                       >
                         Connect
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="row-action-btn"
+                      </button>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
                         title="Verify credential"
                         onClick={() => {
                           setSelectedAccount(account.id);
@@ -3567,580 +3655,586 @@ function AccountsView({
                         }}
                       >
                         Verify
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="row-action-btn"
-                        title="Inspect account details"
-                        onClick={() => {
-                          setSelectedAccount(account.id);
-                          setDrawerOpen(true);
-                        }}
-                      >
-                        <Eye size={13} />
-                      </Button>
+                      </button>
                     </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {accounts.length === 0 && (
-            <EmptyState
-              title="No matching accounts"
-              detail="Adjust the search text or filtering parameters."
-              icon={KeyRound}
-            />
-          )}
-        </div>
-      </Panel>
+              );
+            })}
+          </tbody>
+        </table>
+        {accounts.length === 0 && (
+          <div style={{ padding: 32, textAlign: "center", color: "#8E9EB2" }}>
+            <KeyRound size={28} className="mx-auto mb-2 text-[#6F8094]" />
+            <strong className="block text-sm text-[#E8EEF5]">No matching accounts found</strong>
+            <p className="text-xs text-[#6F8094] m-0">
+              Adjust the search filter or onboarding criteria.
+            </p>
+          </div>
+        )}
+      </div>
 
-      {/* CyberArk Right Slide-over Drawer */}
-      {drawerOpen && (
-        <div className="pvwa-drawer-backdrop" onClick={() => setDrawerOpen(false)}>
-          <div className="pvwa-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="pvwa-drawer-header">
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      {/* Classic Account Details Panel (Lower Master-Detail) */}
+      {focused && (
+        <div className="pvwa-detail-panel">
+          <div className="pvwa-detail-header">
+            <div className="pvwa-detail-title">
+              <KeyRound size={16} className="text-[#00A8E8]" />
+              <h3>Account Details: {focused.username}</h3>
+              <span>
+                · {focused.address} ({focused.platform})
+              </span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span
+                className={cx(
+                  "pvwa-status-pill",
+                  focused.status === "Managed"
+                    ? "managed"
+                    : focused.status === "Verify required"
+                      ? "verify"
+                      : focused.status === "Rotation failed"
+                        ? "failed"
+                        : "unmanaged",
+                )}
+              >
+                {focused.status}
+              </span>
+            </div>
+          </div>
+
+          {/* Master-Detail Tabs */}
+          <div className="pvwa-detail-tabs">
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", accountTab === "general" && "active")}
+              onClick={() => setAccountTab("general")}
+            >
+              General
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", accountTab === "management" && "active")}
+              onClick={() => setAccountTab("management")}
+            >
+              Management (CPM)
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", accountTab === "activities" && "active")}
+              onClick={() => setAccountTab("activities")}
+            >
+              Activities ({accountAudits.length})
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-tab-btn", accountTab === "sessions" && "active")}
+              onClick={() => setAccountTab("sessions")}
+            >
+              Sessions ({accountSessions.length})
+            </button>
+          </div>
+
+          <div className="pvwa-detail-body">
+            {accountTab === "general" && (
+              <div>
+                <div className="pvwa-facts-grid">
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">USERNAME</span>
+                    <span className="pvwa-fact-value">{focused.username}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">ACCOUNT NAME</span>
+                    <span className="pvwa-fact-value">{focused.name}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">TARGET SYSTEM</span>
+                    <span className="pvwa-fact-value">{focused.address}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">SAFE</span>
+                    <span className="pvwa-fact-value">{focused.safe}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">PLATFORM</span>
+                    <span className="pvwa-fact-value">{focused.platform}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">ACCOUNT TYPE</span>
+                    <span className="pvwa-fact-value">{focused.type}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">OWNER</span>
+                    <span className="pvwa-fact-value">{focused.owner}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">DEFAULT PORT</span>
+                    <span className="pvwa-fact-value">
+                      {focused.platform.includes("Windows")
+                        ? "3389 (RDP)"
+                        : focused.platform.includes("Unix") || focused.platform.includes("Linux")
+                          ? "22 (SSH)"
+                          : focused.platform.includes("Oracle")
+                            ? "1521 (TNS)"
+                            : focused.platform.includes("SQL")
+                              ? "1433 (TDS)"
+                              : "443 (HTTPS)"}
+                    </span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">BUSINESS PURPOSE</span>
+                    <span className="pvwa-fact-value">{focused.purpose}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">DEPENDENCY</span>
+                    <span className="pvwa-fact-value">{focused.dependency || "None recorded"}</span>
+                  </div>
+                </div>
+
                 <div
-                  className="account-key-icon"
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 6,
-                    background: "rgba(0, 168, 232, 0.12)",
-                    color: "#00A8E8",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    marginTop: 14,
+                    padding: 10,
+                    background: "#0B0F14",
+                    border: "1px solid #1C2633",
+                    borderRadius: 4,
+                    fontSize: 12,
                   }}
                 >
-                  <KeyRound size={18} />
-                </div>
-                <div>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#E8EEF5" }}>
-                    {focused?.username}
-                  </h3>
-                  <span style={{ fontSize: 12, color: "#8E9EB2" }}>
-                    {focused?.address} · {focused?.platform}
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: "#6F8094",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    LEAST-PRIVILEGE SAFE MEMBERSHIP VERIFICATION
                   </span>
+                  <p style={{ margin: "4px 0 0 0", color: "#E8EEF5" }}>
+                    Operating identity <strong>{learner}</strong>{" "}
+                    {canSafeMemberPerform(
+                      state.safes.find((s) => s.name === focused.safe),
+                      learner,
+                      "List accounts",
+                    )
+                      ? "is authorized to list accounts in this Safe."
+                      : "does not have List accounts permission in this Safe."}
+                  </p>
                 </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span
-                  className={cx(
-                    "status-pill",
-                    focused?.status === "Managed"
-                      ? "managed"
-                      : focused?.status === "Verify required"
-                        ? "verify"
-                        : focused?.status === "Rotation failed"
-                          ? "failed"
-                          : "unmanaged",
-                  )}
-                >
-                  {focused?.status}
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Close drawer"
-                  onClick={() => setDrawerOpen(false)}
-                >
-                  <X size={16} />
-                </Button>
-              </div>
-            </div>
+            )}
 
-            {/* Operational Action Toolbar */}
-            <div className="pvwa-drawer-toolbar">
-              <Button
-                size="sm"
-                className="btn-connect"
-                onClick={() => {
-                  if (focused) {
-                    if (onConnectPsm) onConnectPsm(focused);
-                    else if (setActive) {
-                      setActive("psm");
-                      toast.info(`Connecting to ${focused.username} on ${focused.address}`);
-                    }
-                  }
-                }}
-              >
-                <MonitorPlay size={14} style={{ marginRight: 6 }} />
-                Connect (PSM)
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Verify")}>
-                <SearchCheck size={14} style={{ marginRight: 6 }} />
-                Verify
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Change")}>
-                <RotateCcw size={14} style={{ marginRight: 6 }} />
-                Change
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Reconcile")}>
-                <Activity size={14} style={{ marginRight: 6 }} />
-                Reconcile
-              </Button>
-            </div>
-
-            {/* 5-Tab Selector */}
-            <div className="pvwa-drawer-tabs">
-              <button
-                type="button"
-                className={cx("pvwa-drawer-tab", drawerTab === "overview" && "active")}
-                onClick={() => setDrawerTab("overview")}
-              >
-                Overview
-              </button>
-              <button
-                type="button"
-                className={cx("pvwa-drawer-tab", drawerTab === "properties" && "active")}
-                onClick={() => setDrawerTab("properties")}
-              >
-                Properties
-              </button>
-              <button
-                type="button"
-                className={cx("pvwa-drawer-tab", drawerTab === "cpm" && "active")}
-                onClick={() => setDrawerTab("cpm")}
-              >
-                CPM
-              </button>
-              <button
-                type="button"
-                className={cx("pvwa-drawer-tab", drawerTab === "activities" && "active")}
-                onClick={() => setDrawerTab("activities")}
-              >
-                Activities ({accountAudits.length})
-              </button>
-              <button
-                type="button"
-                className={cx("pvwa-drawer-tab", drawerTab === "sessions" && "active")}
-                onClick={() => setDrawerTab("sessions")}
-              >
-                Sessions ({accountSessions.length})
-              </button>
-            </div>
-
-            {/* Tab Contents */}
-            <div className="pvwa-drawer-content">
-              {drawerTab === "overview" && focused && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="detail-facts">
-                    <Detail label="ACCOUNT NAME" value={focused.name} />
-                    <Detail label="USERNAME" value={focused.username} />
-                    <Detail label="TARGET ADDRESS" value={focused.address} />
-                    <Detail label="SAFE" value={focused.safe} />
-                    <Detail label="PLATFORM" value={focused.platform} />
-                    <Detail label="ACCOUNT TYPE" value={focused.type} />
-                    <Detail label="OWNER" value={focused.owner} />
-                    <Detail label="BUSINESS PURPOSE" value={focused.purpose} />
-                    <Detail
-                      label="APPLICATION DEPENDENCY"
-                      value={focused.dependency || "None recorded"}
-                    />
+            {accountTab === "management" && (
+              <div>
+                <div className="pvwa-facts-grid">
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">CPM MANAGEMENT STATE</span>
+                    <span className="pvwa-fact-value">{focused.status}</span>
                   </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">ROTATION POLICY</span>
+                    <span className="pvwa-fact-value">{focused.policy}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">LAST VERIFY OPERATION</span>
+                    <span className="pvwa-fact-value">{focused.lastVerify}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">LAST PASSWORD CHANGE</span>
+                    <span className="pvwa-fact-value">{focused.lastChange}</span>
+                  </div>
+                  <div className="pvwa-fact">
+                    <span className="pvwa-fact-label">LAST RECONCILE OPERATION</span>
+                    <span className="pvwa-fact-value">{focused.lastReconcile}</span>
+                  </div>
+                </div>
+
+                {focused.failureCause && (
+                  <div className="pvwa-failure-box">
+                    <AlertTriangle size={18} />
+                    <div>
+                      <strong>CPM Operation Exception Detected</strong>
+                      <p>{focused.failureCause}</p>
+                    </div>
+                  </div>
+                )}
+
+                {focused.failureCause && onRepairCpm && (
                   <div
                     style={{
+                      marginTop: 14,
                       padding: 12,
-                      borderRadius: 6,
-                      background: "#10151D",
+                      background: "#0B0F14",
                       border: "1px solid #263241",
+                      borderRadius: 4,
                     }}
                   >
                     <span
                       style={{
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: 700,
-                        color: "#6F8094",
+                        color: "#F87171",
                         textTransform: "uppercase",
+                        display: "block",
+                        marginBottom: 8,
                       }}
                     >
-                      SAFE MEMBERSHIP PERMISSION TEST
+                      ONE-CLICK INCIDENT RECOVERY ACTIONS
                     </span>
-                    <p style={{ margin: "4px 0 0 0", fontSize: 12, color: "#E8EEF5" }}>
-                      Operating Learner <strong>{learner}</strong>{" "}
-                      {canSafeMemberPerform(
-                        state.safes.find((s) => s.name === focused.safe),
-                        learner,
-                        "List accounts",
-                      )
-                        ? "has List accounts permission in this Safe."
-                        : "is not authorized to list accounts in this Safe."}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {drawerTab === "properties" && focused && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="detail-facts">
-                    <Detail label="HOSTNAME / IP" value={focused.address} />
-                    <Detail
-                      label="DEFAULT PORT"
-                      value={
-                        focused.platform.includes("Windows")
-                          ? "3389 (RDP)"
-                          : focused.platform.includes("Unix") || focused.platform.includes("Linux")
-                            ? "22 (SSH)"
-                            : focused.platform.includes("Oracle")
-                              ? "1521 (TNS)"
-                              : focused.platform.includes("SQL")
-                                ? "1433 (TDS)"
-                                : "443 (HTTPS)"
-                      }
-                    />
-                    <Detail
-                      label="LOGON DOMAIN"
-                      value={focused.platform.includes("Domain") ? "CORP.LOCAL" : "STANDALONE"}
-                    />
-                    <Detail
-                      label="PLATFORM ID"
-                      value={`${focused.platform.toLowerCase().replace(/\s+/g, "-")}-enterprise`}
-                    />
-                    <Detail label="ROTATION POLICY" value={focused.policy} />
-                    <Detail label="DISCOVERY SOURCE" value="Active Directory Scan" />
-                    <Detail label="ENROLLMENT DATE" value="2026-10-01 09:00:00 UTC" />
-                    <Detail
-                      label="AUTO MANAGEMENT"
-                      value={focused.status === "Managed" ? "Enabled" : "Suspended"}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {drawerTab === "cpm" && focused && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                  <div className="detail-facts">
-                    <Detail label="MANAGEMENT STATE" value={focused.status} />
-                    <Detail label="POLICY RULE" value={focused.policy} />
-                    <Detail label="LAST VERIFY" value={focused.lastVerify} />
-                    <Detail label="LAST CHANGE" value={focused.lastChange} />
-                    <Detail label="LAST RECONCILE" value={focused.lastReconcile} />
-                  </div>
-
-                  {focused.failureCause && (
-                    <div className="pvwa-failure-callout">
-                      <AlertTriangle size={16} />
-                      <div>
-                        <strong>CPM Rotation / Verification Failure Detected</strong>
-                        <p>{focused.failureCause}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {focused.failureCause && onRepairCpm && (
-                    <div
-                      style={{
-                        padding: 12,
-                        borderRadius: 6,
-                        background: "#10151D",
-                        border: "1px solid #263241",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 700,
-                          color: "#6F8094",
-                          textTransform: "uppercase",
-                        }}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                        onClick={() => onRepairCpm("unlock")}
                       >
-                        ONE-CLICK INCIDENT RECOVERY
-                      </span>
-                      <div
-                        style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}
+                        <Power size={13} />
+                        Unlock Target Account
+                      </button>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                        onClick={() => onRepairCpm("reconcile-access")}
                       >
-                        <Button size="sm" variant="outline" onClick={() => onRepairCpm("unlock")}>
-                          <Power size={13} style={{ marginRight: 6 }} />
-                          Unlock Target Account
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onRepairCpm("reconcile-access")}
-                        >
-                          <KeyRound size={13} style={{ marginRight: 6 }} />
-                          Restore Reconcile Access
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => onRepairCpm("target-connectivity")}
-                        >
-                          <Network size={13} style={{ marginRight: 6 }} />
-                          Repair Target Connectivity
-                        </Button>
-                      </div>
+                        <KeyRound size={13} />
+                        Restore Reconcile Access
+                      </button>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                        onClick={() => onRepairCpm("target-connectivity")}
+                      >
+                        <Network size={13} />
+                        Repair Target Connectivity
+                      </button>
                     </div>
-                  )}
-
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Verify")}>
-                      Run Verify Now
-                    </Button>
-                    <Button size="sm" onClick={() => onCpmOperation?.("Change")}>
-                      Run Change Now
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onCpmOperation?.("Reconcile")}
-                    >
-                      Run Reconcile Now
-                    </Button>
                   </div>
-                </div>
-              )}
+                )}
 
-              {drawerTab === "activities" && focused && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {accountAudits.map((a) => (
-                    <div
-                      key={a.id}
-                      style={{
-                        padding: 10,
-                        background: "#10151D",
-                        border: "1px solid #263241",
-                        borderRadius: 6,
-                        fontSize: 12,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: 4,
-                        }}
-                      >
-                        <span style={{ fontWeight: 600, color: "#E8EEF5" }}>{a.action}</span>
-                        <span style={{ color: "#6F8094", fontSize: 11 }}>{a.time}</span>
-                      </div>
-                      <div style={{ color: "#8E9EB2", fontSize: 11 }}>{a.detail}</div>
-                      <div style={{ marginTop: 6, display: "flex", gap: 6, alignItems: "center" }}>
-                        <StatusBadge
-                          tone={
-                            a.result === "Success"
-                              ? "good"
-                              : a.result === "Warning"
-                                ? "warn"
-                                : "bad"
-                          }
-                        >
-                          {a.result}
-                        </StatusBadge>
-                        <span style={{ color: "#6F8094", fontSize: 11 }}>Actor: {a.actor}</span>
-                      </div>
-                    </div>
-                  ))}
-                  {accountAudits.length === 0 && (
-                    <EmptyState
-                      title="No activities recorded"
-                      detail="Operations and access events will be logged here."
-                      icon={FileClock}
-                    />
-                  )}
+                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                  <button
+                    type="button"
+                    className="pvwa-btn pvwa-btn-secondary"
+                    onClick={() => onCpmOperation?.("Verify")}
+                  >
+                    <SearchCheck size={14} />
+                    Run Verify Now
+                  </button>
+                  <button
+                    type="button"
+                    className="pvwa-btn pvwa-btn-primary"
+                    onClick={() => onCpmOperation?.("Change")}
+                  >
+                    <RotateCcw size={14} />
+                    Run Change Now
+                  </button>
+                  <button
+                    type="button"
+                    className="pvwa-btn pvwa-btn-secondary"
+                    onClick={() => onCpmOperation?.("Reconcile")}
+                  >
+                    <Activity size={14} />
+                    Run Reconcile Now
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {drawerTab === "sessions" && focused && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {accountSessions.map((s) => (
-                    <div
-                      key={s.id}
-                      style={{
-                        padding: 10,
-                        background: "#10151D",
-                        border: "1px solid #263241",
-                        borderRadius: 6,
-                        fontSize: 12,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: 4,
-                        }}
-                      >
-                        <span style={{ fontWeight: 600, color: "#E8EEF5" }}>
-                          {s.target} ({s.component})
-                        </span>
-                        <StatusBadge tone={s.status === "Active" ? "good" : "neutral"}>
-                          {s.status}
-                        </StatusBadge>
-                      </div>
-                      <div style={{ color: "#8E9EB2", fontSize: 11 }}>
-                        Ticket: {s.ticket} · Started: {s.started}
-                      </div>
-                      <div style={{ color: "#6F8094", fontSize: 11, marginTop: 4 }}>
-                        Commands executed: {s.commands.length}
-                      </div>
-                    </div>
-                  ))}
-                  {accountSessions.length === 0 && (
-                    <EmptyState
-                      title="No recorded sessions"
-                      detail="Launch a PSM session to connect to this target."
-                      icon={MonitorPlay}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
+            {accountTab === "activities" && (
+              <div className="pvwa-grid-wrap">
+                <table className="pvwa-grid">
+                  <thead>
+                    <tr>
+                      <th>TIME</th>
+                      <th>ACTOR</th>
+                      <th>ACTION</th>
+                      <th>RESULT</th>
+                      <th>DETAIL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accountAudits.map((a) => (
+                      <tr key={a.id}>
+                        <td>{a.time}</td>
+                        <td>
+                          <strong>{a.actor}</strong>
+                        </td>
+                        <td>{a.action}</td>
+                        <td>
+                          <span
+                            className={cx(
+                              "pvwa-status-pill",
+                              a.result === "Success"
+                                ? "managed"
+                                : a.result === "Warning"
+                                  ? "verify"
+                                  : "failed",
+                            )}
+                          >
+                            {a.result}
+                          </span>
+                        </td>
+                        <td>
+                          <small className="text-[#8E9EB2]">{a.detail}</small>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {accountAudits.length === 0 && (
+                  <p
+                    style={{
+                      padding: 16,
+                      textAlign: "center",
+                      color: "#6F8094",
+                      margin: 0,
+                      fontSize: 12,
+                    }}
+                  >
+                    No audit activities recorded for this account.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {accountTab === "sessions" && (
+              <div className="pvwa-grid-wrap">
+                <table className="pvwa-grid">
+                  <thead>
+                    <tr>
+                      <th>TARGET</th>
+                      <th>COMPONENT</th>
+                      <th>TICKET</th>
+                      <th>STARTED</th>
+                      <th>COMMANDS</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accountSessions.map((s) => (
+                      <tr key={s.id}>
+                        <td>
+                          <strong>{s.target}</strong>
+                        </td>
+                        <td>{s.component}</td>
+                        <td>
+                          <span className="pvwa-code-cell">{s.ticket}</span>
+                        </td>
+                        <td>{s.started}</td>
+                        <td>{s.commands.length} executed</td>
+                        <td>
+                          <span
+                            className={cx(
+                              "pvwa-status-pill",
+                              s.status === "Active" ? "managed" : "unmanaged",
+                            )}
+                          >
+                            {s.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {accountSessions.length === 0 && (
+                  <p
+                    style={{
+                      padding: 16,
+                      textAlign: "center",
+                      color: "#6F8094",
+                      margin: 0,
+                      fontSize: 12,
+                    }}
+                  >
+                    No recorded PSM sessions for this target system.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Onboard Form */}
-      <div id="account-onboard">
-        <Panel
-          title="Onboard a privileged account"
-          note="Platform validation · Supported enterprise platforms"
-        >
-          <form className="account-form" onSubmit={onAdd}>
-            <div className="form-grid">
-              <div className="field">
-                <Label>Account name</Label>
-                <Input
-                  required
-                  value={draft.name}
-                  onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-                  placeholder="Administrator"
-                />
-              </div>
-              <div className="field">
-                <Label>Username</Label>
-                <Input
-                  required
-                  value={draft.username}
-                  onChange={(event) => setDraft({ ...draft, username: event.target.value })}
-                  placeholder="Administrator"
-                />
-              </div>
-              <div className="field">
-                <Label>Target address</Label>
-                <Input
-                  required
-                  value={draft.address}
-                  onChange={(event) =>
-                    setDraft({ ...draft, address: event.target.value.toUpperCase() })
-                  }
-                  placeholder="WIN-SRV-01"
-                />
-              </div>
-              <div className="field">
-                <Label>Platform</Label>
-                <Select
-                  value={draft.platform}
-                  onValueChange={(platform) => setDraft({ ...draft, platform })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...SUPPORTED_PLATFORMS, "Unsupported platform"].map((platform) => (
-                      <SelectItem key={platform} value={platform}>
-                        {platform}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <Label>Safe</Label>
-                <Select value={draft.safe} onValueChange={(safe) => setDraft({ ...draft, safe })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {state.safes.map((safe) => (
-                      <SelectItem key={safe.name} value={safe.name}>
-                        {safe.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <Label>Account type</Label>
-                <Select value={draft.type} onValueChange={(type) => setDraft({ ...draft, type })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[
-                      "Human administrator",
-                      "Domain administrator",
-                      "Service account",
-                      "Database account",
-                      "Application account",
-                      "Shared privileged",
-                    ].map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <Label>Owner</Label>
-                <Select
-                  value={draft.owner}
-                  onValueChange={(owner) => setDraft({ ...draft, owner })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...new Set([...LEARNERS, ...owners])].map((owner) => (
-                      <SelectItem key={owner} value={owner}>
-                        {owner}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="field">
-                <Label>Rotation policy</Label>
-                <Input disabled value="Enterprise · verify before change" />
-              </div>
-              <div className="field span-two">
-                <Label>Business purpose</Label>
-                <Textarea
-                  required
-                  rows={2}
-                  value={draft.purpose}
-                  onChange={(event) => setDraft({ ...draft, purpose: event.target.value })}
-                  placeholder="Describe the system responsibility this account supports"
-                />
-              </div>
-              <div className="field span-two">
-                <Label>
-                  Application dependency <span className="optional">OPTIONAL</span>
-                </Label>
-                <Input
-                  value={draft.dependency}
-                  onChange={(event) => setDraft({ ...draft, dependency: event.target.value })}
-                  placeholder="Service or application using this identity"
-                />
-              </div>
-              <div className="form-end">
-                <Button type="submit">
-                  <Plus size={15} />
-                  Add account
-                </Button>
-                <span>
-                  Management starts at Verify required until credential validation succeeds.
-                </span>
-              </div>
+      {/* Add Account Modal */}
+      {showAddModal && (
+        <div className="pvwa-modal-backdrop" onClick={() => setShowAddModal(false)}>
+          <div className="pvwa-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="pvwa-modal-header">
+              <h3>Onboard Privileged Account</h3>
+              <button
+                type="button"
+                className="text-[#8E9EB2] hover:text-white"
+                onClick={() => setShowAddModal(false)}
+              >
+                <X size={16} />
+              </button>
             </div>
-          </form>
-        </Panel>
-      </div>
+            <form
+              onSubmit={(e) => {
+                onAdd(e);
+                setShowAddModal(false);
+              }}
+            >
+              <div className="pvwa-modal-body">
+                <div className="pvwa-form-grid">
+                  <div className="pvwa-field">
+                    <label>Account Name</label>
+                    <input
+                      required
+                      className="pvwa-input"
+                      value={draft.name}
+                      onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                      placeholder="e.g. Administrator"
+                    />
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Username</label>
+                    <input
+                      required
+                      className="pvwa-input"
+                      value={draft.username}
+                      onChange={(e) => setDraft({ ...draft, username: e.target.value })}
+                      placeholder="e.g. Administrator"
+                    />
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Target Address / Hostname</label>
+                    <input
+                      required
+                      className="pvwa-input"
+                      value={draft.address}
+                      onChange={(e) =>
+                        setDraft({ ...draft, address: e.target.value.toUpperCase() })
+                      }
+                      placeholder="e.g. WIN-SRV-01"
+                    />
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Platform</label>
+                    <Select
+                      value={draft.platform}
+                      onValueChange={(platform) => setDraft({ ...draft, platform })}
+                    >
+                      <SelectTrigger className="pvwa-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...SUPPORTED_PLATFORMS, "Unsupported platform"].map((p) => (
+                          <SelectItem key={p} value={p}>
+                            {p}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Safe</label>
+                    <Select
+                      value={draft.safe}
+                      onValueChange={(safe) => setDraft({ ...draft, safe })}
+                    >
+                      <SelectTrigger className="pvwa-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {state.safes.map((s) => (
+                          <SelectItem key={s.name} value={s.name}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Account Type</label>
+                    <Select
+                      value={draft.type}
+                      onValueChange={(type) => setDraft({ ...draft, type })}
+                    >
+                      <SelectTrigger className="pvwa-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[
+                          "Human administrator",
+                          "Domain administrator",
+                          "Service account",
+                          "Database account",
+                          "Application account",
+                          "Shared privileged",
+                        ].map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Account Owner</label>
+                    <Select
+                      value={draft.owner}
+                      onValueChange={(owner) => setDraft({ ...draft, owner })}
+                    >
+                      <SelectTrigger className="pvwa-select">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...new Set([...LEARNERS, ...owners])].map((o) => (
+                          <SelectItem key={o} value={o}>
+                            {o}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="pvwa-field">
+                    <label>Rotation Policy</label>
+                    <input
+                      disabled
+                      className="pvwa-input text-[#6F8094]"
+                      value="Enterprise · verify before change"
+                    />
+                  </div>
+                  <div className="pvwa-field span-2">
+                    <label>Business Purpose</label>
+                    <textarea
+                      required
+                      rows={2}
+                      className="pvwa-textarea"
+                      value={draft.purpose}
+                      onChange={(e) => setDraft({ ...draft, purpose: e.target.value })}
+                      placeholder="Administrative responsibility and operational scope"
+                    />
+                  </div>
+                  <div className="pvwa-field span-2">
+                    <label>Application Dependency (Optional)</label>
+                    <input
+                      className="pvwa-input"
+                      value={draft.dependency}
+                      onChange={(e) => setDraft({ ...draft, dependency: e.target.value })}
+                      placeholder="e.g. Core Banking Service"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="pvwa-modal-footer">
+                <button
+                  type="button"
+                  className="pvwa-btn pvwa-btn-secondary"
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="pvwa-btn pvwa-btn-primary">
+                  <Plus size={14} />
+                  Onboard Account
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -4318,293 +4412,336 @@ function CpmView({
 
   return (
     <>
-      <SectionHeading
-        eyebrow="CENTRAL POLICY MANAGER · OPERATIONS"
-        title="CPM operations"
-        description="Run deterministic account verification, password changes and reconciliation. Inspect operation evidence and repair failure conditions before retry."
-        actions={
-          <StatusBadge
-            tone={
-              state.accounts.some((account) => account.status === "Rotation failed")
-                ? "warn"
-                : "good"
-            }
+      {/* Page Title & Context Toolbar */}
+      <div className="pvwa-page-header">
+        <div className="pvwa-page-title-block">
+          <h1>
+            <Activity size={20} className="text-[#00A8E8]" />
+            CPM Operations
+          </h1>
+          <p>
+            CyberArk Central Policy Manager deterministic credential verification, rotation and
+            reconciliation
+          </p>
+        </div>
+        <div className="pvwa-toolbar">
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary"
+            onClick={() => onRun("Verify")}
           >
-            {state.accounts.some((account) => account.status === "Rotation failed")
-              ? "EXCEPTIONS PRESENT"
-              : "CPM HEALTHY"}
-          </StatusBadge>
-        }
-      />
-      <div className="cpm-metrics">
-        <div>
-          <span>MANAGED ACCOUNTS</span>
-          <strong>{state.accounts.filter((account) => account.status === "Managed").length}</strong>
-          <small>eligible for schedule</small>
-        </div>
-        <div>
-          <span>VERIFY REQUIRED</span>
-          <strong>
-            {state.accounts.filter((account) => account.status === "Verify required").length}
-          </strong>
-          <small>pending credential test</small>
-        </div>
-        <div>
-          <span>FAILED ROTATIONS</span>
-          <strong
-            className={
-              state.accounts.some((account) => account.status === "Rotation failed")
-                ? "metric-danger"
-                : ""
-            }
+            <SearchCheck size={14} />
+            Verify
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-primary"
+            onClick={() => onRun("Change")}
           >
-            {state.accounts.filter((account) => account.status === "Rotation failed").length}
-          </strong>
-          <small>requires investigation</small>
-        </div>
-        <div>
-          <span>PENDING RECONCILE</span>
-          <strong>
-            {state.accounts.filter((account) => account.status === "Rotation failed").length}
-          </strong>
-          <small>review before retry</small>
+            <RotateCcw size={14} />
+            Change Password
+          </button>
+          <button
+            type="button"
+            className="pvwa-btn pvwa-btn-secondary"
+            onClick={() => onRun("Reconcile")}
+          >
+            <Activity size={14} />
+            Reconcile
+          </button>
         </div>
       </div>
-      <div className="cpm-layout">
-        <div className="cpm-main">
-          <Panel
-            title="Managed Accounts & CPM Queue"
-            note="Full enterprise inventory with instantaneous row operations"
-          >
-            <div className="data-table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ACCOUNT · TARGET</th>
-                    <th>PLATFORM · SAFE</th>
-                    <th>CPM STATUS</th>
-                    <th>LAST VERIFY</th>
-                    <th>LAST CHANGE</th>
-                    <th>LAST RECONCILE</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {queue.map((account) => (
-                    <tr
-                      key={account.id}
-                      className={cx(
-                        "click-row",
-                        (targetAccount?.id === account.id || selectedAccount === account.id) &&
-                          "row-selected",
-                      )}
-                      onClick={() => setSelectedAccount(account.id)}
-                    >
-                      <td>
-                        <strong>{account.username}</strong>
-                        <small>{account.address}</small>
-                      </td>
-                      <td>
-                        {account.platform}
-                        <small>{account.safe}</small>
-                      </td>
-                      <td>
-                        <StatusBadge
-                          tone={
-                            account.status === "Managed"
-                              ? "good"
-                              : account.status === "Rotation failed"
-                                ? "bad"
-                                : "warn"
-                          }
-                        >
-                          {account.status}
-                        </StatusBadge>
-                      </td>
-                      <td>
-                        <small>{account.lastVerify}</small>
-                      </td>
-                      <td>
-                        <small>{account.lastChange}</small>
-                      </td>
-                      <td>
-                        <small>{account.lastReconcile}</small>
-                      </td>
-                      <td>
-                        <div
-                          style={{ display: "flex", gap: 4 }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            title="Verify credential"
-                            onClick={() => {
-                              setSelectedAccount(account.id);
-                              onRun("Verify");
-                            }}
-                          >
-                            Verify
-                          </Button>
-                          <Button
-                            size="sm"
-                            title="Change password"
-                            onClick={() => {
-                              setSelectedAccount(account.id);
-                              onRun("Change");
-                            }}
-                          >
-                            Change
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            title="Reconcile password"
-                            onClick={() => {
-                              setSelectedAccount(account.id);
-                              onRun("Reconcile");
-                            }}
-                          >
-                            Reconcile
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Panel>
-          <Panel
-            title="Operation History"
-            note={
-              targetAccount
-                ? `${targetAccount.username} · ${targetAccount.address}`
-                : "Select an account"
-            }
-          >
-            <div className="operation-list">
-              {operations.length > 0 ? (
-                operations.map((operation) => (
-                  <div className="operation-row" key={operation.id}>
+
+      {/* Metrics Summary Strip */}
+      <div className="pvwa-metrics-strip">
+        <div className="pvwa-metric-card">
+          <span>MANAGED ACCOUNTS</span>
+          <strong>{state.accounts.filter((a) => a.status === "Managed").length}</strong>
+          <small>Eligible for automated schedule</small>
+        </div>
+        <div className="pvwa-metric-card">
+          <span>VERIFY REQUIRED</span>
+          <strong>{state.accounts.filter((a) => a.status === "Verify required").length}</strong>
+          <small>Pending initial credential test</small>
+        </div>
+        <div
+          className={cx(
+            "pvwa-metric-card",
+            state.accounts.some((a) => a.status === "Rotation failed") && "pvwa-metric-danger",
+          )}
+        >
+          <span>ROTATION FAILED</span>
+          <strong>{state.accounts.filter((a) => a.status === "Rotation failed").length}</strong>
+          <small>Requires diagnosis & repair</small>
+        </div>
+        <div className="pvwa-metric-card">
+          <span>PENDING RECONCILE</span>
+          <strong>{state.accounts.filter((a) => a.status === "Rotation failed").length}</strong>
+          <small>Review evidence before retry</small>
+        </div>
+      </div>
+
+      {/* CPM Accounts Grid */}
+      <div className="pvwa-grid-wrap">
+        <table className="pvwa-grid">
+          <thead>
+            <tr>
+              <th>ACCOUNT · TARGET</th>
+              <th>PLATFORM · SAFE</th>
+              <th>CPM STATUS</th>
+              <th>LAST VERIFY</th>
+              <th>LAST CHANGE</th>
+              <th>LAST RECONCILE</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {queue.map((account) => {
+              const isSelected = targetAccount?.id === account.id || selectedAccount === account.id;
+              return (
+                <tr
+                  key={account.id}
+                  onClick={() => setSelectedAccount(account.id)}
+                  className={isSelected ? "selected" : ""}
+                >
+                  <td>
+                    <strong>{account.username}</strong>
+                    <small className="block text-[#8E9EB2]">{account.address}</small>
+                  </td>
+                  <td>
+                    {account.platform}
+                    <small className="block text-[#00A8E8]">{account.safe}</small>
+                  </td>
+                  <td>
                     <span
-                      className={
-                        operation.result === "Completed"
-                          ? "operation-indicator success"
-                          : "operation-indicator failed"
-                      }
-                    >
-                      {operation.result === "Completed" ? (
-                        <Check size={13} />
-                      ) : (
-                        <AlertTriangle size={13} />
+                      className={cx(
+                        "pvwa-status-pill",
+                        account.status === "Managed"
+                          ? "managed"
+                          : account.status === "Rotation failed"
+                            ? "failed"
+                            : "verify",
                       )}
+                    >
+                      <i className="pvwa-pulse-dot" />
+                      {account.status}
                     </span>
-                    <div>
-                      <strong>
-                        {operation.operation} · {operation.result}
-                      </strong>
-                      <p>{operation.detail}</p>
+                  </td>
+                  <td>
+                    <small className="text-[#8E9EB2]">{account.lastVerify}</small>
+                  </td>
+                  <td>
+                    <small className="text-[#8E9EB2]">{account.lastChange}</small>
+                  </td>
+                  <td>
+                    <small className="text-[#8E9EB2]">{account.lastReconcile}</small>
+                  </td>
+                  <td>
+                    <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                        onClick={() => {
+                          setSelectedAccount(account.id);
+                          onRun("Verify");
+                        }}
+                      >
+                        Verify
+                      </button>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-sm pvwa-btn-primary"
+                        onClick={() => {
+                          setSelectedAccount(account.id);
+                          onRun("Change");
+                        }}
+                      >
+                        Change
+                      </button>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                        onClick={() => {
+                          setSelectedAccount(account.id);
+                          onRun("Reconcile");
+                        }}
+                      >
+                        Reconcile
+                      </button>
                     </div>
-                    <time>{operation.time}</time>
-                  </div>
-                ))
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Selected Account Incident & Operations Detail */}
+      {targetAccount && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 16 }}>
+          <div className="pvwa-detail-panel" style={{ marginTop: 0 }}>
+            <div className="pvwa-detail-header">
+              <div className="pvwa-detail-title">
+                <Activity size={16} className="text-[#00A8E8]" />
+                <h3>CPM Operation History: {targetAccount.username}</h3>
+              </div>
+            </div>
+            <div className="pvwa-detail-body" style={{ maxHeight: 320, overflowY: "auto" }}>
+              {operations.length > 0 ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {operations.map((op) => (
+                    <div
+                      key={op.id}
+                      style={{
+                        padding: 8,
+                        background: "#0B0F14",
+                        border: "1px solid #1C2633",
+                        borderRadius: 3,
+                        fontSize: 12,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 8,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: op.result === "Completed" ? "#34D399" : "#F87171",
+                          marginTop: 2,
+                        }}
+                      >
+                        {op.result === "Completed" ? (
+                          <Check size={14} />
+                        ) : (
+                          <AlertTriangle size={14} />
+                        )}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <strong>
+                            {op.operation} · {op.result}
+                          </strong>
+                          <span style={{ fontSize: 11, color: "#6F8094" }}>{op.time}</span>
+                        </div>
+                        <p style={{ margin: "2px 0 0 0", color: "#8E9EB2", fontSize: 11 }}>
+                          {op.detail}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <EmptyState
-                  title="No operations recorded for this account"
-                  detail="Run Verify, Change or Reconcile to create evidence."
-                  icon={Activity}
-                />
+                <p
+                  style={{ textAlign: "center", color: "#6F8094", fontSize: 12, margin: "20px 0" }}
+                >
+                  No operations recorded for this account. Run Verify or Change to generate
+                  evidence.
+                </p>
               )}
             </div>
-          </Panel>
+          </div>
+
+          <div className="pvwa-detail-panel" style={{ marginTop: 0 }}>
+            <div className="pvwa-detail-header">
+              <div className="pvwa-detail-title">
+                <KeyRound size={16} className="text-[#00A8E8]" />
+                <h3>Diagnostic Console: {targetAccount.address}</h3>
+              </div>
+            </div>
+            <div className="pvwa-detail-body">
+              <div className="pvwa-facts-grid">
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">PLATFORM</span>
+                  <span className="pvwa-fact-value">{targetAccount.platform}</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">SAFE</span>
+                  <span className="pvwa-fact-value">{targetAccount.safe}</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">STATUS</span>
+                  <span className="pvwa-fact-value">{targetAccount.status}</span>
+                </div>
+                <div className="pvwa-fact">
+                  <span className="pvwa-fact-label">POLICY</span>
+                  <span className="pvwa-fact-value">{targetAccount.policy}</span>
+                </div>
+              </div>
+
+              {targetAccount.failureCause && (
+                <div className="pvwa-failure-box" style={{ marginTop: 12 }}>
+                  <AlertTriangle size={16} />
+                  <div>
+                    <strong>Failure Root Cause</strong>
+                    <p>{targetAccount.failureCause}</p>
+                  </div>
+                </div>
+              )}
+
+              {targetAccount.failureCause && (
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 10,
+                    background: "#0B0F14",
+                    border: "1px solid #263241",
+                    borderRadius: 4,
+                  }}
+                >
+                  <strong
+                    style={{
+                      fontSize: 11,
+                      color: "#F87171",
+                      textTransform: "uppercase",
+                      display: "block",
+                      marginBottom: 6,
+                    }}
+                  >
+                    One-Click Incident Recovery
+                  </strong>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                      onClick={() => onRepair("unlock")}
+                    >
+                      <Power size={13} />
+                      Unlock Target Account
+                    </button>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                      onClick={() => onRepair("reconcile-access")}
+                    >
+                      <KeyRound size={13} />
+                      Restore Reconcile Access
+                    </button>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                      onClick={() => onRepair("target-connectivity")}
+                    >
+                      <Network size={13} />
+                      Repair Connectivity
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                <button
+                  type="button"
+                  className="pvwa-btn pvwa-btn-primary"
+                  onClick={() => onRun("Change")}
+                >
+                  <RotateCcw size={14} />
+                  Retry Password Change
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <aside className="cpm-side">
-          <Panel title="Account Operation Console" note="Selected managed account">
-            <Select value={targetAccount?.id ?? selectedAccount} onValueChange={setSelectedAccount}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose an account" />
-              </SelectTrigger>
-              <SelectContent>
-                {state.accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.username} · {account.address}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="cpm-account-brief">
-              <span className="account-key-icon">
-                <KeyRound size={17} />
-              </span>
-              <div>
-                <strong>{targetAccount?.username}</strong>
-                <small>{targetAccount?.address}</small>
-              </div>
-            </div>
-            <div className="detail-facts cpm-facts">
-              <Detail label="PLATFORM" value={targetAccount?.platform ?? "—"} />
-              <Detail label="SAFE" value={targetAccount?.safe ?? "—"} />
-              <Detail label="POLICY" value={targetAccount?.policy ?? "—"} />
-              <Detail label="LAST VERIFY" value={targetAccount?.lastVerify ?? "—"} />
-              <Detail label="LAST CHANGE" value={targetAccount?.lastChange ?? "—"} />
-              <Detail label="LAST RECONCILE" value={targetAccount?.lastReconcile ?? "—"} />
-            </div>
-            {targetAccount?.failureCause && (
-              <div className="failure-callout">
-                <AlertTriangle size={15} />
-                <span>
-                  <strong>Failure reason</strong>
-                  {targetAccount.failureCause}
-                </span>
-              </div>
-            )}
-            <div className="operation-actions">
-              <Button type="button" variant="outline" onClick={() => onRun("Verify")}>
-                <SearchCheck size={14} />
-                Verify
-              </Button>
-              <Button type="button" onClick={() => onRun("Change")}>
-                <RotateCcw size={14} />
-                Change password
-              </Button>
-              <Button type="button" variant="outline" onClick={() => onRun("Reconcile")}>
-                <Activity size={14} />
-                Reconcile
-              </Button>
-            </div>
-          </Panel>
-          {targetAccount?.failureCause && (
-            <Panel
-              title="Incident recovery"
-              note="Repair the target condition before retrying change"
-            >
-              <div className="repair-options">
-                <Button type="button" variant="outline" onClick={() => onRepair("unlock")}>
-                  <Power size={14} />
-                  Unlock target account
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onRepair("reconcile-access")}
-                >
-                  <KeyRound size={14} />
-                  Restore reconcile access
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onRepair("target-connectivity")}
-                >
-                  <Network size={14} />
-                  Restore target connectivity
-                </Button>
-              </div>
-            </Panel>
-          )}
-        </aside>
-      </div>
+      )}
     </>
   );
 }
@@ -4639,69 +4776,90 @@ function PsmView({
 
   return (
     <>
-      <SectionHeading
-        eyebrow="PRIVILEGED SESSION MANAGER · BROKERED ACCESS"
-        title="PSM operations"
-        description="Request controlled RDP/SSH access, run an isolated simulated command set, and review recordings and timeline evidence."
-        actions={
-          <StatusBadge tone={state.psmConnectorHealthy ? "good" : "bad"}>
-            {state.psmConnectorHealthy ? "PSM CONNECTOR HEALTHY" : "CONNECTOR UNAVAILABLE"}
-          </StatusBadge>
-        }
-      />
-      <div className="inventory-stats">
-        <div>
-          <span>CONNECTOR STATUS</span>
-          <strong>{state.psmConnectorHealthy ? "HEALTHY" : "OFFLINE"}</strong>
-        </div>
-        <div>
-          <span>ACTIVE SESSIONS</span>
-          <strong>{state.sessions.filter((s) => s.status === "Active").length}</strong>
-        </div>
-        <div>
-          <span>TOTAL RECORDINGS</span>
-          <strong>{state.sessions.length}</strong>
-        </div>
-        <div>
-          <span>AUDIT ENFORCEMENT</span>
-          <strong>100% CAPTURED</strong>
+      {/* Page Title & Context Toolbar */}
+      <div className="pvwa-page-header">
+        <div className="pvwa-page-title-block">
+          <h1>
+            <MonitorPlay size={20} className="text-[#00A8E8]" />
+            PSM Operations
+          </h1>
+          <p>
+            CyberArk Privileged Session Manager brokered access, recording controls and session
+            telemetry
+          </p>
         </div>
       </div>
 
-      <Tabs
-        value={psmTab}
-        onValueChange={(val) => setPsmTab(val as "launch" | "console" | "recordings")}
-        className="ops-tabs"
-        style={{ marginBottom: 20 }}
-      >
-        <TabsList>
-          <TabsTrigger value="launch">Launch Privileged Session</TabsTrigger>
-          <TabsTrigger value="console">Active Console {session ? "(LIVE)" : ""}</TabsTrigger>
-          <TabsTrigger value="recordings">
-            Session Monitoring & Recordings ({recent.length})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* Top Status Strip */}
+      <div className="pvwa-metrics-strip">
+        <div className="pvwa-metric-card">
+          <span>PSM GATEWAY STATUS</span>
+          <strong style={{ color: "#34D399" }}>HEALTHY</strong>
+          <small>RDP/SSH proxy port 3389 active</small>
+        </div>
+        <div className="pvwa-metric-card">
+          <span>ACTIVE SESSIONS</span>
+          <strong>{state.sessions.filter((s) => s.status === "Active").length}</strong>
+          <small>Monitored live in isolation</small>
+        </div>
+        <div className="pvwa-metric-card">
+          <span>RECORDED ARCHIVE</span>
+          <strong>{state.sessions.length}</strong>
+          <small>Retained for audit evidence</small>
+        </div>
+        <div className="pvwa-metric-card">
+          <span>RECORDING POLICY</span>
+          <strong style={{ color: "#00A8E8" }}>100% CAPTURED</strong>
+          <small>Full keystroke and screen telemetry</small>
+        </div>
+      </div>
+
+      {/* Subnav Tabs */}
+      <div className="pvwa-detail-tabs" style={{ marginBottom: 14 }}>
+        <button
+          type="button"
+          className={cx("pvwa-tab-btn", psmTab === "launch" && "active")}
+          onClick={() => setPsmTab("launch")}
+        >
+          Launch Privileged Session
+        </button>
+        <button
+          type="button"
+          className={cx("pvwa-tab-btn", psmTab === "console" && "active")}
+          onClick={() => setPsmTab("console")}
+        >
+          Active Console {session ? "(LIVE)" : ""}
+        </button>
+        <button
+          type="button"
+          className={cx("pvwa-tab-btn", psmTab === "recordings" && "active")}
+          onClick={() => setPsmTab("recordings")}
+        >
+          Session Monitoring & Recordings ({recent.length})
+        </button>
+      </div>
 
       {psmTab === "launch" && (
-        <div className="psm-layout">
-          <div className="psm-main">
-            <Panel
-              title="Launch a privileged session"
-              note="Production-like ticket controls · isolated training session"
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 16 }}>
+          <div className="pvwa-detail-panel" style={{ marginTop: 0 }}>
+            <div className="pvwa-detail-header">
+              <div className="pvwa-detail-title">
+                <Play size={16} className="text-[#00A8E8]" />
+                <h3>Launch Brokered Session</h3>
+              </div>
+            </div>
+            <form
+              onSubmit={(e) => {
+                onLaunch(e);
+                setPsmTab("console");
+              }}
             >
-              <form
-                className="session-form"
-                onSubmit={(e) => {
-                  onLaunch(e);
-                  setPsmTab("console");
-                }}
-              >
-                <div className="form-grid">
-                  <div className="field">
-                    <Label>Target server</Label>
+              <div className="pvwa-detail-body">
+                <div className="pvwa-form-grid">
+                  <div className="pvwa-field">
+                    <label>Target Server</label>
                     <Select name="psm-target" defaultValue="WIN-SRV-01">
-                      <SelectTrigger>
+                      <SelectTrigger className="pvwa-select">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -4713,317 +4871,297 @@ function PsmView({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="field">
-                    <Label>Target account</Label>
-                    <Input disabled value="Administrator" />
+                  <div className="pvwa-field">
+                    <label>Target Account</label>
+                    <input disabled className="pvwa-input text-[#6F8094]" value="Administrator" />
                   </div>
-                  <div className="field">
-                    <Label>Connection component</Label>
-                    <Input disabled value="RDP through PSM" />
+                  <div className="pvwa-field">
+                    <label>Connection Protocol / Component</label>
+                    <input disabled className="pvwa-input text-[#6F8094]" value="RDP through PSM" />
                   </div>
-                  <div className="field">
-                    <Label>Ticket reference</Label>
-                    <Input
+                  <div className="pvwa-field">
+                    <label>Ticket Reference</label>
+                    <input
                       required
                       name="psm-ticket"
-                      placeholder="CHG-12345"
+                      className="pvwa-input"
                       defaultValue="CHG-89042"
                     />
                   </div>
-                  <div className="field span-two">
-                    <Label>Business reason</Label>
-                    <Textarea
+                  <div className="pvwa-field span-2">
+                    <label>Business Justification (12+ characters)</label>
+                    <textarea
                       required
                       name="psm-reason"
                       rows={2}
-                      defaultValue="Emergency maintenance and diagnostic verification of system telemetry"
-                      placeholder="Describe the approved administrative task (12+ characters)"
+                      className="pvwa-textarea"
+                      defaultValue="Emergency diagnostic verification and performance telemetry audit"
                     />
                   </div>
                 </div>
-                <div className="approval-row">
-                  <div className="approval-icon">
-                    <ClipboardCheck size={17} />
-                  </div>
+
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: 12,
+                    background: "#0B0F14",
+                    border: "1px solid #1C2633",
+                    borderRadius: 4,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <div>
-                    <strong>Approval status</strong>
-                    <small>
+                    <strong style={{ fontSize: 12, color: "#FFFFFF" }}>
+                      Dual Control & Operator Approval
+                    </strong>
+                    <p style={{ margin: "2px 0 0 0", fontSize: 11, color: "#8E9EB2" }}>
                       {state.approvalGranted
-                        ? "Approved for this training scenario · WIN-SRV-01"
-                        : "Approval required before session launch"}
-                    </small>
+                        ? "Approval verified for this session"
+                        : "Session launch requires operator authorization"}
+                    </p>
                   </div>
-                  <StatusBadge tone={state.approvalGranted ? "good" : "warn"}>
-                    {state.approvalGranted ? "APPROVED" : "PENDING"}
-                  </StatusBadge>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={state.approvalGranted ? "outline" : "default"}
-                    onClick={onApproval}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span
+                      className={cx(
+                        "pvwa-status-pill",
+                        state.approvalGranted ? "managed" : "verify",
+                      )}
+                    >
+                      {state.approvalGranted ? "APPROVED" : "PENDING APPROVAL"}
+                    </span>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                      onClick={onApproval}
+                    >
+                      {state.approvalGranted ? "Withdraw" : "Grant Approval"}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+                  <button
+                    type="submit"
+                    className="pvwa-btn pvwa-btn-primary"
+                    disabled={!state.psmConnectorHealthy || Boolean(session)}
                   >
-                    {state.approvalGranted ? "Withdraw" : "Request approval"}
-                  </Button>
-                </div>
-                <div className="session-footer">
-                  <span>
-                    <Clock3 size={14} />
-                    Session duration cap <b>60 min</b> · Recording <b>enabled</b>
-                  </span>
-                  <Button type="submit" disabled={!state.psmConnectorHealthy || Boolean(session)}>
                     <Play size={14} />
-                    Launch through PSM
-                  </Button>
+                    Launch Through PSM
+                  </button>
                 </div>
-              </form>
-            </Panel>
+              </div>
+            </form>
           </div>
-          <aside className="psm-side">
-            <Panel title="Session requirements" note="Access preflight checklist">
-              <div className="preflight-list">
+
+          <div className="pvwa-detail-panel" style={{ marginTop: 0 }}>
+            <div className="pvwa-detail-header">
+              <div className="pvwa-detail-title">
+                <ClipboardCheck size={16} className="text-[#00A8E8]" />
+                <h3>Access Preflight Gate</h3>
+              </div>
+            </div>
+            <div className="pvwa-detail-body">
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {[
                   {
-                    label: "Safe session permission",
+                    label: "Safe Session Permission",
                     ok: true,
                     detail: "WIN-SAFE · Initiate privileged sessions",
                   },
                   {
-                    label: "Approval request",
+                    label: "Operator Approval",
                     ok: state.approvalGranted,
-                    detail: state.approvalGranted
-                      ? "Training approval recorded"
-                      : "Awaiting operator approval",
+                    detail: state.approvalGranted ? "Verified" : "Pending request",
                   },
                   {
-                    label: "PSM connector",
+                    label: "PSM Connector",
                     ok: state.psmConnectorHealthy,
-                    detail: state.psmConnectorHealthy
-                      ? "RDP component available"
-                      : "Connector health check failed",
+                    detail: "Port 3389 reachable",
                   },
-                  {
-                    label: "Recording policy",
-                    ok: true,
-                    detail: "Session events retained in audit",
-                  },
+                  { label: "Audit Recording Policy", ok: true, detail: "100% captured" },
                 ].map((item) => (
-                  <div className="preflight-row" key={item.label}>
-                    <span className={item.ok ? "preflight-ok" : "preflight-pending"}>
-                      {item.ok ? <Check size={12} /> : <Clock3 size={12} />}
+                  <div
+                    key={item.label}
+                    style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}
+                  >
+                    <span style={{ color: item.ok ? "#34D399" : "#FBBF24" }}>
+                      {item.ok ? <Check size={14} /> : <Clock3 size={14} />}
                     </span>
                     <div>
-                      <strong>{item.label}</strong>
-                      <small>{item.detail}</small>
+                      <strong className="block text-[#E8EEF5]">{item.label}</strong>
+                      <small className="text-[#8E9EB2]">{item.detail}</small>
                     </div>
                   </div>
                 ))}
               </div>
-              <Button type="button" variant="outline" className="full-width" onClick={onApproval}>
-                {state.approvalGranted ? "Reset approval" : "Obtain approval"}
-              </Button>
-            </Panel>
-          </aside>
+            </div>
+          </div>
         </div>
       )}
 
       {psmTab === "console" && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }}>
-          <Panel
-            className="terminal-panel"
-            title="Controlled Session Console"
-            note={
-              session
-                ? `${session.target} · ${session.account} · ${session.ticket}`
-                : "A session terminal appears after an approved launch"
-            }
-            action={
-              session && (
-                <Button type="button" variant="outline" size="sm" onClick={onClose}>
-                  <Power size={14} />
-                  Terminate
-                </Button>
-              )
-            }
-          >
-            <div className="terminal-window">
-              <div className="terminal-titlebar">
+        <div className="pvwa-detail-panel" style={{ marginTop: 0 }}>
+          <div className="pvwa-detail-header">
+            <div className="pvwa-detail-title">
+              <Terminal size={16} className="text-[#00A8E8]" />
+              <h3>Controlled Session Console</h3>
+              <span>
+                ·{" "}
+                {session
+                  ? `${session.target} (${session.account}) · ${session.ticket}`
+                  : "Standby — Launch an approved session"}
+              </span>
+            </div>
+            {session && (
+              <button
+                type="button"
+                className="pvwa-btn pvwa-btn-sm pvwa-btn-danger"
+                onClick={onClose}
+              >
+                <Power size={13} />
+                Terminate Session
+              </button>
+            )}
+          </div>
+          <div className="pvwa-detail-body">
+            <div className="pvwa-terminal">
+              <div className="pvwa-terminal-titlebar">
                 <span>
-                  <i />
-                  <i />
-                  <i />
-                </span>
-                <strong>
                   {session
                     ? `psm-session://${session.target}/${session.account}`
                     : "psm-session://awaiting-launch"}
-                </strong>
-                <span className={session ? "terminal-live" : "terminal-idle"}>
-                  {session ? "SESSION ACTIVE · RECORDING" : "STANDBY"}
+                </span>
+                <span style={{ color: session ? "#34D399" : "#6F8094", fontWeight: 700 }}>
+                  {session ? "● SESSION ACTIVE · RECORDING" : "STANDBY"}
                 </span>
               </div>
-              <div className="terminal-body">
-                <div className="terminal-intro">
-                  ShadowXLab controlled enterprise shell
+              <div className="pvwa-terminal-body">
+                <div>
+                  ShadowXLab Controlled Enterprise Shell
                   <br />
-                  Target: {session?.target ?? "not connected"}
+                  Target System: {session?.target ?? "not connected"}
                   <br />
-                  Identity: {session?.account ?? "not authenticated"}
+                  Privileged Identity: {session?.account ?? "not authenticated"}
                   <br />
-                  Type <b>help</b> to list allowed commands.
+                  Type <strong>help</strong> to list allowed simulator commands.
                 </div>
                 {session?.commands.map((entry, index) => {
                   const [cmd, ...output] = entry.split("\n");
                   return (
-                    <div className="terminal-output" key={`${session.id}-${index}`}>
+                    <div key={`${session.id}-${index}`} style={{ marginTop: 8 }}>
                       <div>
-                        <span>PS&gt;</span> {cmd}
+                        <span style={{ color: "#38BDF8" }}>PS&gt;</span> {cmd}
                       </div>
                       {output.map((line, idx) => (
-                        <pre key={idx}>{line}</pre>
+                        <pre
+                          key={idx}
+                          style={{ margin: 0, color: "#E8EEF5", fontFamily: "inherit" }}
+                        >
+                          {line}
+                        </pre>
                       ))}
                     </div>
                   );
                 })}
                 <div ref={terminalEnd} />
               </div>
-              <form className="terminal-input-row" onSubmit={onCommand}>
-                <span>PS&gt;</span>
-                <Input
+              <form className="pvwa-terminal-input-row" onSubmit={onCommand}>
+                <span style={{ color: "#38BDF8", fontWeight: 700 }}>PS&gt;</span>
+                <input
                   aria-label="Simulated terminal command"
                   value={command}
-                  onChange={(event) => setCommand(event.target.value)}
+                  onChange={(e) => setCommand(e.target.value)}
                   disabled={!session || session.status !== "Active"}
                   placeholder={
                     session
-                      ? "Enter a simulated command (e.g. whoami, hostname, Get-Service)..."
-                      : "Launch an approved session to continue"
+                      ? "Enter command (e.g. whoami, hostname, Get-Service)..."
+                      : "Launch an approved session to start"
                   }
                 />
-                <Button
+                <button
                   type="submit"
-                  size="icon"
+                  className="pvwa-btn pvwa-btn-sm pvwa-btn-primary"
                   disabled={!session || session.status !== "Active" || !command.trim()}
-                  aria-label="Run simulated command"
                 >
-                  <ArrowRight size={15} />
-                </Button>
+                  <ArrowRight size={13} />
+                </button>
               </form>
             </div>
-            <div className="command-chips">
-              {TERMINAL_COMMANDS.map((item) => (
-                <Button
+
+            {/* Command Shortcut Chips */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 10 }}>
+              {TERMINAL_COMMANDS.map((cmdItem) => (
+                <button
+                  key={cmdItem}
                   type="button"
-                  key={item}
-                  variant="outline"
-                  size="sm"
+                  className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
                   disabled={!session || session.status !== "Active"}
-                  onClick={() => onExecuteCommand(item)}
+                  onClick={() => onExecuteCommand(cmdItem)}
                 >
-                  {item}
-                </Button>
+                  {cmdItem}
+                </button>
               ))}
             </div>
-            <p className="terminal-disclaimer">
-              <Shield size={13} />
-              Commands return deterministic training telemetry and never execute on the host OS.
+            <p
+              style={{
+                margin: "8px 0 0 0",
+                fontSize: 11,
+                color: "#6F8094",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <Shield size={12} />
+              Commands return deterministic simulated telemetry and never execute on the host OS.
             </p>
-          </Panel>
+          </div>
         </div>
       )}
 
       {psmTab === "recordings" && (
-        <div className="psm-layout">
-          <div className="psm-main">
-            <Panel
-              title="Session Recordings Archive"
-              note="All recorded administrative sessions in this vault"
-            >
-              <div className="data-table-wrap">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>TARGET</th>
-                      <th>ACCOUNT</th>
-                      <th>COMPONENT</th>
-                      <th>TICKET</th>
-                      <th>STARTED</th>
-                      <th>COMMANDS</th>
-                      <th>STATUS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recent.map((item) => (
-                      <tr key={item.id}>
-                        <td>
-                          <strong>{item.target}</strong>
-                        </td>
-                        <td>{item.account}</td>
-                        <td>{item.component}</td>
-                        <td>
-                          <span className="code-cell">{item.ticket}</span>
-                        </td>
-                        <td>{item.started}</td>
-                        <td>{item.commands.length} executed</td>
-                        <td>
-                          <StatusBadge tone={item.status === "Terminated" ? "good" : "blue"}>
-                            {item.status}
-                          </StatusBadge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Panel>
-          </div>
-          <aside className="psm-side">
-            <Panel title="Session Recording Evidence" note="Event timeline verification">
-              {session ? (
-                <div className="recording-card">
-                  <div className="recording-header">
-                    <span>
-                      <span className="recording-dot" />
-                      {session.status === "Active" ? "RECORDING LIVE" : "RECORDING COMPLETE"}
+        <div className="pvwa-grid-wrap">
+          <table className="pvwa-grid">
+            <thead>
+              <tr>
+                <th>TARGET SYSTEM</th>
+                <th>ACCOUNT</th>
+                <th>COMPONENT</th>
+                <th>TICKET</th>
+                <th>STARTED</th>
+                <th>COMMANDS</th>
+                <th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recent.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <strong>{item.target}</strong>
+                  </td>
+                  <td>{item.account}</td>
+                  <td>{item.component}</td>
+                  <td>
+                    <span className="pvwa-code-cell">{item.ticket}</span>
+                  </td>
+                  <td>{item.started}</td>
+                  <td>{item.commands.length} executed</td>
+                  <td>
+                    <span
+                      className={cx(
+                        "pvwa-status-pill",
+                        item.status === "Active" ? "managed" : "unmanaged",
+                      )}
+                    >
+                      {item.status}
                     </span>
-                    <span>{session.started}</span>
-                  </div>
-                  <div className="recording-title">
-                    {session.target} <span>→</span> {session.account}
-                  </div>
-                  <div className="recording-timeline">
-                    {[
-                      "Session requested",
-                      "Approval verified",
-                      "Credential injected",
-                      ...session.commands.map((_, index) => `Command ${index + 1}`),
-                      ...(session.status === "Terminated" ? ["Session terminated"] : []),
-                    ].map((event, index) => (
-                      <div key={`${event}-${index}`}>
-                        <i
-                          style={{
-                            left: `${Math.min((index / Math.max(session.commands.length + 3, 3)) * 100, 100)}%`,
-                          }}
-                        />
-                        <span>{event}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="recording-meta">
-                    <span>CONNECTION</span>
-                    <b>{session.component}</b>
-                    <span>TICKET</span>
-                    <b>{session.ticket}</b>
-                  </div>
-                </div>
-              ) : (
-                <EmptyState
-                  title="No active session"
-                  detail="Launch a session to view live recording timeline telemetry."
-                  icon={MonitorPlay}
-                />
-              )}
-            </Panel>
-          </aside>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </>
