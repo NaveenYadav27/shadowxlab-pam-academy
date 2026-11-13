@@ -17,7 +17,9 @@ import {
   Clock3,
   Command,
   Database,
+  Eye,
   FileClock,
+  Filter,
   Fingerprint,
   GraduationCap,
   KeyRound,
@@ -28,9 +30,11 @@ import {
   Menu,
   MonitorPlay,
   Network,
+  PanelLeftClose,
   Play,
   Plus,
   Power,
+  RefreshCw,
   RotateCcw,
   Search,
   SearchCheck,
@@ -117,23 +121,36 @@ const NAV_GROUPS: {
     ],
   },
   {
-    label: "OPERATIONS",
+    label: "PRIVILEGED ACCESS",
     items: [
       { id: "safes", title: "Safes", icon: Boxes },
       { id: "accounts", title: "Accounts", icon: KeyRound },
       { id: "access", title: "Access Management", icon: UsersRound },
-      { id: "cpm", title: "CPM Operations", icon: Activity },
-      { id: "psm", title: "PSM Operations", icon: MonitorPlay },
-      { id: "policies", title: "Policies", icon: SlidersHorizontal },
-      { id: "discovery", title: "Discovery", icon: SearchCheck },
     ],
   },
   {
-    label: "LEARN & REVIEW",
+    label: "SESSION MANAGEMENT",
+    items: [{ id: "psm", title: "PSM Operations", icon: MonitorPlay }],
+  },
+  {
+    label: "PASSWORD MANAGEMENT",
     items: [
+      { id: "cpm", title: "CPM Operations", icon: Activity },
+      { id: "policies", title: "Password Policies", icon: SlidersHorizontal },
+    ],
+  },
+  {
+    label: "GOVERNANCE",
+    items: [
+      { id: "discovery", title: "Discovery", icon: SearchCheck },
       { id: "audit", title: "Audit & Reports", icon: FileClock },
-      { id: "troubleshooting", title: "Troubleshooting", icon: LifeBuoy },
       { id: "assessments", title: "Assessments", icon: ClipboardCheck },
+    ],
+  },
+  {
+    label: "SUPPORT",
+    items: [
+      { id: "troubleshooting", title: "Troubleshooting", icon: LifeBuoy },
       { id: "knowledge", title: "Knowledge Base", icon: BookText },
       { id: "instructor", title: "Instructor Console", icon: GraduationCap },
     ],
@@ -522,6 +539,16 @@ function titleFor(section: SectionId): string {
     "Overview"
   );
 }
+
+function breadcrumbFor(section: SectionId): { group: string; title: string } {
+  for (const group of NAV_GROUPS) {
+    const item = group.items.find((i) => i.id === section);
+    if (item) {
+      return { group: group.label, title: item.title };
+    }
+  }
+  return { group: "WORKSPACE", title: titleFor(section) };
+}
 function initials(email: string): string {
   return (email.split("@")[0] ?? "learner").slice(0, 2).toUpperCase();
 }
@@ -719,6 +746,7 @@ export function PamAcademy() {
   const [password, setPassword] = useState("");
   const [active, setActiveState] = useState<SectionId>(getInitialSection);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const setActive = (section: SectionId, push = true) => {
     setActiveState(section);
@@ -1372,6 +1400,8 @@ export function PamAcademy() {
           accessResult={accessResult}
           setAccessResult={setAccessResult}
           updateState={updateState}
+          setActive={setActive}
+          setSelectedAccount={setSelectedAccount}
         />
       );
     if (active === "accounts")
@@ -1389,6 +1419,14 @@ export function PamAcademy() {
           selectedAccount={selectedAccount}
           setSelectedAccount={setSelectedAccount}
           learner={learner}
+          onCpmOperation={handleCpm}
+          onRepairCpm={handleRepair}
+          onConnectPsm={(account) => {
+            setSelectedAccount(account.id);
+            setActive("psm");
+            toast.info(`Configured PSM target for ${account.username} on ${account.address}`);
+          }}
+          setActive={setActive}
         />
       );
     if (active === "access")
@@ -1495,7 +1533,13 @@ export function PamAcademy() {
           aria-hidden="true"
         />
       )}
-      <aside className={cx("sidebar", mobileMenuOpen && "sidebar-open")}>
+      <aside
+        className={cx(
+          "sidebar",
+          mobileMenuOpen && "sidebar-open",
+          sidebarCollapsed && "sidebar-collapsed",
+        )}
+      >
         <div className="sidebar-brand">
           <span className="brand-mark">
             <Shield size={18} />
@@ -1582,6 +1626,17 @@ export function PamAcademy() {
             >
               <Menu size={18} />
             </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="hidden md:inline-flex"
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              onClick={() => setSidebarCollapsed((prev) => !prev)}
+            >
+              <PanelLeftClose size={17} className={sidebarCollapsed ? "rotate-180" : ""} />
+            </Button>
             <span className="topbar-title">
               ShadowXLab <span>/</span> PAM Academy
             </span>
@@ -1659,9 +1714,9 @@ export function PamAcademy() {
         <div className="breadcrumb">
           <span>ShadowXLab</span>
           <ChevronRight size={13} />
-          <span>Operations Center</span>
+          <span>{breadcrumbFor(active).group}</span>
           <ChevronRight size={13} />
-          <strong>{titleFor(active)}</strong>
+          <strong>{breadcrumbFor(active).title}</strong>
         </div>
         <div className="workspace-content">
           {authIssue && (
@@ -2593,6 +2648,8 @@ function SafesView({
   accessResult,
   setAccessResult,
   updateState,
+  setActive,
+  setSelectedAccount,
 }: {
   state: PamState;
   selectedSafe: string;
@@ -2610,17 +2667,29 @@ function SafesView({
   accessResult: { allowed: boolean; message: string } | null;
   setAccessResult: (result: { allowed: boolean; message: string } | null) => void;
   updateState: (state: PamState) => void;
+  setActive?: (section: SectionId) => void;
+  setSelectedAccount?: (id: string) => void;
 }) {
   const [safeSearch, setSafeSearch] = useState("");
-  const [selectedAccountId, setSelectedAccountId] = useState("");
-  const visibleSafes = state.safes.filter((safe) =>
-    safe.name.toLowerCase().includes(safeSearch.toLowerCase()),
+  const [testPermission, setTestPermission] = useState<SafePermission>("Use accounts");
+  const visibleSafes = state.safes.filter(
+    (safe) =>
+      safe.name.toLowerCase().includes(safeSearch.toLowerCase()) ||
+      safe.description.toLowerCase().includes(safeSearch.toLowerCase()),
   );
   const safeAccounts = state.accounts.filter((account) => account.safe === selectedSafe);
+  const safeAudits = state.audit.filter(
+    (a) =>
+      a.target.includes(selectedSafe) ||
+      a.detail.includes(selectedSafe) ||
+      safeAccounts.some((acc) => a.target.includes(acc.username)),
+  );
   const deps = permissionDependencies(memberPermissions);
-  function testAccess(permission: SafePermission) {
-    setAccessResult(evaluatePermission(state, selectedSafe, selectedMember, permission));
+
+  function testLearnerAccess() {
+    setAccessResult(evaluatePermission(state, selectedSafe, learner, testPermission));
   }
+
   function togglePermission(permission: SafePermission, checked: boolean) {
     setMemberPermissions(
       checked
@@ -2628,6 +2697,7 @@ function SafesView({
         : memberPermissions.filter((item) => item !== permission),
     );
   }
+
   return (
     <>
       <SectionHeading
@@ -2647,6 +2717,30 @@ function SafesView({
           </Button>
         }
       />
+      <div className="inventory-stats">
+        <div>
+          <span>TOTAL SAFES</span>
+          <strong>{state.safes.length}</strong>
+        </div>
+        <div>
+          <span>ACCOUNTS STORED</span>
+          <strong>{state.accounts.length}</strong>
+        </div>
+        <div>
+          <span>SAFE ADMINISTRATORS</span>
+          <strong>
+            {state.safes.reduce(
+              (acc, s) =>
+                acc + s.members.filter((m) => m.permissions.includes("Manage Safe")).length,
+              0,
+            )}
+          </strong>
+        </div>
+        <div>
+          <span>POLICY ENFORCEMENT</span>
+          <strong>LEAST PRIVILEGE</strong>
+        </div>
+      </div>
       <div className="safe-workspace">
         <aside className="safe-list-pane">
           <div className="pane-title">
@@ -2742,16 +2836,96 @@ function SafesView({
               <strong>{safeAccounts.length}</strong>
             </div>
             <div>
-              <span>POLICY CONTROL</span>
-              <strong>Least privilege</strong>
+              <span>RETENTION</span>
+              <strong>7 DAYS</strong>
             </div>
           </div>
-          <Tabs defaultValue="members" className="ops-tabs">
+          <Tabs defaultValue="overview" className="ops-tabs">
             <TabsList>
-              <TabsTrigger value="members">Members & permissions</TabsTrigger>
-              <TabsTrigger value="inventory">Accounts ({safeAccounts.length})</TabsTrigger>
-              <TabsTrigger value="activity">Audit activity</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="accounts">Accounts ({safeAccounts.length})</TabsTrigger>
+              <TabsTrigger value="members">
+                Members ({currentSafe?.members.length ?? 0})
+              </TabsTrigger>
+              <TabsTrigger value="permissions">Permission Matrix</TabsTrigger>
+              <TabsTrigger value="audit">Audit Activity ({safeAudits.length})</TabsTrigger>
             </TabsList>
+            <TabsContent value="overview">
+              <div className="detail-facts" style={{ padding: "16px 0" }}>
+                <Detail label="SAFE NAME" value={currentSafe?.name ?? selectedSafe} />
+                <Detail label="OWNER" value={currentSafe?.owner ?? "—"} />
+                <Detail label="DESCRIPTION" value={currentSafe?.description ?? "No description"} />
+                <Detail label="ACCOUNTS ENROLLED" value={`${safeAccounts.length} accounts`} />
+                <Detail
+                  label="MEMBERS ASSIGNED"
+                  value={`${currentSafe?.members.length ?? 0} operators`}
+                />
+                <Detail label="RETENTION POLICY" value="7 days version history" />
+                <Detail label="PROTECTION LEVEL" value="High security · Dual control ready" />
+                <Detail label="VAULT STATUS" value="Online · Synchronized" />
+              </div>
+            </TabsContent>
+            <TabsContent value="accounts">
+              <div className="data-table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>IDENTITY</th>
+                      <th>TARGET</th>
+                      <th>PLATFORM</th>
+                      <th>TYPE</th>
+                      <th>STATUS</th>
+                      <th>ACTION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {safeAccounts.map((acc) => (
+                      <tr key={acc.id}>
+                        <td>
+                          <strong>{acc.username}</strong>
+                          <small>{acc.name}</small>
+                        </td>
+                        <td>{acc.address}</td>
+                        <td>{acc.platform}</td>
+                        <td>{acc.type}</td>
+                        <td>
+                          <StatusBadge
+                            tone={
+                              acc.status === "Managed"
+                                ? "good"
+                                : acc.status === "Rotation failed"
+                                  ? "bad"
+                                  : "warn"
+                            }
+                          >
+                            {acc.status}
+                          </StatusBadge>
+                        </td>
+                        <td>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedAccount?.(acc.id);
+                              setActive?.("accounts");
+                            }}
+                          >
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {safeAccounts.length === 0 && (
+                  <EmptyState
+                    title="No accounts in this Safe"
+                    detail="Onboard accounts to place them into this protection boundary."
+                    icon={KeyRound}
+                  />
+                )}
+              </div>
+            </TabsContent>
             <TabsContent value="members">
               <div className="member-table">
                 <div className="member-table-head">
@@ -2814,14 +2988,19 @@ function SafesView({
                   </div>
                 ))}
               </div>
+            </TabsContent>
+            <TabsContent value="permissions">
               <div className="member-editor">
                 <div className="member-editor-title">
                   <div>
-                    <h3>Configure member permissions</h3>
-                    <p>Permission dependencies are validated before saving.</p>
+                    <h3>CyberArk Safe Permission Matrix</h3>
+                    <p>
+                      Enforce least privilege and review authorization dependencies for member
+                      identities.
+                    </p>
                   </div>
                   <div className="field compact-field">
-                    <Label>Member</Label>
+                    <Label>Configured Member</Label>
                     <Select
                       value={selectedMember}
                       onValueChange={(value) => {
@@ -2850,670 +3029,1117 @@ function SafesView({
                     <label key={permission} className="permission-toggle">
                       <Checkbox
                         checked={memberPermissions.includes(permission)}
-                        onCheckedChange={(value) => togglePermission(permission, value === true)}
+                        onCheckedChange={(checked) =>
+                          togglePermission(permission, Boolean(checked))
+                        }
                       />
-                      <span>{permission}</span>
+                      <span>
+                        <strong>{permission}</strong>
+                        <small>
+                          {permission === "Initiate privileged sessions"
+                            ? "Requires Use accounts permission"
+                            : permission === "Update account properties"
+                              ? "Enables editing privileged metadata"
+                              : permission === "Manage Safe"
+                                ? "Full administrative control of Safe"
+                                : "Standard Safe permission boundary"}
+                        </small>
+                      </span>
                     </label>
                   ))}
                 </div>
                 {deps.length > 0 && (
-                  <p className="dependency-note">
-                    <span>DEPENDENCIES</span>
-                    {deps.join(" · ")}
-                  </p>
+                  <div className="dependency-alert">
+                    <AlertTriangle size={15} />
+                    <div>
+                      <strong>Missing required permission dependencies</strong>
+                      <ul>
+                        {deps.map((issue) => (
+                          <li key={issue}>{issue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 )}
                 <div className="member-editor-actions">
                   <Button type="button" onClick={onSaveMember}>
                     Save permissions
-                    <Check size={15} />
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() =>
-                      testAccess(
-                        memberPermissions.includes("Use accounts")
-                          ? "Use accounts"
-                          : "List accounts",
-                      )
-                    }
+                    onClick={() => {
+                      const found = currentSafe?.members.find(
+                        (member) => member.username === selectedMember,
+                      );
+                      setMemberPermissions(found?.permissions ?? []);
+                    }}
                   >
-                    Test member access
-                    <SearchCheck size={14} />
+                    Reset
                   </Button>
                 </div>
               </div>
+
+              <div
+                style={{
+                  marginTop: 24,
+                  padding: 16,
+                  background: "#10151D",
+                  borderRadius: 8,
+                  border: "1px solid #263241",
+                }}
+              >
+                <h4
+                  style={{ margin: "0 0 8px 0", fontSize: 13, color: "#E8EEF5", fontWeight: 700 }}
+                >
+                  Interactive Access Evaluation Sandbox
+                </h4>
+                <p style={{ margin: "0 0 12px 0", fontSize: 12, color: "#8E9EB2" }}>
+                  Simulate whether operating learner <strong>{learner}</strong> can execute a target
+                  PAM operation in <strong>{selectedSafe}</strong>.
+                </p>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <Select
+                    value={testPermission}
+                    onValueChange={(val) => setTestPermission(val as SafePermission)}
+                  >
+                    <SelectTrigger style={{ width: 240 }}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SAFE_PERMISSIONS.map((perm) => (
+                        <SelectItem key={perm} value={perm}>
+                          {perm}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" variant="outline" onClick={testLearnerAccess}>
+                    Evaluate Access
+                  </Button>
+                </div>
+                {accessResult && (
+                  <div
+                    style={{
+                      marginTop: 12,
+                      padding: 10,
+                      borderRadius: 6,
+                      background: accessResult.allowed
+                        ? "rgba(16, 185, 129, 0.12)"
+                        : "rgba(239, 68, 68, 0.12)",
+                      border: accessResult.allowed
+                        ? "1px solid rgba(16, 185, 129, 0.3)"
+                        : "1px solid rgba(239, 68, 68, 0.3)",
+                      color: accessResult.allowed ? "#34D399" : "#F87171",
+                      fontSize: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    {accessResult.allowed ? (
+                      <CheckCircle2 size={16} />
+                    ) : (
+                      <AlertTriangle size={16} />
+                    )}
+                    <span>
+                      <strong>
+                        {accessResult.allowed ? "ACCESS PERMITTED" : "ACCESS DENIED"}:{" "}
+                      </strong>
+                      {accessResult.message}
+                    </span>
+                  </div>
+                )}
+              </div>
             </TabsContent>
-            <TabsContent value="inventory">
+            <TabsContent value="audit">
               <div className="data-table-wrap">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>ACCOUNT</th>
+                      <th>TIME</th>
+                      <th>ACTOR</th>
+                      <th>ACTION</th>
                       <th>TARGET</th>
-                      <th>PLATFORM</th>
-                      <th>MANAGEMENT</th>
+                      <th>RESULT</th>
+                      <th>DETAIL</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {safeAccounts.map((account) => (
-                      <tr
-                        key={account.id}
-                        onClick={() => setSelectedAccountId(account.id)}
-                        className={cx(selectedAccountId === account.id && "row-selected")}
-                      >
+                    {safeAudits.map((a) => (
+                      <tr key={a.id}>
+                        <td>{a.time}</td>
                         <td>
-                          <strong>{account.username}</strong>
-                          <small>{account.type}</small>
+                          <strong>{a.actor}</strong>
                         </td>
-                        <td>{account.address}</td>
-                        <td>{account.platform}</td>
+                        <td>{a.action}</td>
+                        <td>{a.target}</td>
                         <td>
                           <StatusBadge
                             tone={
-                              account.status === "Managed"
+                              a.result === "Success"
                                 ? "good"
-                                : account.status === "Rotation failed"
-                                  ? "bad"
-                                  : "warn"
+                                : a.result === "Warning"
+                                  ? "warn"
+                                  : "bad"
                             }
                           >
-                            {account.status}
+                            {a.result}
                           </StatusBadge>
+                        </td>
+                        <td>
+                          <small>{a.detail}</small>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {safeAccounts.length === 0 && (
+                {safeAudits.length === 0 && (
                   <EmptyState
-                    title="No accounts in this Safe"
-                    detail="Onboard an account from the Accounts workspace."
-                    icon={KeyRound}
+                    title="No audit activity recorded"
+                    detail="Safe events will appear here when permissions or accounts change."
+                    icon={FileClock}
                   />
                 )}
               </div>
             </TabsContent>
-            <TabsContent value="activity">
-              <div className="timeline">
-                {state.audit
-                  .filter(
-                    (event) =>
-                      event.target.includes(selectedSafe) || event.detail.includes(selectedSafe),
-                  )
-                  .slice(0, 8)
-                  .map((event) => (
-                    <TimelineEvent key={event.id} event={event} />
-                  ))}
-              </div>
-            </TabsContent>
           </Tabs>
-          {accessResult && (
-            <div
-              className={cx(
-                "access-result",
-                accessResult.allowed ? "access-result-ok" : "access-result-denied",
-              )}
-            >
-              <span>
-                {accessResult.allowed ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
-              </span>
-              <p>{accessResult.message}</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Dismiss result"
-                onClick={() => setAccessResult(null)}
-              >
-                <X size={14} />
-              </Button>
-            </div>
-          )}
         </div>
       </div>
-      <div className="bottom-workspace">
-        <Panel title="Create a Safe" note="Establish an isolated account and access boundary">
-          <form id="safe-create-form" className="form-grid" onSubmit={onCreateSafe}>
-            <div className="field">
-              <Label>Safe name</Label>
-              <Input
-                required
-                value={newSafe.name}
-                onChange={(event) =>
-                  setNewSafe({ ...newSafe, name: event.target.value.toUpperCase() })
-                }
-                placeholder="e.g. DBA-REPORTING"
-                maxLength={30}
-              />
-              <small>3–30 uppercase letters, numbers or hyphens.</small>
-            </div>
-            <div className="field">
-              <Label>Safe owner</Label>
-              <Select
-                value={newSafe.owner}
-                onValueChange={(owner) => setNewSafe({ ...newSafe, owner })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LEARNERS.map((name) => (
-                    <SelectItem key={name} value={name}>
-                      {name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="field span-two">
-              <Label>Description</Label>
-              <Input
-                required
-                value={newSafe.description}
-                onChange={(event) => setNewSafe({ ...newSafe, description: event.target.value })}
-                placeholder="Business purpose and account scope"
-              />
-            </div>
-            <div className="form-end">
-              <Button type="submit">
-                <Plus size={15} />
-                Create Safe
-              </Button>
+      <div id="safe-create-form">
+        <Panel
+          title="Create a new Safe"
+          note="Vault boundary creation · assigns ownership and initial permissions"
+        >
+          <form className="safe-form" onSubmit={onCreateSafe}>
+            <div className="form-grid">
+              <div className="field">
+                <Label>Safe name</Label>
+                <Input
+                  required
+                  value={newSafe.name}
+                  onChange={(event) =>
+                    setNewSafe({ ...newSafe, name: event.target.value.toUpperCase() })
+                  }
+                  placeholder="APP-DATA-SAFE"
+                />
+              </div>
+              <div className="field">
+                <Label>Owner</Label>
+                <Select
+                  value={newSafe.owner}
+                  onValueChange={(owner) => setNewSafe({ ...newSafe, owner })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LEARNERS.map((owner) => (
+                      <SelectItem key={owner} value={owner}>
+                        {owner}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field span-two">
+                <Label>Description</Label>
+                <Textarea
+                  required
+                  rows={2}
+                  value={newSafe.description}
+                  onChange={(event) => setNewSafe({ ...newSafe, description: event.target.value })}
+                  placeholder="Enterprise responsibility and system scope for this Safe"
+                />
+              </div>
+              <div className="form-end">
+                <Button type="submit">
+                  <Plus size={15} />
+                  Create Safe
+                </Button>
+                <span>The Safe creator is granted Safe owner permissions automatically.</span>
+              </div>
             </div>
           </form>
-        </Panel>
-        <Panel title="Permission validator" note="Confirm a permitted and denied action">
-          <div className="field">
-            <Label>Action to test</Label>
-            <Select
-              value="Retrieve accounts"
-              onValueChange={(permission) => {
-                const result = evaluatePermission(
-                  state,
-                  selectedSafe,
-                  selectedMember,
-                  permission as SafePermission,
-                );
-                setAccessResult(result);
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SAFE_PERMISSIONS.map((permission) => (
-                  <SelectItem key={permission} value={permission}>
-                    {permission}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="validator-copy">
-            Current test identity <b>{selectedMember}</b> in <b>{selectedSafe}</b>. Removing
-            membership immediately affects access results.
-          </div>
-          <Button type="button" variant="outline" onClick={() => testAccess("Retrieve accounts")}>
-            Test Retrieve accounts
-            <ArrowRight size={14} />
-          </Button>
         </Panel>
       </div>
     </>
   );
 }
 
-function TimelineEvent({ event }: { event: PamState["audit"][number] }) {
-  return (
-    <div className="timeline-event">
-      <span className={`timeline-dot timeline-${event.result.toLowerCase()}`} />
-      <div>
-        <strong>{event.action}</strong>
-        <small>
-          {event.actor} · {event.target}
-        </small>
-        <p>{event.detail}</p>
-      </div>
-      <time>{event.time}</time>
-    </div>
-  );
-}
-
 function AccountsView({
   state,
-  filteredAccounts,
-  search,
-  setSearch,
-  statusFilter,
-  setStatusFilter,
+  filteredAccounts: initialFilteredAccounts,
+  search: externalSearch,
+  setSearch: setExternalSearch,
+  statusFilter: externalStatusFilter,
+  setStatusFilter: setExternalStatusFilter,
   draft,
   setDraft,
   onAdd,
   selectedAccount,
   setSelectedAccount,
   learner,
+  onCpmOperation,
+  onRepairCpm,
+  onConnectPsm,
+  setActive,
 }: {
   state: PamState;
-  filteredAccounts: PamAccount[];
-  search: string;
-  setSearch: (value: string) => void;
-  statusFilter: string;
-  setStatusFilter: (value: string) => void;
+  filteredAccounts?: PamAccount[];
+  search?: string;
+  setSearch?: (value: string) => void;
+  statusFilter?: string;
+  setStatusFilter?: (value: string) => void;
   draft: PamAccount;
   setDraft: (draft: PamAccount) => void;
   onAdd: (event: FormEvent<HTMLFormElement>) => void;
   selectedAccount: string;
   setSelectedAccount: (id: string) => void;
   learner: string;
+  onCpmOperation?: (operation: CpmOperation) => void;
+  onRepairCpm?: (repair: "unlock" | "reconcile-access" | "target-connectivity") => void;
+  onConnectPsm?: (account: PamAccount) => void;
+  setActive?: (section: SectionId) => void;
 }) {
+  const [internalSearch, setInternalSearch] = useState("");
+  const [internalStatusFilter, setInternalStatusFilter] = useState("all");
+  const [safeFilter, setSafeFilter] = useState("all");
+  const [platformFilter, setPlatformFilter] = useState("all");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<
+    "overview" | "properties" | "cpm" | "activities" | "sessions"
+  >("overview");
+
+  const searchVal = externalSearch !== undefined ? externalSearch : internalSearch;
+  const setFilterSearch = setExternalSearch ?? setInternalSearch;
+  const statusVal =
+    externalStatusFilter !== undefined ? externalStatusFilter : internalStatusFilter;
+  const setFilterStatus = setExternalStatusFilter ?? setInternalStatusFilter;
+
+  const accounts = state.accounts.filter((acc) => {
+    const matchesSearch =
+      !searchVal.trim() ||
+      acc.username.toLowerCase().includes(searchVal.toLowerCase()) ||
+      acc.address.toLowerCase().includes(searchVal.toLowerCase()) ||
+      acc.name.toLowerCase().includes(searchVal.toLowerCase()) ||
+      acc.safe.toLowerCase().includes(searchVal.toLowerCase()) ||
+      acc.platform.toLowerCase().includes(searchVal.toLowerCase()) ||
+      acc.owner.toLowerCase().includes(searchVal.toLowerCase());
+    const matchesStatus = statusVal === "all" || acc.status === statusVal;
+    const matchesSafe = safeFilter === "all" || acc.safe === safeFilter;
+    const matchesPlatform = platformFilter === "all" || acc.platform === platformFilter;
+    return matchesSearch && matchesStatus && matchesSafe && matchesPlatform;
+  });
+
   const focused =
     state.accounts.find((account) => account.id === selectedAccount) ??
-    filteredAccounts[0] ??
+    accounts[0] ??
     state.accounts[0];
-  const [drawer, setDrawer] = useState(false);
+
   const owners = [...new Set(state.accounts.map((account) => account.owner))];
+  const allSafes = [...new Set(state.safes.map((s) => s.name))];
+  const allPlatforms = [...SUPPORTED_PLATFORMS];
+
+  const accountAudits = state.audit.filter(
+    (a) =>
+      focused &&
+      (a.target.includes(focused.username) ||
+        a.target.includes(focused.address) ||
+        a.detail.includes(focused.username) ||
+        a.target.includes(focused.safe)),
+  );
+
+  const accountSessions = state.sessions.filter(
+    (s) => focused && (s.target === focused.address || s.account === focused.username),
+  );
+
   return (
     <>
       <SectionHeading
         eyebrow="PRIVILEGED INVENTORY · ACCOUNT LIFECYCLE"
         title="Account management"
-        description="Onboard, verify and inspect privileged identities across Windows, Unix, database and application platforms."
+        description="Enterprise privileged account inventory modeled on CyberArk PVWA. Onboard, verify, rotate, and launch brokered sessions."
         actions={
           <span className="inventory-total">
             <KeyRound size={15} />
-            <b>{state.accounts.length}</b> accounts
+            <b>{state.accounts.length}</b> total accounts
           </span>
         }
       />
       <div className="inventory-stats">
         <div>
           <span>MANAGED</span>
-          <strong>{state.accounts.filter((account) => account.status === "Managed").length}</strong>
+          <strong>{state.accounts.filter((a) => a.status === "Managed").length}</strong>
         </div>
         <div>
           <span>VERIFY REQUIRED</span>
-          <strong>
-            {state.accounts.filter((account) => account.status === "Verify required").length}
-          </strong>
+          <strong>{state.accounts.filter((a) => a.status === "Verify required").length}</strong>
         </div>
         <div>
           <span>ROTATION FAILED</span>
-          <strong>
-            {state.accounts.filter((account) => account.status === "Rotation failed").length}
+          <strong
+            className={
+              state.accounts.some((a) => a.status === "Rotation failed") ? "metric-danger" : ""
+            }
+          >
+            {state.accounts.filter((a) => a.status === "Rotation failed").length}
           </strong>
         </div>
         <div>
           <span>UNMANAGED</span>
-          <strong>
-            {state.accounts.filter((account) => account.status === "Unmanaged").length}
-          </strong>
+          <strong>{state.accounts.filter((a) => a.status === "Unmanaged").length}</strong>
         </div>
       </div>
-      <div className="account-layout">
-        <Panel
-          className="account-inventory"
-          title="Enterprise account inventory"
-          note="GLOBAL FINANCIAL SERVICES · 9 target systems"
-          action={
-            <Button
-              type="button"
-              size="sm"
-              onClick={() =>
-                document.getElementById("account-onboard")?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              <Plus size={14} />
-              Onboard account
-            </Button>
-          }
-        >
-          <div className="table-toolbar">
-            <div className="search-field">
-              <Search size={14} />
-              <Input
-                aria-label="Search accounts"
-                placeholder="Search username, target or Safe"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="filter-select">
-                <SlidersHorizontal size={14} />
-                <SelectValue placeholder="All states" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All management states</SelectItem>
-                {["Managed", "Verify required", "Rotation failed", "Unmanaged"].map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <span className="result-count">{filteredAccounts.length} RECORDS</span>
+
+      <Panel
+        className="account-inventory"
+        title="Enterprise Privileged Account Inventory"
+        note="GLOBAL FINANCIAL SERVICES · CyberArk PVWA Grid View"
+        action={
+          <Button
+            type="button"
+            size="sm"
+            onClick={() =>
+              document.getElementById("account-onboard")?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            <Plus size={14} />
+            Onboard account
+          </Button>
+        }
+      >
+        <div className="table-toolbar" style={{ flexWrap: "wrap", gap: 10 }}>
+          <div className="search-field" style={{ minWidth: 260 }}>
+            <Search size={14} />
+            <Input
+              aria-label="Search accounts"
+              placeholder="Search identity, target, safe, platform..."
+              value={searchVal}
+              onChange={(event) => setFilterSearch(event.target.value)}
+            />
           </div>
-          <div className="data-table-wrap">
-            <table className="data-table account-table">
-              <thead>
-                <tr>
-                  <th>PRIVILEGED IDENTITY</th>
-                  <th>TARGET SYSTEM</th>
-                  <th>PLATFORM</th>
-                  <th>SAFE</th>
-                  <th>OWNER</th>
-                  <th>STATUS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAccounts.map((account) => (
-                  <tr
-                    key={account.id}
-                    onClick={() => {
-                      setSelectedAccount(account.id);
-                      setDrawer(true);
-                    }}
-                    className={cx("click-row", selectedAccount === account.id && "row-selected")}
-                  >
-                    <td>
-                      <strong>{account.username}</strong>
-                      <small>
-                        {account.name} · {account.type}
-                      </small>
-                    </td>
-                    <td>{account.address}</td>
-                    <td>{account.platform}</td>
-                    <td>
-                      <span className="code-cell">{account.safe}</span>
-                    </td>
-                    <td>{account.owner}</td>
-                    <td>
-                      <StatusBadge
-                        tone={
-                          account.status === "Managed"
-                            ? "good"
-                            : account.status === "Rotation failed"
-                              ? "bad"
-                              : "warn"
-                        }
-                      >
-                        {account.status}
-                      </StatusBadge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredAccounts.length === 0 && (
-              <EmptyState
-                title="No matching accounts"
-                detail="Adjust the search text or management state."
-              />
-            )}
-          </div>
-        </Panel>
-        <Panel className="account-detail" title="Account details" note="SELECTED INVENTORY RECORD">
-          <div className="account-detail-top">
-            <div className="account-key-icon">
-              <KeyRound size={20} />
-            </div>
-            <div>
-              <h3>{focused?.username ?? "No account selected"}</h3>
-              <span>{focused?.address}</span>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Close details"
-              onClick={() => setDrawer(false)}
-            >
-              <X size={15} />
-            </Button>
-          </div>
-          {focused && (
-            <>
-              <StatusBadge
-                tone={
-                  focused.status === "Managed"
-                    ? "good"
-                    : focused.status === "Rotation failed"
-                      ? "bad"
-                      : "warn"
-                }
-              >
-                {focused.status.toUpperCase()}
-              </StatusBadge>
-              <div className="detail-facts account-facts">
-                <Detail label="PLATFORM" value={focused.platform} />
-                <Detail label="SAFE" value={focused.safe} />
-                <Detail label="ACCOUNT OWNER" value={focused.owner} />
-                <Detail label="BUSINESS PURPOSE" value={focused.purpose} />
-                <Detail label="DEPENDENCY" value={focused.dependency || "No dependency recorded"} />
-                <Detail label="ROTATION POLICY" value={focused.policy} />
-                <Detail label="LAST VERIFY" value={focused.lastVerify} />
-                <Detail label="LAST CHANGE" value={focused.lastChange} />
-                <Detail label="LAST RECONCILE" value={focused.lastReconcile} />
-              </div>
-              {focused.failureCause && (
-                <div className="failure-callout">
-                  <AlertTriangle size={15} />
-                  <span>
-                    <strong>Failure detail</strong>
-                    {focused.failureCause}
-                  </span>
-                </div>
-              )}
-              <div className="detail-link-row">
-                <span>MANAGEMENT OPERATIONS</span>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
+          <Select value={safeFilter} onValueChange={setSafeFilter}>
+            <SelectTrigger className="filter-select" style={{ minWidth: 140 }}>
+              <Boxes size={14} />
+              <SelectValue placeholder="All Safes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Safes</SelectItem>
+              {allSafes.map((safe) => (
+                <SelectItem key={safe} value={safe}>
+                  {safe}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={platformFilter} onValueChange={setPlatformFilter}>
+            <SelectTrigger className="filter-select" style={{ minWidth: 150 }}>
+              <Server size={14} />
+              <SelectValue placeholder="All Platforms" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Platforms</SelectItem>
+              {allPlatforms.map((plat) => (
+                <SelectItem key={plat} value={plat}>
+                  {plat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={statusVal} onValueChange={setFilterStatus}>
+            <SelectTrigger className="filter-select" style={{ minWidth: 160 }}>
+              <SlidersHorizontal size={14} />
+              <SelectValue placeholder="All states" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Management States</SelectItem>
+              {["Managed", "Verify required", "Rotation failed", "Unmanaged"].map((st) => (
+                <SelectItem key={st} value={st}>
+                  {st}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="result-count">{accounts.length} RECORDS</span>
+        </div>
+
+        <div className="data-table-wrap">
+          <table className="data-table account-table">
+            <thead>
+              <tr>
+                <th>PRIVILEGED IDENTITY</th>
+                <th>TARGET SYSTEM</th>
+                <th>PLATFORM</th>
+                <th>SAFE</th>
+                <th>ACCOUNT TYPE</th>
+                <th>OWNER</th>
+                <th>CPM STATUS</th>
+                <th>LAST VERIFIED</th>
+                <th>LAST CHANGE</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {accounts.map((account) => (
+                <tr
+                  key={account.id}
                   onClick={() => {
-                    const item = state.accounts.find((account) => account.id === focused.id);
-                    if (item)
-                      document
-                        .getElementById("account-onboard")
-                        ?.scrollIntoView({ behavior: "smooth" });
+                    setSelectedAccount(account.id);
+                    setDrawerOpen(true);
+                  }}
+                  className={cx("click-row", selectedAccount === account.id && "row-selected")}
+                >
+                  <td>
+                    <strong>{account.username}</strong>
+                    <small>{account.name}</small>
+                  </td>
+                  <td>{account.address}</td>
+                  <td>
+                    <Badge variant="outline" style={{ fontSize: 11, borderColor: "#263241" }}>
+                      {account.platform}
+                    </Badge>
+                  </td>
+                  <td>
+                    <span className="code-cell">{account.safe}</span>
+                  </td>
+                  <td>
+                    <small>{account.type}</small>
+                  </td>
+                  <td>{account.owner}</td>
+                  <td>
+                    <span
+                      className={cx(
+                        "status-pill",
+                        account.status === "Managed"
+                          ? "managed"
+                          : account.status === "Verify required"
+                            ? "verify"
+                            : account.status === "Rotation failed"
+                              ? "failed"
+                              : "unmanaged",
+                      )}
+                    >
+                      <i
+                        className={cx(
+                          "pulse-dot",
+                          account.status === "Managed" ? "pulse-good" : "",
+                        )}
+                      />
+                      {account.status}
+                    </span>
+                  </td>
+                  <td>
+                    <small>{account.lastVerify}</small>
+                  </td>
+                  <td>
+                    <small>{account.lastChange}</small>
+                  </td>
+                  <td>
+                    <div
+                      className="table-actions"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: "flex", gap: 4 }}
+                    >
+                      <Button
+                        size="sm"
+                        className="btn-connect"
+                        title="Connect with PSM"
+                        onClick={() => {
+                          setSelectedAccount(account.id);
+                          if (onConnectPsm) onConnectPsm(account);
+                          else if (setActive) {
+                            setActive("psm");
+                            toast.info(`Connecting to ${account.username} on ${account.address}`);
+                          }
+                        }}
+                      >
+                        Connect
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="row-action-btn"
+                        title="Verify credential"
+                        onClick={() => {
+                          setSelectedAccount(account.id);
+                          onCpmOperation?.("Verify");
+                        }}
+                      >
+                        Verify
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="row-action-btn"
+                        title="Inspect account details"
+                        onClick={() => {
+                          setSelectedAccount(account.id);
+                          setDrawerOpen(true);
+                        }}
+                      >
+                        <Eye size={13} />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {accounts.length === 0 && (
+            <EmptyState
+              title="No matching accounts"
+              detail="Adjust the search text or filtering parameters."
+              icon={KeyRound}
+            />
+          )}
+        </div>
+      </Panel>
+
+      {/* CyberArk Right Slide-over Drawer */}
+      {drawerOpen && (
+        <div className="pvwa-drawer-backdrop" onClick={() => setDrawerOpen(false)}>
+          <div className="pvwa-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="pvwa-drawer-header">
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div
+                  className="account-key-icon"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 6,
+                    background: "rgba(0, 168, 232, 0.12)",
+                    color: "#00A8E8",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  Edit properties
+                  <KeyRound size={18} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#E8EEF5" }}>
+                    {focused?.username}
+                  </h3>
+                  <span style={{ fontSize: 12, color: "#8E9EB2" }}>
+                    {focused?.address} · {focused?.platform}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span
+                  className={cx(
+                    "status-pill",
+                    focused?.status === "Managed"
+                      ? "managed"
+                      : focused?.status === "Verify required"
+                        ? "verify"
+                        : focused?.status === "Rotation failed"
+                          ? "failed"
+                          : "unmanaged",
+                  )}
+                >
+                  {focused?.status}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close drawer"
+                  onClick={() => setDrawerOpen(false)}
+                >
+                  <X size={16} />
                 </Button>
               </div>
-              <p className="access-note">
-                Access test: <b>{learner}</b>{" "}
-                {canSafeMemberPerform(
-                  state.safes.find((safe) => safe.name === focused.safe),
-                  learner,
-                  "List accounts",
-                )
-                  ? "can list accounts"
-                  : "cannot list accounts"}{" "}
-                in {focused.safe}.
-              </p>
-            </>
-          )}
-        </Panel>
-      </div>
-      <Panel
-        title="Onboard a privileged account"
-        note="Platform validation · Supported enterprise platforms"
-      >
-        <form id="account-onboard" className="account-form" onSubmit={onAdd}>
-          <div className="form-grid">
-            <div className="field">
-              <Label>Account name</Label>
-              <Input
-                required
-                value={draft.name}
-                onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-                placeholder="Administrator"
-              />
             </div>
-            <div className="field">
-              <Label>Username</Label>
-              <Input
-                required
-                value={draft.username}
-                onChange={(event) => setDraft({ ...draft, username: event.target.value })}
-                placeholder="Administrator"
-              />
-            </div>
-            <div className="field">
-              <Label>Target address</Label>
-              <Input
-                required
-                value={draft.address}
-                onChange={(event) =>
-                  setDraft({ ...draft, address: event.target.value.toUpperCase() })
-                }
-                placeholder="WIN-SRV-01"
-              />
-            </div>
-            <div className="field">
-              <Label>Platform</Label>
-              <Select
-                value={draft.platform}
-                onValueChange={(platform) => setDraft({ ...draft, platform })}
+
+            {/* Operational Action Toolbar */}
+            <div className="pvwa-drawer-toolbar">
+              <Button
+                size="sm"
+                className="btn-connect"
+                onClick={() => {
+                  if (focused) {
+                    if (onConnectPsm) onConnectPsm(focused);
+                    else if (setActive) {
+                      setActive("psm");
+                      toast.info(`Connecting to ${focused.username} on ${focused.address}`);
+                    }
+                  }
+                }}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[...SUPPORTED_PLATFORMS, "Unsupported platform"].map((platform) => (
-                    <SelectItem key={platform} value={platform}>
-                      {platform}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="field">
-              <Label>Safe</Label>
-              <Select value={draft.safe} onValueChange={(safe) => setDraft({ ...draft, safe })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {state.safes.map((safe) => (
-                    <SelectItem key={safe.name} value={safe.name}>
-                      {safe.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="field">
-              <Label>Account type</Label>
-              <Select value={draft.type} onValueChange={(type) => setDraft({ ...draft, type })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[
-                    "Human administrator",
-                    "Domain administrator",
-                    "Service account",
-                    "Database account",
-                    "Application account",
-                    "Shared privileged",
-                  ].map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="field">
-              <Label>Owner</Label>
-              <Select value={draft.owner} onValueChange={(owner) => setDraft({ ...draft, owner })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[...new Set([...LEARNERS, ...owners])].map((owner) => (
-                    <SelectItem key={owner} value={owner}>
-                      {owner}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="field">
-              <Label>Rotation policy</Label>
-              <Input disabled value="Enterprise · verify before change" />
-            </div>
-            <div className="field span-two">
-              <Label>Business purpose</Label>
-              <Textarea
-                required
-                rows={2}
-                value={draft.purpose}
-                onChange={(event) => setDraft({ ...draft, purpose: event.target.value })}
-                placeholder="Describe the system responsibility this account supports"
-              />
-            </div>
-            <div className="field span-two">
-              <Label>
-                Application dependency <span className="optional">OPTIONAL</span>
-              </Label>
-              <Input
-                value={draft.dependency}
-                onChange={(event) => setDraft({ ...draft, dependency: event.target.value })}
-                placeholder="Service or application using this identity"
-              />
-            </div>
-            <div className="form-end">
-              <Button type="submit">
-                <Plus size={15} />
-                Add account
+                <MonitorPlay size={14} style={{ marginRight: 6 }} />
+                Connect (PSM)
               </Button>
-              <span>
-                Management starts at Verify required until credential validation succeeds.
-              </span>
+              <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Verify")}>
+                <SearchCheck size={14} style={{ marginRight: 6 }} />
+                Verify
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Change")}>
+                <RotateCcw size={14} style={{ marginRight: 6 }} />
+                Change
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Reconcile")}>
+                <Activity size={14} style={{ marginRight: 6 }} />
+                Reconcile
+              </Button>
+            </div>
+
+            {/* 5-Tab Selector */}
+            <div className="pvwa-drawer-tabs">
+              <button
+                type="button"
+                className={cx("pvwa-drawer-tab", drawerTab === "overview" && "active")}
+                onClick={() => setDrawerTab("overview")}
+              >
+                Overview
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-drawer-tab", drawerTab === "properties" && "active")}
+                onClick={() => setDrawerTab("properties")}
+              >
+                Properties
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-drawer-tab", drawerTab === "cpm" && "active")}
+                onClick={() => setDrawerTab("cpm")}
+              >
+                CPM
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-drawer-tab", drawerTab === "activities" && "active")}
+                onClick={() => setDrawerTab("activities")}
+              >
+                Activities ({accountAudits.length})
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-drawer-tab", drawerTab === "sessions" && "active")}
+                onClick={() => setDrawerTab("sessions")}
+              >
+                Sessions ({accountSessions.length})
+              </button>
+            </div>
+
+            {/* Tab Contents */}
+            <div className="pvwa-drawer-content">
+              {drawerTab === "overview" && focused && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div className="detail-facts">
+                    <Detail label="ACCOUNT NAME" value={focused.name} />
+                    <Detail label="USERNAME" value={focused.username} />
+                    <Detail label="TARGET ADDRESS" value={focused.address} />
+                    <Detail label="SAFE" value={focused.safe} />
+                    <Detail label="PLATFORM" value={focused.platform} />
+                    <Detail label="ACCOUNT TYPE" value={focused.type} />
+                    <Detail label="OWNER" value={focused.owner} />
+                    <Detail label="BUSINESS PURPOSE" value={focused.purpose} />
+                    <Detail
+                      label="APPLICATION DEPENDENCY"
+                      value={focused.dependency || "None recorded"}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      padding: 12,
+                      borderRadius: 6,
+                      background: "#10151D",
+                      border: "1px solid #263241",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: "#6F8094",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      SAFE MEMBERSHIP PERMISSION TEST
+                    </span>
+                    <p style={{ margin: "4px 0 0 0", fontSize: 12, color: "#E8EEF5" }}>
+                      Operating Learner <strong>{learner}</strong>{" "}
+                      {canSafeMemberPerform(
+                        state.safes.find((s) => s.name === focused.safe),
+                        learner,
+                        "List accounts",
+                      )
+                        ? "has List accounts permission in this Safe."
+                        : "is not authorized to list accounts in this Safe."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {drawerTab === "properties" && focused && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div className="detail-facts">
+                    <Detail label="HOSTNAME / IP" value={focused.address} />
+                    <Detail
+                      label="DEFAULT PORT"
+                      value={
+                        focused.platform.includes("Windows")
+                          ? "3389 (RDP)"
+                          : focused.platform.includes("Unix") || focused.platform.includes("Linux")
+                            ? "22 (SSH)"
+                            : focused.platform.includes("Oracle")
+                              ? "1521 (TNS)"
+                              : focused.platform.includes("SQL")
+                                ? "1433 (TDS)"
+                                : "443 (HTTPS)"
+                      }
+                    />
+                    <Detail
+                      label="LOGON DOMAIN"
+                      value={focused.platform.includes("Domain") ? "CORP.LOCAL" : "STANDALONE"}
+                    />
+                    <Detail
+                      label="PLATFORM ID"
+                      value={`${focused.platform.toLowerCase().replace(/\s+/g, "-")}-enterprise`}
+                    />
+                    <Detail label="ROTATION POLICY" value={focused.policy} />
+                    <Detail label="DISCOVERY SOURCE" value="Active Directory Scan" />
+                    <Detail label="ENROLLMENT DATE" value="2026-10-01 09:00:00 UTC" />
+                    <Detail
+                      label="AUTO MANAGEMENT"
+                      value={focused.status === "Managed" ? "Enabled" : "Suspended"}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {drawerTab === "cpm" && focused && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div className="detail-facts">
+                    <Detail label="MANAGEMENT STATE" value={focused.status} />
+                    <Detail label="POLICY RULE" value={focused.policy} />
+                    <Detail label="LAST VERIFY" value={focused.lastVerify} />
+                    <Detail label="LAST CHANGE" value={focused.lastChange} />
+                    <Detail label="LAST RECONCILE" value={focused.lastReconcile} />
+                  </div>
+
+                  {focused.failureCause && (
+                    <div className="pvwa-failure-callout">
+                      <AlertTriangle size={16} />
+                      <div>
+                        <strong>CPM Rotation / Verification Failure Detected</strong>
+                        <p>{focused.failureCause}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {focused.failureCause && onRepairCpm && (
+                    <div
+                      style={{
+                        padding: 12,
+                        borderRadius: 6,
+                        background: "#10151D",
+                        border: "1px solid #263241",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: "#6F8094",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        ONE-CLICK INCIDENT RECOVERY
+                      </span>
+                      <div
+                        style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}
+                      >
+                        <Button size="sm" variant="outline" onClick={() => onRepairCpm("unlock")}>
+                          <Power size={13} style={{ marginRight: 6 }} />
+                          Unlock Target Account
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onRepairCpm("reconcile-access")}
+                        >
+                          <KeyRound size={13} style={{ marginRight: 6 }} />
+                          Restore Reconcile Access
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => onRepairCpm("target-connectivity")}
+                        >
+                          <Network size={13} style={{ marginRight: 6 }} />
+                          Repair Target Connectivity
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <Button size="sm" variant="outline" onClick={() => onCpmOperation?.("Verify")}>
+                      Run Verify Now
+                    </Button>
+                    <Button size="sm" onClick={() => onCpmOperation?.("Change")}>
+                      Run Change Now
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onCpmOperation?.("Reconcile")}
+                    >
+                      Run Reconcile Now
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {drawerTab === "activities" && focused && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {accountAudits.map((a) => (
+                    <div
+                      key={a.id}
+                      style={{
+                        padding: 10,
+                        background: "#10151D",
+                        border: "1px solid #263241",
+                        borderRadius: 6,
+                        fontSize: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, color: "#E8EEF5" }}>{a.action}</span>
+                        <span style={{ color: "#6F8094", fontSize: 11 }}>{a.time}</span>
+                      </div>
+                      <div style={{ color: "#8E9EB2", fontSize: 11 }}>{a.detail}</div>
+                      <div style={{ marginTop: 6, display: "flex", gap: 6, alignItems: "center" }}>
+                        <StatusBadge
+                          tone={
+                            a.result === "Success"
+                              ? "good"
+                              : a.result === "Warning"
+                                ? "warn"
+                                : "bad"
+                          }
+                        >
+                          {a.result}
+                        </StatusBadge>
+                        <span style={{ color: "#6F8094", fontSize: 11 }}>Actor: {a.actor}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {accountAudits.length === 0 && (
+                    <EmptyState
+                      title="No activities recorded"
+                      detail="Operations and access events will be logged here."
+                      icon={FileClock}
+                    />
+                  )}
+                </div>
+              )}
+
+              {drawerTab === "sessions" && focused && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {accountSessions.map((s) => (
+                    <div
+                      key={s.id}
+                      style={{
+                        padding: 10,
+                        background: "#10151D",
+                        border: "1px solid #263241",
+                        borderRadius: 6,
+                        fontSize: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <span style={{ fontWeight: 600, color: "#E8EEF5" }}>
+                          {s.target} ({s.component})
+                        </span>
+                        <StatusBadge tone={s.status === "Active" ? "good" : "neutral"}>
+                          {s.status}
+                        </StatusBadge>
+                      </div>
+                      <div style={{ color: "#8E9EB2", fontSize: 11 }}>
+                        Ticket: {s.ticket} · Started: {s.started}
+                      </div>
+                      <div style={{ color: "#6F8094", fontSize: 11, marginTop: 4 }}>
+                        Commands executed: {s.commands.length}
+                      </div>
+                    </div>
+                  ))}
+                  {accountSessions.length === 0 && (
+                    <EmptyState
+                      title="No recorded sessions"
+                      detail="Launch a PSM session to connect to this target."
+                      icon={MonitorPlay}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </form>
-      </Panel>
-      <div
-        className={cx("detail-drawer-backdrop", drawer && "drawer-open")}
-        onClick={() => setDrawer(false)}
-      >
-        <div className="detail-drawer" onClick={(event) => event.stopPropagation()}>
-          <div className="drawer-head">
-            <strong>Account record</strong>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Close account details"
-              onClick={() => setDrawer(false)}
-            >
-              <X size={16} />
-            </Button>
-          </div>
-          <p>
-            {focused?.username} · {focused?.address}
-          </p>
-          {focused && (
-            <div className="detail-facts">
-              {Object.entries({
-                Platform: focused.platform,
-                Safe: focused.safe,
-                Owner: focused.owner,
-                Policy: focused.policy,
-                "Last verify": focused.lastVerify,
-                "Last change": focused.lastChange,
-                "Last reconcile": focused.lastReconcile,
-              }).map(([label, value]) => (
-                <Detail key={label} label={label.toUpperCase()} value={value} />
-              ))}
-            </div>
-          )}
         </div>
+      )}
+
+      {/* Onboard Form */}
+      <div id="account-onboard">
+        <Panel
+          title="Onboard a privileged account"
+          note="Platform validation · Supported enterprise platforms"
+        >
+          <form className="account-form" onSubmit={onAdd}>
+            <div className="form-grid">
+              <div className="field">
+                <Label>Account name</Label>
+                <Input
+                  required
+                  value={draft.name}
+                  onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+                  placeholder="Administrator"
+                />
+              </div>
+              <div className="field">
+                <Label>Username</Label>
+                <Input
+                  required
+                  value={draft.username}
+                  onChange={(event) => setDraft({ ...draft, username: event.target.value })}
+                  placeholder="Administrator"
+                />
+              </div>
+              <div className="field">
+                <Label>Target address</Label>
+                <Input
+                  required
+                  value={draft.address}
+                  onChange={(event) =>
+                    setDraft({ ...draft, address: event.target.value.toUpperCase() })
+                  }
+                  placeholder="WIN-SRV-01"
+                />
+              </div>
+              <div className="field">
+                <Label>Platform</Label>
+                <Select
+                  value={draft.platform}
+                  onValueChange={(platform) => setDraft({ ...draft, platform })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...SUPPORTED_PLATFORMS, "Unsupported platform"].map((platform) => (
+                      <SelectItem key={platform} value={platform}>
+                        {platform}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field">
+                <Label>Safe</Label>
+                <Select value={draft.safe} onValueChange={(safe) => setDraft({ ...draft, safe })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {state.safes.map((safe) => (
+                      <SelectItem key={safe.name} value={safe.name}>
+                        {safe.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field">
+                <Label>Account type</Label>
+                <Select value={draft.type} onValueChange={(type) => setDraft({ ...draft, type })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[
+                      "Human administrator",
+                      "Domain administrator",
+                      "Service account",
+                      "Database account",
+                      "Application account",
+                      "Shared privileged",
+                    ].map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field">
+                <Label>Owner</Label>
+                <Select
+                  value={draft.owner}
+                  onValueChange={(owner) => setDraft({ ...draft, owner })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...new Set([...LEARNERS, ...owners])].map((owner) => (
+                      <SelectItem key={owner} value={owner}>
+                        {owner}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="field">
+                <Label>Rotation policy</Label>
+                <Input disabled value="Enterprise · verify before change" />
+              </div>
+              <div className="field span-two">
+                <Label>Business purpose</Label>
+                <Textarea
+                  required
+                  rows={2}
+                  value={draft.purpose}
+                  onChange={(event) => setDraft({ ...draft, purpose: event.target.value })}
+                  placeholder="Describe the system responsibility this account supports"
+                />
+              </div>
+              <div className="field span-two">
+                <Label>
+                  Application dependency <span className="optional">OPTIONAL</span>
+                </Label>
+                <Input
+                  value={draft.dependency}
+                  onChange={(event) => setDraft({ ...draft, dependency: event.target.value })}
+                  placeholder="Service or application using this identity"
+                />
+              </div>
+              <div className="form-end">
+                <Button type="submit">
+                  <Plus size={15} />
+                  Add account
+                </Button>
+                <span>
+                  Management starts at Verify required until credential validation succeeds.
+                </span>
+              </div>
+            </div>
+          </form>
+        </Panel>
       </div>
     </>
   );
@@ -3686,12 +4312,10 @@ function CpmView({
   onRun: (operation: CpmOperation) => void;
   onRepair: (repair: "unlock" | "reconcile-access" | "target-connectivity") => void;
 }) {
-  const queue = state.accounts.filter(
-    (account) =>
-      account.status === "Verify required" ||
-      account.status === "Rotation failed" ||
-      account.status === "Unmanaged",
-  );
+  const queue = state.accounts;
+  const targetAccount =
+    selectedCpmAccount ?? state.accounts.find((a) => a.id === selectedAccount) ?? state.accounts[0];
+
   return (
     <>
       <SectionHeading
@@ -3749,8 +4373,8 @@ function CpmView({
       <div className="cpm-layout">
         <div className="cpm-main">
           <Panel
-            title="Rotation and verification queue"
-            note="Select an account to inspect its policy, state and operation history"
+            title="Managed Accounts & CPM Queue"
+            note="Full enterprise inventory with instantaneous row operations"
           >
             <div className="data-table-wrap">
               <table className="data-table">
@@ -3758,15 +4382,22 @@ function CpmView({
                   <tr>
                     <th>ACCOUNT · TARGET</th>
                     <th>PLATFORM · SAFE</th>
+                    <th>CPM STATUS</th>
+                    <th>LAST VERIFY</th>
                     <th>LAST CHANGE</th>
-                    <th>MANAGEMENT STATE</th>
+                    <th>LAST RECONCILE</th>
+                    <th>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {queue.map((account) => (
                     <tr
                       key={account.id}
-                      className={cx("click-row", selectedAccount === account.id && "row-selected")}
+                      className={cx(
+                        "click-row",
+                        (targetAccount?.id === account.id || selectedAccount === account.id) &&
+                          "row-selected",
+                      )}
                       onClick={() => setSelectedAccount(account.id)}
                     >
                       <td>
@@ -3777,30 +4408,78 @@ function CpmView({
                         {account.platform}
                         <small>{account.safe}</small>
                       </td>
-                      <td>{account.lastChange}</td>
                       <td>
-                        <StatusBadge tone={account.status === "Rotation failed" ? "bad" : "warn"}>
+                        <StatusBadge
+                          tone={
+                            account.status === "Managed"
+                              ? "good"
+                              : account.status === "Rotation failed"
+                                ? "bad"
+                                : "warn"
+                          }
+                        >
                           {account.status}
                         </StatusBadge>
+                      </td>
+                      <td>
+                        <small>{account.lastVerify}</small>
+                      </td>
+                      <td>
+                        <small>{account.lastChange}</small>
+                      </td>
+                      <td>
+                        <small>{account.lastReconcile}</small>
+                      </td>
+                      <td>
+                        <div
+                          style={{ display: "flex", gap: 4 }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            title="Verify credential"
+                            onClick={() => {
+                              setSelectedAccount(account.id);
+                              onRun("Verify");
+                            }}
+                          >
+                            Verify
+                          </Button>
+                          <Button
+                            size="sm"
+                            title="Change password"
+                            onClick={() => {
+                              setSelectedAccount(account.id);
+                              onRun("Change");
+                            }}
+                          >
+                            Change
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            title="Reconcile password"
+                            onClick={() => {
+                              setSelectedAccount(account.id);
+                              onRun("Reconcile");
+                            }}
+                          >
+                            Reconcile
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {queue.length === 0 && (
-                <EmptyState
-                  title="No operation exceptions"
-                  detail="All accounts are managed and verified."
-                  icon={CheckCircle2}
-                />
-              )}
             </div>
           </Panel>
           <Panel
-            title="Operation history"
+            title="Operation History"
             note={
-              selectedCpmAccount
-                ? `${selectedCpmAccount.username} · ${selectedCpmAccount.address}`
+              targetAccount
+                ? `${targetAccount.username} · ${targetAccount.address}`
                 : "Select an account"
             }
           >
@@ -3841,11 +4520,8 @@ function CpmView({
           </Panel>
         </div>
         <aside className="cpm-side">
-          <Panel title="Account operation" note="Selected managed account">
-            <Select
-              value={selectedCpmAccount?.id ?? selectedAccount}
-              onValueChange={setSelectedAccount}
-            >
+          <Panel title="Account Operation Console" note="Selected managed account">
+            <Select value={targetAccount?.id ?? selectedAccount} onValueChange={setSelectedAccount}>
               <SelectTrigger>
                 <SelectValue placeholder="Choose an account" />
               </SelectTrigger>
@@ -3862,24 +4538,24 @@ function CpmView({
                 <KeyRound size={17} />
               </span>
               <div>
-                <strong>{selectedCpmAccount?.username}</strong>
-                <small>{selectedCpmAccount?.address}</small>
+                <strong>{targetAccount?.username}</strong>
+                <small>{targetAccount?.address}</small>
               </div>
             </div>
             <div className="detail-facts cpm-facts">
-              <Detail label="PLATFORM" value={selectedCpmAccount?.platform ?? "—"} />
-              <Detail label="SAFE" value={selectedCpmAccount?.safe ?? "—"} />
-              <Detail label="POLICY" value={selectedCpmAccount?.policy ?? "—"} />
-              <Detail label="LAST VERIFY" value={selectedCpmAccount?.lastVerify ?? "—"} />
-              <Detail label="LAST CHANGE" value={selectedCpmAccount?.lastChange ?? "—"} />
-              <Detail label="LAST RECONCILE" value={selectedCpmAccount?.lastReconcile ?? "—"} />
+              <Detail label="PLATFORM" value={targetAccount?.platform ?? "—"} />
+              <Detail label="SAFE" value={targetAccount?.safe ?? "—"} />
+              <Detail label="POLICY" value={targetAccount?.policy ?? "—"} />
+              <Detail label="LAST VERIFY" value={targetAccount?.lastVerify ?? "—"} />
+              <Detail label="LAST CHANGE" value={targetAccount?.lastChange ?? "—"} />
+              <Detail label="LAST RECONCILE" value={targetAccount?.lastReconcile ?? "—"} />
             </div>
-            {selectedCpmAccount?.failureCause && (
+            {targetAccount?.failureCause && (
               <div className="failure-callout">
                 <AlertTriangle size={15} />
                 <span>
                   <strong>Failure reason</strong>
-                  {selectedCpmAccount.failureCause}
+                  {targetAccount.failureCause}
                 </span>
               </div>
             )}
@@ -3897,17 +4573,8 @@ function CpmView({
                 Reconcile
               </Button>
             </div>
-            <div className="management-toggle">
-              <span>
-                <b>Enable management</b>
-                <small>Management is simulated per account.</small>
-              </span>
-              <Button type="button" size="sm" variant="outline" onClick={() => onRun("Verify")}>
-                {selectedCpmAccount?.status === "Managed" ? "Managed" : "Verify to enable"}
-              </Button>
-            </div>
           </Panel>
-          {selectedCpmAccount?.failureCause && (
+          {targetAccount?.failureCause && (
             <Panel
               title="Incident recovery"
               note="Repair the target condition before retrying change"
@@ -3931,66 +4598,12 @@ function CpmView({
                   onClick={() => onRepair("target-connectivity")}
                 >
                   <Network size={14} />
-                  Restore connectivity
+                  Restore target connectivity
                 </Button>
               </div>
-              <p className="small-note">
-                Record the corrective action, run Reconcile if the target and vault may differ, then
-                Change and Verify.
-              </p>
             </Panel>
           )}
         </aside>
-      </div>
-      <div className="bottom-workspace">
-        <Panel title="Rotation policy" note="Policy assignment is visible on each account">
-          <div className="policy-grid">
-            <div>
-              <span>POLICY</span>
-              <strong>Windows-90d</strong>
-              <small>Account-driven interval</small>
-            </div>
-            <div>
-              <span>ROTATION INTERVAL</span>
-              <strong>90 days</strong>
-              <small>Next schedule derived from last change</small>
-            </div>
-            <div>
-              <span>COMPLEXITY PROFILE</span>
-              <strong>GFS-Strong-24</strong>
-              <small>Simulated target policy</small>
-            </div>
-            <div>
-              <span>DEPENDENCY AWARE</span>
-              <strong>Enabled</strong>
-              <small>Review consumers before rotation</small>
-            </div>
-          </div>
-        </Panel>
-        <Panel title="CPM health checks" note="Component readiness">
-          <div className="health-list">
-            <div className="health-row">
-              <span className="health-check">
-                <Check size={12} />
-              </span>
-              <div>
-                <strong>CPM worker</strong>
-                <small>Control service available</small>
-              </div>
-              <span className="health-time">HEALTHY</span>
-            </div>
-            <div className="health-row">
-              <span className="health-check">
-                <Check size={12} />
-              </span>
-              <div>
-                <strong>Target connectivity</strong>
-                <small>Training network path simulated</small>
-              </div>
-              <span className="health-time">READY</span>
-            </div>
-          </div>
-        </Panel>
       </div>
     </>
   );
@@ -4019,103 +4632,205 @@ function PsmView({
   setCommand: (command: string) => void;
   terminalEnd: React.RefObject<HTMLDivElement | null>;
 }) {
-  const recent = state.sessions.slice(0, 5);
+  const [psmTab, setPsmTab] = useState<"launch" | "console" | "recordings">(
+    session ? "console" : "launch",
+  );
+  const recent = state.sessions;
+
   return (
     <>
       <SectionHeading
         eyebrow="PRIVILEGED SESSION MANAGER · BROKERED ACCESS"
         title="PSM operations"
-        description="Request controlled RDP access, run a safe simulated command set and review the session events and recording timeline."
+        description="Request controlled RDP/SSH access, run an isolated simulated command set, and review recordings and timeline evidence."
         actions={
           <StatusBadge tone={state.psmConnectorHealthy ? "good" : "bad"}>
             {state.psmConnectorHealthy ? "PSM CONNECTOR HEALTHY" : "CONNECTOR UNAVAILABLE"}
           </StatusBadge>
         }
       />
-      <div className="psm-layout">
-        <div className="psm-main">
-          <Panel
-            title="Launch a privileged session"
-            note="Production-like ticket controls · isolated training session"
-          >
-            <form className="session-form" onSubmit={onLaunch}>
-              <div className="form-grid">
-                <div className="field">
-                  <Label>Target server</Label>
-                  <Select name="psm-target" defaultValue="WIN-SRV-01">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["WIN-SRV-01", "WIN-SRV-02", "WIN-DC-01", "WIN-APP-01"].map((target) => (
-                        <SelectItem value={target} key={target}>
-                          {target}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+      <div className="inventory-stats">
+        <div>
+          <span>CONNECTOR STATUS</span>
+          <strong>{state.psmConnectorHealthy ? "HEALTHY" : "OFFLINE"}</strong>
+        </div>
+        <div>
+          <span>ACTIVE SESSIONS</span>
+          <strong>{state.sessions.filter((s) => s.status === "Active").length}</strong>
+        </div>
+        <div>
+          <span>TOTAL RECORDINGS</span>
+          <strong>{state.sessions.length}</strong>
+        </div>
+        <div>
+          <span>AUDIT ENFORCEMENT</span>
+          <strong>100% CAPTURED</strong>
+        </div>
+      </div>
+
+      <Tabs
+        value={psmTab}
+        onValueChange={(val) => setPsmTab(val as "launch" | "console" | "recordings")}
+        className="ops-tabs"
+        style={{ marginBottom: 20 }}
+      >
+        <TabsList>
+          <TabsTrigger value="launch">Launch Privileged Session</TabsTrigger>
+          <TabsTrigger value="console">Active Console {session ? "(LIVE)" : ""}</TabsTrigger>
+          <TabsTrigger value="recordings">
+            Session Monitoring & Recordings ({recent.length})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {psmTab === "launch" && (
+        <div className="psm-layout">
+          <div className="psm-main">
+            <Panel
+              title="Launch a privileged session"
+              note="Production-like ticket controls · isolated training session"
+            >
+              <form
+                className="session-form"
+                onSubmit={(e) => {
+                  onLaunch(e);
+                  setPsmTab("console");
+                }}
+              >
+                <div className="form-grid">
+                  <div className="field">
+                    <Label>Target server</Label>
+                    <Select name="psm-target" defaultValue="WIN-SRV-01">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["WIN-SRV-01", "WIN-SRV-02", "WIN-DC-01", "WIN-APP-01"].map((target) => (
+                          <SelectItem value={target} key={target}>
+                            {target}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="field">
+                    <Label>Target account</Label>
+                    <Input disabled value="Administrator" />
+                  </div>
+                  <div className="field">
+                    <Label>Connection component</Label>
+                    <Input disabled value="RDP through PSM" />
+                  </div>
+                  <div className="field">
+                    <Label>Ticket reference</Label>
+                    <Input
+                      required
+                      name="psm-ticket"
+                      placeholder="CHG-12345"
+                      defaultValue="CHG-89042"
+                    />
+                  </div>
+                  <div className="field span-two">
+                    <Label>Business reason</Label>
+                    <Textarea
+                      required
+                      name="psm-reason"
+                      rows={2}
+                      defaultValue="Emergency maintenance and diagnostic verification of system telemetry"
+                      placeholder="Describe the approved administrative task (12+ characters)"
+                    />
+                  </div>
                 </div>
-                <div className="field">
-                  <Label>Target account</Label>
-                  <Input disabled value="Administrator" />
+                <div className="approval-row">
+                  <div className="approval-icon">
+                    <ClipboardCheck size={17} />
+                  </div>
+                  <div>
+                    <strong>Approval status</strong>
+                    <small>
+                      {state.approvalGranted
+                        ? "Approved for this training scenario · WIN-SRV-01"
+                        : "Approval required before session launch"}
+                    </small>
+                  </div>
+                  <StatusBadge tone={state.approvalGranted ? "good" : "warn"}>
+                    {state.approvalGranted ? "APPROVED" : "PENDING"}
+                  </StatusBadge>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={state.approvalGranted ? "outline" : "default"}
+                    onClick={onApproval}
+                  >
+                    {state.approvalGranted ? "Withdraw" : "Request approval"}
+                  </Button>
                 </div>
-                <div className="field">
-                  <Label>Connection component</Label>
-                  <Input disabled value="RDP through PSM" />
+                <div className="session-footer">
+                  <span>
+                    <Clock3 size={14} />
+                    Session duration cap <b>60 min</b> · Recording <b>enabled</b>
+                  </span>
+                  <Button type="submit" disabled={!state.psmConnectorHealthy || Boolean(session)}>
+                    <Play size={14} />
+                    Launch through PSM
+                  </Button>
                 </div>
-                <div className="field">
-                  <Label>Ticket reference</Label>
-                  <Input required name="psm-ticket" placeholder="CHG-12345" />
-                </div>
-                <div className="field span-two">
-                  <Label>Business reason</Label>
-                  <Textarea
-                    required
-                    name="psm-reason"
-                    rows={2}
-                    placeholder="Describe the approved administrative task (12+ characters)"
-                  />
-                </div>
+              </form>
+            </Panel>
+          </div>
+          <aside className="psm-side">
+            <Panel title="Session requirements" note="Access preflight checklist">
+              <div className="preflight-list">
+                {[
+                  {
+                    label: "Safe session permission",
+                    ok: true,
+                    detail: "WIN-SAFE · Initiate privileged sessions",
+                  },
+                  {
+                    label: "Approval request",
+                    ok: state.approvalGranted,
+                    detail: state.approvalGranted
+                      ? "Training approval recorded"
+                      : "Awaiting operator approval",
+                  },
+                  {
+                    label: "PSM connector",
+                    ok: state.psmConnectorHealthy,
+                    detail: state.psmConnectorHealthy
+                      ? "RDP component available"
+                      : "Connector health check failed",
+                  },
+                  {
+                    label: "Recording policy",
+                    ok: true,
+                    detail: "Session events retained in audit",
+                  },
+                ].map((item) => (
+                  <div className="preflight-row" key={item.label}>
+                    <span className={item.ok ? "preflight-ok" : "preflight-pending"}>
+                      {item.ok ? <Check size={12} /> : <Clock3 size={12} />}
+                    </span>
+                    <div>
+                      <strong>{item.label}</strong>
+                      <small>{item.detail}</small>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="approval-row">
-                <div className="approval-icon">
-                  <ClipboardCheck size={17} />
-                </div>
-                <div>
-                  <strong>Approval status</strong>
-                  <small>
-                    {state.approvalGranted
-                      ? "Approved for this training scenario · WIN-SRV-01"
-                      : "Approval required before session launch"}
-                  </small>
-                </div>
-                <StatusBadge tone={state.approvalGranted ? "good" : "warn"}>
-                  {state.approvalGranted ? "APPROVED" : "PENDING"}
-                </StatusBadge>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={state.approvalGranted ? "outline" : "default"}
-                  onClick={onApproval}
-                >
-                  {state.approvalGranted ? "Withdraw" : "Request approval"}
-                </Button>
-              </div>
-              <div className="session-footer">
-                <span>
-                  <Clock3 size={14} />
-                  Session duration cap <b>60 min</b> · Recording <b>enabled</b>
-                </span>
-                <Button type="submit" disabled={!state.psmConnectorHealthy || Boolean(session)}>
-                  <Play size={14} />
-                  Launch through PSM
-                </Button>
-              </div>
-            </form>
-          </Panel>
+              <Button type="button" variant="outline" className="full-width" onClick={onApproval}>
+                {state.approvalGranted ? "Reset approval" : "Obtain approval"}
+              </Button>
+            </Panel>
+          </aside>
+        </div>
+      )}
+
+      {psmTab === "console" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 20 }}>
           <Panel
             className="terminal-panel"
-            title="Controlled session console"
+            title="Controlled Session Console"
             note={
               session
                 ? `${session.target} · ${session.account} · ${session.ticket}`
@@ -4143,12 +4858,12 @@ function PsmView({
                     : "psm-session://awaiting-launch"}
                 </strong>
                 <span className={session ? "terminal-live" : "terminal-idle"}>
-                  {session ? "SESSION ACTIVE" : "STANDBY"}
+                  {session ? "SESSION ACTIVE · RECORDING" : "STANDBY"}
                 </span>
               </div>
               <div className="terminal-body">
                 <div className="terminal-intro">
-                  ShadowXLab controlled training shell
+                  ShadowXLab controlled enterprise shell
                   <br />
                   Target: {session?.target ?? "not connected"}
                   <br />
@@ -4180,7 +4895,7 @@ function PsmView({
                   disabled={!session || session.status !== "Active"}
                   placeholder={
                     session
-                      ? "Enter a simulated command…"
+                      ? "Enter a simulated command (e.g. whoami, hostname, Get-Service)..."
                       : "Launch an approved session to continue"
                   }
                 />
@@ -4210,123 +4925,107 @@ function PsmView({
             </div>
             <p className="terminal-disclaimer">
               <Shield size={13} />
-              Commands return deterministic training telemetry and never execute on the local OS.
+              Commands return deterministic training telemetry and never execute on the host OS.
             </p>
           </Panel>
         </div>
-        <aside className="psm-side">
-          <Panel title="Session requirements" note="Access preflight">
-            <div className="preflight-list">
-              {[
-                {
-                  label: "Safe session permission",
-                  ok: true,
-                  detail: "WIN-SAFE · Initiate privileged sessions",
-                },
-                {
-                  label: "Approval request",
-                  ok: state.approvalGranted,
-                  detail: state.approvalGranted
-                    ? "Training approval recorded"
-                    : "Awaiting operator approval",
-                },
-                {
-                  label: "PSM connector",
-                  ok: state.psmConnectorHealthy,
-                  detail: state.psmConnectorHealthy
-                    ? "RDP component available"
-                    : "Connector health check failed",
-                },
-                { label: "Recording policy", ok: true, detail: "Session events retained in audit" },
-              ].map((item) => (
-                <div className="preflight-row" key={item.label}>
-                  <span className={item.ok ? "preflight-ok" : "preflight-pending"}>
-                    {item.ok ? <Check size={12} /> : <Clock3 size={12} />}
-                  </span>
-                  <div>
-                    <strong>{item.label}</strong>
-                    <small>{item.detail}</small>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button type="button" variant="outline" className="full-width" onClick={onApproval}>
-              {state.approvalGranted ? "Reset approval" : "Obtain approval"}
-            </Button>
-          </Panel>
-          <Panel title="Session recording" note="Most recent session evidence">
-            {session ? (
-              <div className="recording-card">
-                <div className="recording-header">
-                  <span>
-                    <span className="recording-dot" />
-                    {session.status === "Active" ? "RECORDING LIVE" : "RECORDING COMPLETE"}
-                  </span>
-                  <span>{session.started}</span>
-                </div>
-                <div className="recording-title">
-                  {session.target} <span>→</span> {session.account}
-                </div>
-                <div className="recording-timeline">
-                  {[
-                    "Session requested",
-                    "Approval verified",
-                    "Credential injected",
-                    ...session.commands.map((_, index) => `Command ${index + 1}`),
-                    ...(session.status === "Terminated" ? ["Session terminated"] : []),
-                  ].map((event, index) => (
-                    <div key={`${event}-${index}`}>
-                      <i
-                        style={{
-                          left: `${Math.min((index / Math.max(session.commands.length + 3, 3)) * 100, 100)}%`,
-                        }}
-                      />
-                      <span>{event}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="recording-meta">
-                  <span>CONNECTION</span>
-                  <b>{session.component}</b>
-                  <span>TICKET</span>
-                  <b>{session.ticket}</b>
-                </div>
+      )}
+
+      {psmTab === "recordings" && (
+        <div className="psm-layout">
+          <div className="psm-main">
+            <Panel
+              title="Session Recordings Archive"
+              note="All recorded administrative sessions in this vault"
+            >
+              <div className="data-table-wrap">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>TARGET</th>
+                      <th>ACCOUNT</th>
+                      <th>COMPONENT</th>
+                      <th>TICKET</th>
+                      <th>STARTED</th>
+                      <th>COMMANDS</th>
+                      <th>STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recent.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <strong>{item.target}</strong>
+                        </td>
+                        <td>{item.account}</td>
+                        <td>{item.component}</td>
+                        <td>
+                          <span className="code-cell">{item.ticket}</span>
+                        </td>
+                        <td>{item.started}</td>
+                        <td>{item.commands.length} executed</td>
+                        <td>
+                          <StatusBadge tone={item.status === "Terminated" ? "good" : "blue"}>
+                            {item.status}
+                          </StatusBadge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ) : (
-              <EmptyState
-                title="No session recorded"
-                detail="Launch a session to create recording evidence."
-                icon={MonitorPlay}
-              />
-            )}
-          </Panel>
-          <Panel
-            title="Session history"
-            note={`${state.sessions.length} recorded training sessions`}
-          >
-            <div className="session-history">
-              {recent.map((item) => (
-                <div className="session-history-row" key={item.id}>
-                  <span className="session-history-icon">
-                    <MonitorPlay size={14} />
-                  </span>
-                  <div>
-                    <strong>
-                      {item.target} · {item.account}
-                    </strong>
-                    <small>
-                      {item.ticket} · {item.started}
-                    </small>
+            </Panel>
+          </div>
+          <aside className="psm-side">
+            <Panel title="Session Recording Evidence" note="Event timeline verification">
+              {session ? (
+                <div className="recording-card">
+                  <div className="recording-header">
+                    <span>
+                      <span className="recording-dot" />
+                      {session.status === "Active" ? "RECORDING LIVE" : "RECORDING COMPLETE"}
+                    </span>
+                    <span>{session.started}</span>
                   </div>
-                  <StatusBadge tone={item.status === "Terminated" ? "good" : "blue"}>
-                    {item.status}
-                  </StatusBadge>
+                  <div className="recording-title">
+                    {session.target} <span>→</span> {session.account}
+                  </div>
+                  <div className="recording-timeline">
+                    {[
+                      "Session requested",
+                      "Approval verified",
+                      "Credential injected",
+                      ...session.commands.map((_, index) => `Command ${index + 1}`),
+                      ...(session.status === "Terminated" ? ["Session terminated"] : []),
+                    ].map((event, index) => (
+                      <div key={`${event}-${index}`}>
+                        <i
+                          style={{
+                            left: `${Math.min((index / Math.max(session.commands.length + 3, 3)) * 100, 100)}%`,
+                          }}
+                        />
+                        <span>{event}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="recording-meta">
+                    <span>CONNECTION</span>
+                    <b>{session.component}</b>
+                    <span>TICKET</span>
+                    <b>{session.ticket}</b>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </Panel>
-        </aside>
-      </div>
+              ) : (
+                <EmptyState
+                  title="No active session"
+                  detail="Launch a session to view live recording timeline telemetry."
+                  icon={MonitorPlay}
+                />
+              )}
+            </Panel>
+          </aside>
+        </div>
+      )}
     </>
   );
 }

@@ -1110,3 +1110,462 @@
     padding: 16px;
   }
 }
+
+/* ==========================================================================
+   CYBERARK PVWA ENTERPRISE UI TRANSFORMATION ADDITIONS
+   ========================================================================== */
+
+/* App Shell & Backgrounds */
+.app-shell {
+  background-color: #0B0F14 !important;
+  color: #E8EEF5 !important;
+}
+
+.main-area {
+  background-color: #0B0F14 !important;
+}
+
+/* Sidebar Collapsible states */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: #10151D !important;
+  border-right: 1px solid #263241 !important;
+  transition: width 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease !important;
+}
+
+.sidebar.sidebar-collapsed {
+  width: 64px !important;
+  min-width: 64px !important;
+}
+
+.sidebar.sidebar-collapsed .sidebar-brand strong,
+.sidebar.sidebar-collapsed .sidebar-brand small,
+.sidebar.sidebar-collapsed .brand-code,
+.sidebar.sidebar-collapsed .workspace-switch div,
+.sidebar.sidebar-collapsed .workspace-switch svg,
+.sidebar.sidebar-collapsed .nav-label,
+.sidebar.sidebar-collapsed .nav-item span,
+.sidebar.sidebar-collapsed .nav-count,
+.sidebar.sidebar-collapsed .sidebar-user-info,
+.sidebar.sidebar-collapsed .connection div {
+  display: none !important;
+}
+
+.sidebar.sidebar-collapsed .sidebar-brand {
+  justify-content: center;
+  padding: 14px 10px;
+}
+
+.sidebar.sidebar-collapsed .workspace-switch {
+  margin: 8px auto;
+  padding: 8px;
+  justify-content: center;
+}
+
+.sidebar.sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 10px;
+}
+
+.sidebar.sidebar-collapsed .sidebar-user {
+  justify-content: center;
+  padding: 8px;
+}
+
+.sidebar.sidebar-collapsed .connection {
+  justify-content: center;
+}
+
+/* Nav Item CyberArk PVWA Style */
+.nav-item {
+  position: relative;
+  color: #9AA9BA !important;
+  border-radius: 4px !important;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.nav-item:hover {
+  background: #18212C !important;
+  color: #E8EEF5 !important;
+}
+
+.nav-item-active {
+  background: #18212C !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+.nav-item-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: #00A8E8;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Header PVWA Style */
+.topbar {
+  background: #0D1219 !important;
+  border-bottom: 1px solid #263241 !important;
+  height: 52px !important;
+  padding: 0 20px !important;
+}
+
+.environment-chip {
+  background: #131A23 !important;
+  border: 1px solid #263241 !important;
+  color: #00A8E8 !important;
+  font-weight: 600;
+}
+
+.breadcrumb {
+  background: #0B0F14 !important;
+  border-bottom: 1px solid #263241 !important;
+  padding: 8px 24px !important;
+  font-size: 11px !important;
+  color: #6F8094 !important;
+  letter-spacing: 0.02em;
+}
+
+.breadcrumb strong {
+  color: #00A8E8 !important;
+  font-weight: 600;
+}
+
+/* Dense CyberArk PVWA Tables */
+.data-table-wrap {
+  border: 1px solid #263241 !important;
+  border-radius: 6px !important;
+  background: #131A23 !important;
+  overflow-x: auto;
+}
+
+.data-table,
+.account-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px !important;
+}
+
+.data-table th,
+.account-table th {
+  background: #0D1219 !important;
+  color: #6F8094 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 8px 12px !important;
+  border-bottom: 1px solid #263241 !important;
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.data-table td,
+.account-table td {
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  color: #E8EEF5 !important;
+  border-bottom: 1px solid #1C2633 !important;
+  height: 40px !important;
+  vertical-align: middle;
+}
+
+.data-table tr.click-row:hover td,
+.account-table tr.click-row:hover td {
+  background: #18212C !important;
+  cursor: pointer;
+}
+
+.data-table tr.row-selected td,
+.account-table tr.row-selected td {
+  background: #18212C !important;
+  border-bottom-color: #263241 !important;
+}
+
+.data-table tr.row-selected td:first-child,
+.account-table tr.row-selected td:first-child {
+  border-left: 3px solid #00A8E8 !important;
+}
+
+/* Row Action Buttons */
+.row-actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.row-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  background: #18212C;
+  border: 1px solid #263241;
+  color: #9AA9BA;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 12px;
+}
+
+.row-action-btn:hover {
+  background: #1685D4;
+  color: #FFFFFF;
+  border-color: #00A8E8;
+}
+
+.row-action-btn.btn-connect {
+  background: rgba(0, 168, 232, 0.15);
+  border-color: rgba(0, 168, 232, 0.4);
+  color: #00A8E8;
+}
+
+.row-action-btn.btn-connect:hover {
+  background: #00A8E8;
+  color: #0B0F14;
+}
+
+/* CyberArk PVWA Slide-over Account Detail Drawer */
+.pvwa-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 70;
+  animation: fadeIn 0.2s ease;
+}
+
+.pvwa-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  max-width: 95vw;
+  background: #131A23;
+  border-left: 1px solid #263241;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.85);
+  animation: drawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes drawerSlideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pvwa-drawer-head {
+  padding: 16px 20px;
+  background: #0D1219;
+  border-bottom: 1px solid #263241;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pvwa-drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pvwa-drawer-title h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #E8EEF5;
+  margin: 0;
+}
+
+.pvwa-drawer-title span {
+  font-size: 12px;
+  color: #9AA9BA;
+  font-family: monospace;
+}
+
+.pvwa-drawer-toolbar {
+  padding: 10px 20px;
+  background: #18212C;
+  border-bottom: 1px solid #263241;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pvwa-drawer-tabs {
+  background: #0D1219;
+  border-bottom: 1px solid #263241;
+  padding: 0 16px;
+  display: flex;
+  gap: 4px;
+}
+
+.pvwa-tab-btn {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9AA9BA;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pvwa-tab-btn:hover {
+  color: #E8EEF5;
+}
+
+.pvwa-tab-btn.active {
+  color: #00A8E8;
+  border-bottom-color: #00A8E8;
+}
+
+.pvwa-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pvwa-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  background: #0D1219;
+  border: 1px solid #263241;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.pvwa-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pvwa-detail-item label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6F8094;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pvwa-detail-item span {
+  font-size: 12px;
+  color: #E8EEF5;
+  font-weight: 500;
+}
+
+.pvwa-failure-callout {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pvwa-failure-callout strong {
+  color: #F87171;
+  font-size: 12px;
+  display: block;
+}
+
+.pvwa-failure-callout p {
+  color: #E8EEF5;
+  font-size: 11px;
+  margin: 2px 0 0 0;
+}
+
+/* Safe Permission Matrix */
+.perm-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #0D1219;
+  border: 1px solid #263241;
+  border-radius: 6px;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.perm-matrix-table th {
+  background: #10151D;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6F8094;
+  text-transform: uppercase;
+  border-bottom: 1px solid #263241;
+  text-align: left;
+}
+
+.perm-matrix-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1C2633;
+  color: #E8EEF5;
+}
+
+.perm-matrix-table tr:hover td {
+  background: #131A23;
+}
+
+/* Status Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.status-pill.managed {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34D399;
+}
+
+.status-pill.verify {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #FBBF24;
+}
+
+.status-pill.failed {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #F87171;
+}
+
+.status-pill.unmanaged {
+  background: rgba(100, 116, 139, 0.14);
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  color: #94A3B8;
+}
