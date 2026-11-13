@@ -4,16 +4,19 @@
    ========================================================================== */
 
 /* Base Reset & Box Sizing */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background-color: #0B0F14;
-  color: #E8EEF5;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #0b0f14;
+  color: #e8eef5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -26,15 +29,15 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #0B0F14;
-  color: #E8EEF5;
+  background-color: #0b0f14;
+  color: #e8eef5;
 }
 
 /* Top Global Header (44px) */
 .pvwa-top-header {
   height: 44px;
-  background: #0C1017;
-  border-bottom: 1px solid #1E2633;
+  background: #0c1017;
+  border-bottom: 1px solid #1e2633;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,12 +63,12 @@ body {
 .pvwa-logo-icon {
   width: 26px;
   height: 26px;
-  background: linear-gradient(135deg, #00A8E8, #0077B6);
+  background: linear-gradient(135deg, #00a8e8, #0077b6);
   border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 800;
   font-size: 13px;
   box-shadow: 0 2px 4px rgba(0, 168, 232, 0.25);
@@ -74,14 +77,14 @@ body {
 .pvwa-logo-text {
   font-size: 14px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
   letter-spacing: 0.02em;
 }
 
 .pvwa-logo-sub {
   font-size: 11px;
   font-weight: 500;
-  color: #8E9EB2;
+  color: #8e9eb2;
   margin-left: 4px;
   padding-left: 8px;
   border-left: 1px solid #263241;
@@ -93,11 +96,11 @@ body {
   gap: 6px;
   padding: 2px 8px;
   border-radius: 3px;
-  background: #141C26;
+  background: #141c26;
   border: 1px solid #263241;
   font-size: 11px;
   font-weight: 600;
-  color: #00A8E8;
+  color: #00a8e8;
   letter-spacing: 0.05em;
 }
 
@@ -107,7 +110,7 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10B981;
+  background: #10b981;
   box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
 }
 
@@ -121,7 +124,7 @@ body {
   border: 1px solid rgba(245, 158, 11, 0.35);
   font-size: 11px;
   font-weight: 700;
-  color: #FBBF24;
+  color: #fbbf24;
   letter-spacing: 0.05em;
 }
 
@@ -136,18 +139,18 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-save-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10B981;
+  background: #10b981;
 }
 
 .pvwa-save-dot.busy {
-  background: #F59E0B;
+  background: #f59e0b;
   animation: pulse 1s infinite;
 }
 
@@ -163,8 +166,8 @@ body {
 
 .pvwa-nav-bar {
   height: 38px;
-  background: #10151D;
-  border-bottom: 1px solid #1E2633;
+  background: #10151d;
+  border-bottom: 1px solid #1e2633;
   display: flex;
   align-items: center;
   padding: 0 12px;
@@ -180,7 +183,7 @@ body {
   gap: 7px;
   height: 38px;
   padding: 0 14px;
-  color: #9AA9BA;
+  color: #9aa9ba;
   font-size: 12px;
   font-weight: 600;
   background: transparent;
@@ -193,14 +196,14 @@ body {
 }
 
 .pvwa-nav-tab:hover {
-  color: #FFFFFF;
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.03);
 }
 
 .pvwa-nav-tab.active {
-  color: #00A8E8;
-  background: #131A23;
-  border-bottom: 2px solid #00A8E8;
+  color: #00a8e8;
+  background: #131a23;
+  border-bottom: 2px solid #00a8e8;
   font-weight: 700;
 }
 
@@ -217,13 +220,13 @@ body {
   font-size: 10px;
   font-weight: 700;
   background: rgba(0, 168, 232, 0.18);
-  color: #00A8E8;
+  color: #00a8e8;
   border: 1px solid rgba(0, 168, 232, 0.3);
 }
 
 .pvwa-nav-badge.danger {
   background: rgba(239, 68, 68, 0.18);
-  color: #F87171;
+  color: #f87171;
   border-color: rgba(239, 68, 68, 0.3);
 }
 
@@ -233,7 +236,7 @@ body {
 
 .pvwa-subnav-bar {
   height: 34px;
-  background: #131A23;
+  background: #131a23;
   border-bottom: 1px solid #263241;
   display: flex;
   align-items: center;
@@ -247,21 +250,21 @@ body {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #6F8094;
+  color: #6f8094;
 }
 
 .pvwa-breadcrumbs span {
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-breadcrumbs strong {
-  color: #E8EEF5;
+  color: #e8eef5;
   font-weight: 600;
 }
 
 .pvwa-subnav-meta {
   font-size: 11px;
-  color: #6F8094;
+  color: #6f8094;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -297,7 +300,7 @@ body {
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
@@ -307,7 +310,7 @@ body {
 .pvwa-page-title-block p {
   margin: 2px 0 0 0;
   font-size: 12px;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-toolbar {
@@ -333,42 +336,42 @@ body {
 }
 
 .pvwa-btn-primary {
-  background: #00A8E8;
-  color: #0B0F14;
-  border-color: #00A8E8;
+  background: #00a8e8;
+  color: #0b0f14;
+  border-color: #00a8e8;
   font-weight: 700;
 }
 
 .pvwa-btn-primary:hover {
-  background: #0087BA;
-  border-color: #0087BA;
+  background: #0087ba;
+  border-color: #0087ba;
 }
 
 .pvwa-btn-secondary {
-  background: #18212C;
-  color: #E8EEF5;
+  background: #18212c;
+  color: #e8eef5;
   border-color: #263241;
 }
 
 .pvwa-btn-secondary:hover {
-  background: #1F2C3A;
-  border-color: #38485C;
+  background: #1f2c3a;
+  border-color: #38485c;
 }
 
 .pvwa-btn-connect {
-  background: #1685D4;
-  color: #FFFFFF;
-  border-color: #1685D4;
+  background: #1685d4;
+  color: #ffffff;
+  border-color: #1685d4;
   font-weight: 700;
 }
 
 .pvwa-btn-connect:hover {
-  background: #126BB0;
+  background: #126bb0;
 }
 
 .pvwa-btn-danger {
   background: rgba(239, 68, 68, 0.15);
-  color: #F87171;
+  color: #f87171;
   border-color: rgba(239, 68, 68, 0.35);
 }
 
@@ -390,7 +393,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #10151D;
+  background: #10151d;
   border: 1px solid #263241;
   border-bottom: none;
   padding: 8px 12px;
@@ -402,7 +405,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #0B0F14;
+  background: #0b0f14;
   border: 1px solid #263241;
   border-radius: 3px;
   padding: 0 10px;
@@ -415,13 +418,13 @@ body {
   background: transparent;
   border: none;
   outline: none;
-  color: #E8EEF5;
+  color: #e8eef5;
   font-size: 12px;
   width: 100%;
 }
 
 .pvwa-search-box input::placeholder {
-  color: #6F8094;
+  color: #6f8094;
 }
 
 .pvwa-filter-dropdowns {
@@ -434,7 +437,7 @@ body {
 .pvwa-record-count {
   font-size: 11px;
   font-weight: 700;
-  color: #6F8094;
+  color: #6f8094;
   letter-spacing: 0.05em;
   margin-left: auto;
   white-space: nowrap;
@@ -449,7 +452,7 @@ body {
   overflow-x: auto;
   border: 1px solid #263241;
   border-radius: 0 0 4px 4px;
-  background: #10151D;
+  background: #10151d;
 }
 
 .pvwa-grid {
@@ -460,15 +463,15 @@ body {
 }
 
 .pvwa-grid th {
-  background: #0C1017;
-  color: #8E9EB2;
+  background: #0c1017;
+  color: #8e9eb2;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 9px 12px;
   border-bottom: 1px solid #263241;
-  border-right: 1px solid #1C2633;
+  border-right: 1px solid #1c2633;
   white-space: nowrap;
   user-select: none;
 }
@@ -479,9 +482,9 @@ body {
 
 .pvwa-grid td {
   padding: 8px 12px;
-  border-bottom: 1px solid #18212C;
-  border-right: 1px solid #18212C;
-  color: #E8EEF5;
+  border-bottom: 1px solid #18212c;
+  border-right: 1px solid #18212c;
+  color: #e8eef5;
   vertical-align: middle;
   font-size: 12px;
   white-space: nowrap;
@@ -497,11 +500,11 @@ body {
 }
 
 .pvwa-grid tbody tr:nth-child(even) {
-  background: #0E131A;
+  background: #0e131a;
 }
 
 .pvwa-grid tbody tr:hover {
-  background: #151D28;
+  background: #151d28;
 }
 
 .pvwa-grid tbody tr.selected {
@@ -509,7 +512,7 @@ body {
 }
 
 .pvwa-grid tbody tr.selected td:first-child {
-  border-left: 3px solid #00A8E8;
+  border-left: 3px solid #00a8e8;
 }
 
 .pvwa-code-cell {
@@ -517,9 +520,9 @@ body {
   font-size: 11px;
   padding: 2px 6px;
   border-radius: 3px;
-  background: #0B0F14;
+  background: #0b0f14;
   border: 1px solid #263241;
-  color: #00A8E8;
+  color: #00a8e8;
 }
 
 /* Status Badges */
@@ -537,25 +540,25 @@ body {
 .pvwa-status-pill.managed {
   background: rgba(16, 185, 129, 0.14);
   border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34D399;
+  color: #34d399;
 }
 
 .pvwa-status-pill.verify {
   background: rgba(245, 158, 11, 0.14);
   border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #FBBF24;
+  color: #fbbf24;
 }
 
 .pvwa-status-pill.failed {
   background: rgba(239, 68, 68, 0.14);
   border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #F87171;
+  color: #f87171;
 }
 
 .pvwa-status-pill.unmanaged {
   background: rgba(100, 116, 139, 0.14);
   border: 1px solid rgba(100, 116, 139, 0.35);
-  color: #94A3B8;
+  color: #94a3b8;
 }
 
 .pvwa-pulse-dot {
@@ -571,7 +574,7 @@ body {
 
 .pvwa-detail-panel {
   margin-top: 16px;
-  background: #10151D;
+  background: #10151d;
   border: 1px solid #263241;
   border-radius: 4px;
   overflow: hidden;
@@ -583,7 +586,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #0C1017;
+  background: #0c1017;
   border-bottom: 1px solid #263241;
 }
 
@@ -597,19 +600,19 @@ body {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .pvwa-detail-title span {
   font-size: 12px;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-detail-tabs {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: #0E131A;
+  background: #0e131a;
   border-bottom: 1px solid #263241;
   padding: 0 12px;
 }
@@ -618,7 +621,7 @@ body {
   padding: 8px 14px;
   font-size: 12px;
   font-weight: 600;
-  color: #8E9EB2;
+  color: #8e9eb2;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -627,12 +630,12 @@ body {
 }
 
 .pvwa-tab-btn:hover {
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .pvwa-tab-btn.active {
-  color: #00A8E8;
-  border-bottom: 2px solid #00A8E8;
+  color: #00a8e8;
+  border-bottom: 2px solid #00a8e8;
   font-weight: 700;
   background: rgba(0, 168, 232, 0.05);
 }
@@ -653,15 +656,15 @@ body {
   flex-direction: column;
   gap: 3px;
   padding: 8px 12px;
-  background: #0B0F14;
-  border: 1px solid #1C2633;
+  background: #0b0f14;
+  border: 1px solid #1c2633;
   border-radius: 3px;
 }
 
 .pvwa-fact-label {
   font-size: 10px;
   font-weight: 700;
-  color: #6F8094;
+  color: #6f8094;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -669,7 +672,7 @@ body {
 .pvwa-fact-value {
   font-size: 12px;
   font-weight: 600;
-  color: #E8EEF5;
+  color: #e8eef5;
   word-break: break-all;
 }
 
@@ -683,7 +686,7 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  color: #F87171;
+  color: #f87171;
 }
 
 .pvwa-failure-box strong {
@@ -695,7 +698,7 @@ body {
 .pvwa-failure-box p {
   margin: 0;
   font-size: 12px;
-  color: #E8EEF5;
+  color: #e8eef5;
 }
 
 /* ==========================================================================
@@ -711,7 +714,7 @@ body {
 
 .pvwa-metric-card {
   padding: 10px 14px;
-  background: #10151D;
+  background: #10151d;
   border: 1px solid #263241;
   border-radius: 4px;
   display: flex;
@@ -722,7 +725,7 @@ body {
 .pvwa-metric-card span {
   font-size: 10px;
   font-weight: 700;
-  color: #6F8094;
+  color: #6f8094;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -730,16 +733,16 @@ body {
 .pvwa-metric-card strong {
   font-size: 20px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .pvwa-metric-card small {
   font-size: 11px;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-metric-danger strong {
-  color: #F87171;
+  color: #f87171;
 }
 
 /* ==========================================================================
@@ -749,16 +752,16 @@ body {
 .pvwa-perm-matrix {
   width: 100%;
   border-collapse: collapse;
-  background: #0B0F14;
+  background: #0b0f14;
   border: 1px solid #263241;
   border-radius: 4px;
   font-size: 12px;
 }
 
 .pvwa-perm-matrix th {
-  background: #0C1017;
+  background: #0c1017;
   padding: 8px 12px;
-  color: #8E9EB2;
+  color: #8e9eb2;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -768,12 +771,12 @@ body {
 
 .pvwa-perm-matrix td {
   padding: 8px 12px;
-  border-bottom: 1px solid #18212C;
-  color: #E8EEF5;
+  border-bottom: 1px solid #18212c;
+  color: #e8eef5;
 }
 
 .pvwa-perm-matrix tr:hover td {
-  background: #131A23;
+  background: #131a23;
 }
 
 /* ==========================================================================
@@ -781,7 +784,7 @@ body {
    ========================================================================== */
 
 .pvwa-terminal {
-  background: #05080C;
+  background: #05080c;
   border: 1px solid #263241;
   border-radius: 4px;
   overflow: hidden;
@@ -789,14 +792,14 @@ body {
 }
 
 .pvwa-terminal-titlebar {
-  background: #0C1017;
+  background: #0c1017;
   padding: 8px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #1E2633;
+  border-bottom: 1px solid #1e2633;
   font-size: 11px;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-terminal-body {
@@ -806,7 +809,7 @@ body {
   overflow-y: auto;
   font-size: 12px;
   line-height: 1.5;
-  color: #00A8E8;
+  color: #00a8e8;
 }
 
 .pvwa-terminal-input-row {
@@ -814,15 +817,15 @@ body {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: #080D14;
-  border-top: 1px solid #1E2633;
+  background: #080d14;
+  border-top: 1px solid #1e2633;
 }
 
 .pvwa-terminal-input-row input {
   background: transparent;
   border: none;
   outline: none;
-  color: #FFFFFF;
+  color: #ffffff;
   font-family: inherit;
   font-size: 12px;
   width: 100%;
@@ -840,7 +843,7 @@ body {
 }
 
 .pvwa-academy-classes {
-  background: #10151D;
+  background: #10151d;
   border: 1px solid #263241;
   border-radius: 4px;
   overflow: hidden;
@@ -848,7 +851,7 @@ body {
 
 .pvwa-academy-classes-head {
   padding: 12px 14px;
-  background: #0C1017;
+  background: #0c1017;
   border-bottom: 1px solid #263241;
 }
 
@@ -856,7 +859,7 @@ body {
   margin: 0;
   font-size: 13px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -866,29 +869,29 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid #18212C;
+  border-bottom: 1px solid #18212c;
   background: transparent;
   width: 100%;
   text-align: left;
   border-left: 3px solid transparent;
   cursor: pointer;
   transition: all 0.15s ease;
-  color: #E8EEF5;
+  color: #e8eef5;
 }
 
 .pvwa-class-item:hover {
-  background: #151D28;
+  background: #151d28;
 }
 
 .pvwa-class-item.active {
   background: rgba(0, 168, 232, 0.1);
-  border-left-color: #00A8E8;
+  border-left-color: #00a8e8;
 }
 
 .pvwa-class-copy small {
   font-size: 10px;
   font-weight: 700;
-  color: #00A8E8;
+  color: #00a8e8;
   text-transform: uppercase;
   display: block;
 }
@@ -896,14 +899,14 @@ body {
 .pvwa-class-copy strong {
   font-size: 13px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
   display: block;
   margin: 2px 0;
 }
 
 .pvwa-class-copy span {
   font-size: 11px;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
 .pvwa-academy-main {
@@ -913,7 +916,7 @@ body {
 }
 
 .pvwa-academy-card {
-  background: #10151D;
+  background: #10151d;
   border: 1px solid #263241;
   border-radius: 4px;
   padding: 16px;
@@ -938,7 +941,7 @@ body {
 .pvwa-modal {
   width: 580px;
   max-width: 95vw;
-  background: #10151D;
+  background: #10151d;
   border: 1px solid #263241;
   border-radius: 4px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -950,7 +953,7 @@ body {
 
 .pvwa-modal-header {
   padding: 12px 16px;
-  background: #0C1017;
+  background: #0c1017;
   border-bottom: 1px solid #263241;
   display: flex;
   align-items: center;
@@ -961,7 +964,7 @@ body {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 .pvwa-modal-body {
@@ -971,7 +974,7 @@ body {
 
 .pvwa-modal-footer {
   padding: 12px 16px;
-  background: #0C1017;
+  background: #0c1017;
   border-top: 1px solid #263241;
   display: flex;
   align-items: center;
@@ -999,23 +1002,27 @@ body {
 .pvwa-field label {
   font-size: 11px;
   font-weight: 600;
-  color: #8E9EB2;
+  color: #8e9eb2;
 }
 
-.pvwa-input, .pvwa-select, .pvwa-textarea {
-  background: #0B0F14;
+.pvwa-input,
+.pvwa-select,
+.pvwa-textarea {
+  background: #0b0f14;
   border: 1px solid #263241;
   border-radius: 3px;
   padding: 6px 10px;
   font-size: 12px;
-  color: #E8EEF5;
+  color: #e8eef5;
   outline: none;
   width: 100%;
 }
 
-.pvwa-input:focus, .pvwa-select:focus, .pvwa-textarea:focus {
-  border-color: #00A8E8;
-  box-shadow: 0 0 0 1px #00A8E8;
+.pvwa-input:focus,
+.pvwa-select:focus,
+.pvwa-textarea:focus {
+  border-color: #00a8e8;
+  box-shadow: 0 0 0 1px #00a8e8;
 }
 
 /* Responsive adjustments */

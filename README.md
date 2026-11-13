@@ -26,6 +26,7 @@ The platform must simulate the operational experience of a CyberArk administrato
 Build a functioning interactive training platform.
 
 Do not create:
+
 - Static pages pretending to be interactive.
 - Empty dashboards with decorative charts.
 - Generic cybersecurity cards.
@@ -39,6 +40,7 @@ Do not create:
 Every major interaction must work.
 
 Every lab must have:
+
 - Defined starting state.
 - Learning objective.
 - Enterprise scenario.
@@ -89,6 +91,7 @@ Create an original ShadowXLab design that feels like a professional enterprise s
 Avoid excessive cards.
 
 Prefer:
+
 - Data tables.
 - Operational workspaces.
 - Split-screen configuration panels.
@@ -134,6 +137,7 @@ TOP HEADER:
 Create a structured CyberArk Administrator training curriculum.
 
 Every class must have:
+
 - Session objectives.
 - Detailed concepts.
 - Enterprise examples.
@@ -181,6 +185,7 @@ Administrator → PVWA → Vault → CPM → Target System
 Privileged User → PVWA → PSM → Target System
 
 Clicking each component should reveal:
+
 - Purpose.
 - Responsibilities.
 - Inputs.
@@ -195,6 +200,7 @@ Clicking each component should reveal:
 Investigate an enterprise PAM architecture.
 
 Learner must:
+
 - Identify components.
 - Explain their responsibilities.
 - Trace account onboarding.
@@ -233,6 +239,7 @@ Learner must:
 Create an actual simulated Safe administration page.
 
 Learner must be able to:
+
 - Create a Safe.
 - Enter Safe name.
 - Enter description.
@@ -246,6 +253,7 @@ Learner must be able to:
 - View audit events.
 
 Permission controls must include realistic options such as:
+
 - List accounts.
 - Retrieve accounts.
 - Use accounts.
@@ -265,6 +273,7 @@ Scenario:
 A new database administration team requires controlled access to privileged database credentials.
 
 Learner must:
+
 1. Create DBA-SAFE.
 2. Assign the Safe owner.
 3. Add DBA team members.
@@ -308,6 +317,7 @@ The platform must show permission results when learners attempt actions.
 Create an operational account onboarding interface.
 
 Fields:
+
 - Account name.
 - Username.
 - Address/target.
@@ -321,6 +331,7 @@ Fields:
 - Rotation policy.
 
 Available actions:
+
 - Add account.
 - Verify account.
 - Change password.
@@ -339,6 +350,7 @@ A new Windows Server 2022 system has been deployed.
 The Administrator account must be onboarded into PAM.
 
 Learner must:
+
 1. Identify the account.
 2. Determine the correct platform.
 3. Assign the correct Safe.
@@ -351,6 +363,7 @@ Learner must:
 10. Review the account record.
 
 Simulate real validation errors:
+
 - Incorrect address.
 - Invalid username.
 - Wrong platform.
@@ -391,17 +404,20 @@ Simulate real validation errors:
 Build an interactive identity hierarchy:
 
 Human identities:
+
 - Standard user.
 - Privileged administrator.
 - Domain administrator.
 
 Non-human identities:
+
 - Service account.
 - Application account.
 - Workload identity.
 - Shared privileged account.
 
 Click every identity to display:
+
 - Definition.
 - Purpose.
 - Permissions.
@@ -431,6 +447,7 @@ DISCOVERY
 Learners must click each stage.
 
 Show:
+
 - Current state.
 - Required action.
 - Control requirement.
@@ -446,6 +463,7 @@ Scenario:
 An enterprise has 30 privileged identities across Windows, Linux, Active Directory, and applications.
 
 Learner must:
+
 - Classify each account.
 - Identify privileged accounts.
 - Assign owners.
@@ -493,6 +511,7 @@ This must be one of the most technically detailed sessions.
 Create an operational CPM dashboard.
 
 Include:
+
 - Managed accounts.
 - Accounts requiring verification.
 - Rotation queue.
@@ -508,6 +527,7 @@ Include:
 ### Account detail page
 
 Show:
+
 - Account identity.
 - Target system.
 - Platform.
@@ -524,6 +544,7 @@ Show:
 ### Functional actions
 
 Learner must be able to:
+
 - Run Verify.
 - Run Change.
 - Run Reconcile.
@@ -541,6 +562,7 @@ Scenario:
 A Windows Administrator account must be managed by CPM.
 
 Learner must:
+
 1. Inspect the account.
 2. Verify credentials.
 3. Enable management.
@@ -558,6 +580,7 @@ Scenario:
 A managed account password change failed.
 
 Possible causes:
+
 - Target unreachable.
 - Incorrect reconcile account.
 - Insufficient privileges.
@@ -567,6 +590,7 @@ Possible causes:
 - Account locked.
 
 Learner must:
+
 1. Read the error.
 2. Inspect account configuration.
 3. Determine root cause.
@@ -610,6 +634,7 @@ Do not simply reveal the answer.
 Create a realistic privileged session launch environment.
 
 Include:
+
 - Target server.
 - Target account.
 - Connection component.
@@ -631,6 +656,7 @@ Connection:
 RDP through PSM
 
 Session actions:
+
 - Login.
 - Execute simulated administrative commands.
 - Inspect system.
@@ -643,6 +669,7 @@ Session actions:
 Create an interactive terminal that supports a controlled set of commands.
 
 Examples:
+
 - hostname
 - whoami
 - ipconfig
@@ -663,6 +690,7 @@ Scenario:
 A Windows administrator needs approved access to a production server.
 
 Learner must:
+
 1. Select target.
 2. Select privileged account.
 3. Enter business reason.
@@ -681,6 +709,7 @@ Scenario:
 A user cannot launch an RDP session through PSM.
 
 Potential causes:
+
 - Invalid target.
 - Incorrect connection component.
 - Missing account permissions.
@@ -711,20 +740,24 @@ CORP-PAM-LAB
 ## Systems
 
 Windows:
+
 - WIN-SRV-01
 - WIN-SRV-02
 - WIN-DC-01
 - WIN-APP-01
 
 Linux:
+
 - LNX-SRV-01
 - LNX-SRV-02
 
 Database:
+
 - DB-SQL-01
 - DB-ORA-01
 
 Application:
+
 - APP-PAYMENT-01
 
 ## Accounts
@@ -770,6 +803,7 @@ Implement different permissions and access levels.
 Create a consistent simulated backend/state engine.
 
 Core entities:
+
 - Users.
 - Groups.
 - Safes.
@@ -788,6 +822,7 @@ Core entities:
 All operational modules must use the same state.
 
 If a learner creates an account in Accounts, it must appear in:
+
 - Safe inventory.
 - CPM operations.
 - Account reports.

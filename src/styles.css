@@ -77,31 +77,31 @@
   --radius: 0.375rem;
 
   /* CyberArk PVWA Color Palette */
-  --pvwa-bg-main: #0B0F14;
-  --pvwa-bg-sidebar: #10151D;
-  --pvwa-bg-header: #0D1219;
-  --pvwa-bg-panel: #131A23;
-  --pvwa-bg-elevated: #18212C;
+  --pvwa-bg-main: #0b0f14;
+  --pvwa-bg-sidebar: #10151d;
+  --pvwa-bg-header: #0d1219;
+  --pvwa-bg-panel: #131a23;
+  --pvwa-bg-elevated: #18212c;
   --pvwa-border: #263241;
-  --pvwa-border-subtle: #1C2633;
-  --pvwa-text-primary: #E8EEF5;
-  --pvwa-text-secondary: #9AA9BA;
-  --pvwa-text-muted: #6F8094;
-  --pvwa-accent: #00A8E8;
-  --pvwa-accent-dark: #0087BA;
-  --pvwa-blue: #1685D4;
+  --pvwa-border-subtle: #1c2633;
+  --pvwa-text-primary: #e8eef5;
+  --pvwa-text-secondary: #9aa9ba;
+  --pvwa-text-muted: #6f8094;
+  --pvwa-accent: #00a8e8;
+  --pvwa-accent-dark: #0087ba;
+  --pvwa-blue: #1685d4;
   --pvwa-status-managed-bg: rgba(16, 185, 129, 0.14);
   --pvwa-status-managed-border: rgba(16, 185, 129, 0.35);
-  --pvwa-status-managed-text: #34D399;
+  --pvwa-status-managed-text: #34d399;
   --pvwa-status-warn-bg: rgba(245, 158, 11, 0.14);
   --pvwa-status-warn-border: rgba(245, 158, 11, 0.35);
-  --pvwa-status-warn-text: #FBBF24;
+  --pvwa-status-warn-text: #fbbf24;
   --pvwa-status-failed-bg: rgba(239, 68, 68, 0.14);
   --pvwa-status-failed-border: rgba(239, 68, 68, 0.35);
-  --pvwa-status-failed-text: #F87171;
+  --pvwa-status-failed-text: #f87171;
   --pvwa-status-unmanaged-bg: rgba(100, 116, 139, 0.14);
   --pvwa-status-unmanaged-border: rgba(100, 116, 139, 0.35);
-  --pvwa-status-unmanaged-text: #94A3B8;
+  --pvwa-status-unmanaged-text: #94a3b8;
 
   --background: oklch(0.12 0.015 240);
   --foreground: oklch(0.94 0.015 245);
@@ -111,27 +111,27 @@
   --popover-foreground: oklch(0.94 0.015 245);
   --primary: oklch(0.68 0.16 220);
   --primary-foreground: oklch(0.12 0.015 240);
-  --secondary: oklch(0.20 0.03 245);
+  --secondary: oklch(0.2 0.03 245);
   --secondary-foreground: oklch(0.94 0.015 245);
-  --muted: oklch(0.20 0.03 245);
+  --muted: oklch(0.2 0.03 245);
   --muted-foreground: oklch(0.57 0.03 245);
-  --accent: oklch(0.20 0.03 245);
+  --accent: oklch(0.2 0.03 245);
   --accent-foreground: oklch(0.68 0.16 220);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.003 247);
   --border: oklch(0.27 0.035 245);
-  --input: oklch(0.20 0.03 245);
+  --input: oklch(0.2 0.03 245);
   --ring: oklch(0.68 0.16 220);
   --chart-1: oklch(0.68 0.16 220);
   --chart-2: oklch(0.58 0.16 235);
-  --chart-3: oklch(0.70 0.18 150);
+  --chart-3: oklch(0.7 0.18 150);
   --chart-4: oklch(0.75 0.18 80);
   --chart-5: oklch(0.65 0.22 25);
   --sidebar: oklch(0.14 0.02 245);
   --sidebar-foreground: oklch(0.94 0.015 245);
   --sidebar-primary: oklch(0.68 0.16 220);
   --sidebar-primary-foreground: oklch(0.12 0.015 240);
-  --sidebar-accent: oklch(0.20 0.03 245);
+  --sidebar-accent: oklch(0.2 0.03 245);
   --sidebar-accent-foreground: oklch(0.94 0.015 245);
   --sidebar-border: oklch(0.27 0.035 245);
   --sidebar-ring: oklch(0.68 0.16 220);
@@ -146,27 +146,27 @@
   --popover-foreground: oklch(0.94 0.015 245);
   --primary: oklch(0.68 0.16 220);
   --primary-foreground: oklch(0.12 0.015 240);
-  --secondary: oklch(0.20 0.03 245);
+  --secondary: oklch(0.2 0.03 245);
   --secondary-foreground: oklch(0.94 0.015 245);
-  --muted: oklch(0.20 0.03 245);
+  --muted: oklch(0.2 0.03 245);
   --muted-foreground: oklch(0.57 0.03 245);
-  --accent: oklch(0.20 0.03 245);
+  --accent: oklch(0.2 0.03 245);
   --accent-foreground: oklch(0.68 0.16 220);
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.003 247);
   --border: oklch(0.27 0.035 245);
-  --input: oklch(0.20 0.03 245);
+  --input: oklch(0.2 0.03 245);
   --ring: oklch(0.68 0.16 220);
   --chart-1: oklch(0.68 0.16 220);
   --chart-2: oklch(0.58 0.16 235);
-  --chart-3: oklch(0.70 0.18 150);
+  --chart-3: oklch(0.7 0.18 150);
   --chart-4: oklch(0.75 0.18 80);
   --chart-5: oklch(0.65 0.22 25);
   --sidebar: oklch(0.14 0.02 245);
   --sidebar-foreground: oklch(0.94 0.015 245);
   --sidebar-primary: oklch(0.68 0.16 220);
   --sidebar-primary-foreground: oklch(0.12 0.015 240);
-  --sidebar-accent: oklch(0.20 0.03 245);
+  --sidebar-accent: oklch(0.2 0.03 245);
   --sidebar-accent-foreground: oklch(0.94 0.015 245);
   --sidebar-border: oklch(0.27 0.035 245);
   --sidebar-ring: oklch(0.68 0.16 220);
@@ -180,6 +180,8 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }

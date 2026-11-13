@@ -1,4 +1,5 @@
 <!-- LOVABLE:BEGIN -->
+
 > [!IMPORTANT]
 > This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
 > published git history — force pushing, or rebasing/amending/squashing commits
@@ -27,7 +28,9 @@ use the editor.
   `LOVABLE_API_KEY`. When Lovable does not provide one, users can bring their
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
+
 <!-- LOVABLE:END -->
 
 ## Project architecture
+
 - Keep PAM training operations in a shared, deterministic simulation domain module and persist learner-owned snapshots through Lovable Cloud RLS; the same simulated state must drive every workspace and audit record so training stays consistent without connecting to real infrastructure.

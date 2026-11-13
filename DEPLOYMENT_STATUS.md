@@ -12,6 +12,7 @@
 ## 1. Hosting Target Configuration
 
 The application is configured using TanStack Start and Nitro with Cloudflare Workers module preset:
+
 - **Build Command**: `vite build`
 - **Output Directory**: `.output/public` (Static client assets) and `.output/server` (SSR worker modules)
 - **Nitro Worker Config**: Generated at `.output/server/wrangler.json`
@@ -68,6 +69,7 @@ i Generated .output/nitro.json
 ## 4. Run / Preview Instructions
 
 To run or preview the build locally:
+
 - **Local Dev Server**: `npx vite dev` (runs development server with HMR on `http://localhost:5173`)
 - **Nitro / Vite Preview**: `npx vite preview` (serves production build from `.output/public`)
 - **Automated Tests**: `npx vitest run` (executes 37 tests across 3 suites)
