@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { IS_PAM_DEMO_MODE, DEMO_LEARNER_USER, demoStorageAdapter } from "@/components/pam-academy";
 import {
   makeInitialPamState,
   evaluateLabObjectives,
@@ -128,17 +129,17 @@ describe("Phase 6: Complete End-to-End Learner Journey", () => {
       audit: [
         {
           id: `audit-${Date.now()}`,
-          timestamp: new Date().toISOString(),
+          time: new Date().toISOString(),
           actor: "pam_auditor",
           action: "Retrieve accounts",
           target: "DBA-SAFE/ora_db_admin",
-          outcome: "Denied",
+          result: "Denied",
           detail: auditorCheck.message,
         },
         ...stateB.audit,
       ],
     };
-    expect(stateB.audit[0]?.outcome).toBe("Denied");
+    expect(stateB.audit[0]?.result).toBe("Denied");
     expect(stateB.audit[0]?.actor).toBe("pam_auditor");
 
     // -------------------------------------------------------------
@@ -286,5 +287,103 @@ describe("Phase 6: Complete End-to-End Learner Journey", () => {
     expect(persistedB.audit.some((a) => a.action === "Onboard account")).toBe(true);
     // Verify accounts inventory preserved
     expect(persistedB.accounts.some((a) => a.username === "root_prod")).toBe(true);
+  });
+
+  describe("Temporary Authentication Bypass & Safe Demo Data Adapter", () => {
+    it("provides the demo learner identity and localStorage adapter without breaking backend RLS", () => {
+      // Verify demo flag is boolean and true when VITE_PAM_DEMO_MODE="true"
+      expect(typeof IS_PAM_DEMO_MODE).toBe("boolean");
+      expect(IS_PAM_DEMO_MODE).toBe(true);
+
+      // Verify clearly identifiable demo learner identity
+      expect(DEMO_LEARNER_USER.email).toBe("demo.learner@shadowxlab.internal");
+      expect(DEMO_LEARNER_USER.id).toBe("demo-learner-session-uuid");
+      expect(DEMO_LEARNER_USER.name).toBe("Demo Operator");
+
+      // Mock localStorage for node/jsdom test runner
+      const mockStorage: Record<string, string> = {};
+      const fakeStorage = {
+        getItem: (k: string) => mockStorage[k] ?? null,
+        setItem: (k: string, v: string) => {
+          mockStorage[k] = v;
+        },
+        removeItem: (k: string) => {
+          delete mockStorage[k];
+        },
+      };
+
+      const originalWindow = globalThis.window;
+      globalThis.window = {
+        localStorage: fakeStorage as unknown as Storage,
+      } as unknown as Window & typeof globalThis;
+
+      try {
+        // Test save & load via adapter
+        const demoState = makeInitialPamState();
+        demoStorageAdapter.save(demoState);
+        expect(mockStorage["shadowxlab_pam_demo_state"]).toBeDefined();
+
+        const reloaded = demoStorageAdapter.load();
+        expect(reloaded).not.toBeNull();
+        expect(reloaded?.safes.length).toBe(demoState.safes.length);
+
+        // Test clear
+        demoStorageAdapter.clear();
+        expect(mockStorage["shadowxlab_pam_demo_state"]).toBeUndefined();
+        expect(demoStorageAdapter.load()).toBeNull();
+      } finally {
+        globalThis.window = originalWindow;
+      }
+    });
+
+    it("allows full simulated PAM workflows under demo mode without real backend authentication", () => {
+      let state = makeInitialPamState();
+
+      // Onboard account in demo mode
+      const newAcc: NewAccountInput = {
+        name: "Demo Unix Admin",
+        username: "demo_admin",
+        address: "unix-demo-01.corp",
+        safe: "UNIX-SAFE",
+        platform: "Unix SSH",
+        type: "Local Administrative",
+        owner: "demo_admin",
+        purpose: "Emergency maintenance",
+        dependency: "sshd",
+      };
+      const onboardResult = addAccount(state, newAcc, "pam_admin");
+      expect(onboardResult.error).toBeUndefined();
+      state = onboardResult.state;
+      expect(state.accounts.some((a) => a.username === "demo_admin")).toBe(true);
+
+      // Verify CPM operation works in demo mode
+      const cpmResult = runCpmOperation(state, "account-1", "Verify", "pam_admin");
+      expect(cpmResult.error).toBeUndefined();
+      expect(cpmResult.state.cpmOperations[0]?.result).toBe("Completed");
+      state = cpmResult.state;
+
+      // Verify PSM session works in demo mode (with dual-control approval)
+      state = { ...state, approvalGranted: true };
+      const targetAccount = state.accounts.find((a) => a.id === "account-1")!;
+      const psmResult = launchPsmSession(
+        state,
+        {
+          target: targetAccount.address,
+          account: targetAccount,
+          ticket: "CHG-10001",
+          reason: "Emergency patching and verification CHG-10001",
+        },
+        "pam_admin",
+      );
+      expect(psmResult.error).toBeUndefined();
+      state = psmResult.state;
+      const active = state.sessions.find((s) => s.status === "Active");
+      expect(active).toBeDefined();
+
+      // Verify command execution
+      state = appendSessionCommand(state, active!.id, "whoami", "pam_admin");
+      const updatedActive = state.sessions.find((s) => s.id === active!.id);
+      expect(updatedActive?.commands.some((c) => c.includes("corp\\administrator"))).toBe(true);
+    });
   });
 });

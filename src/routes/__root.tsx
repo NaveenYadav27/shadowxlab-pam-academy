@@ -14,6 +14,13 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.pathname.includes("~oauth")) {
+      // Intercept Lovable Cloud OAuth redirect loops on self-hosted instances
+      window.location.replace("/");
+    }
+  }, []);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -120,6 +127,12 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.pathname.includes("~oauth")) {
+      window.history.replaceState(null, "", "/");
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

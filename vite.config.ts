@@ -15,4 +15,14 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      port: 8080,
+      host: true,
+    },
+    preview: {
+      port: 8080,
+      host: true,
+    },
+  },
 });

@@ -637,6 +637,58 @@ function EmptyState({
   );
 }
 
+export const IS_PAM_DEMO_MODE: boolean =
+  import.meta.env["VITE_PAM_DEMO_MODE"] === "true" ||
+  (typeof window !== "undefined" && window.localStorage.getItem("pam_demo_mode") === "true");
+
+export const DEMO_LEARNER_USER = {
+  id: "demo-learner-session-uuid",
+  email: "demo.learner@shadowxlab.internal",
+  name: "Demo Operator",
+  role: "PAM Security Engineer (Demo)",
+} as const;
+
+const DEMO_STORAGE_KEY = "shadowxlab_pam_demo_state";
+
+export const demoStorageAdapter = {
+  load(): PamState | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = window.localStorage.getItem(DEMO_STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed === "object" &&
+        !Array.isArray(parsed) &&
+        Array.isArray(parsed.safes) &&
+        Array.isArray(parsed.accounts)
+      ) {
+        return parsed as PamState;
+      }
+    } catch {
+      // Ignore corrupted local state and return null
+    }
+    return null;
+  },
+  save(state: PamState): void {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(state));
+    } catch {
+      // Ignore storage write errors
+    }
+  },
+  clear(): void {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.removeItem(DEMO_STORAGE_KEY);
+    } catch {
+      // Ignore clear errors
+    }
+  },
+};
+
 const VALID_SECTIONS: SectionId[] = NAV_GROUPS.flatMap((group) =>
   group.items.map((item) => item.id),
 );
@@ -656,8 +708,10 @@ function getInitialSection(): SectionId {
 }
 
 export function PamAcademy() {
-  const [sessionUser, setSessionUser] = useState<{ id: string; email: string } | null>(null);
-  const [authReady, setAuthReady] = useState(false);
+  const [sessionUser, setSessionUser] = useState<{ id: string; email: string } | null>(() =>
+    IS_PAM_DEMO_MODE ? { id: DEMO_LEARNER_USER.id, email: DEMO_LEARNER_USER.email } : null,
+  );
+  const [authReady, setAuthReady] = useState(IS_PAM_DEMO_MODE);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [authBusy, setAuthBusy] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
@@ -727,6 +781,20 @@ export function PamAcademy() {
   const activeSession = state.sessions.find((item) => item.status === "Active");
 
   useEffect(() => {
+    if (IS_PAM_DEMO_MODE) {
+      // Demo Mode: Rehydrate state from localStorage or initialize baseline
+      const cached = demoStorageAdapter.load();
+      if (cached) {
+        setState(cached);
+      } else {
+        setState(makeInitialPamState());
+      }
+      setSessionUser({ id: DEMO_LEARNER_USER.id, email: DEMO_LEARNER_USER.email });
+      setAuthReady(true);
+      setStateLoaded(true);
+      return;
+    }
+
     let alive = true;
     const loadForUser = async (userId: string) => {
       setStateLoaded(false);
@@ -778,7 +846,18 @@ export function PamAcademy() {
   }, []);
 
   useEffect(() => {
-    if (!sessionUser?.id || !stateLoaded) return;
+    if (!stateLoaded) return;
+
+    if (IS_PAM_DEMO_MODE) {
+      setSaving(true);
+      const timeout = window.setTimeout(() => {
+        demoStorageAdapter.save(state);
+        setSaving(false);
+      }, 300);
+      return () => window.clearTimeout(timeout);
+    }
+
+    if (!sessionUser?.id) return;
     setSaving(true);
     const timeout = window.setTimeout(() => {
       void supabase
@@ -835,7 +914,9 @@ export function PamAcademy() {
   const activeClass = CLASSES.find((item) => item.id === selectedClass) ?? CLASSES[0];
   const currentComponent =
     COMPONENTS.find((item) => item.id === selectedComponent) ?? COMPONENTS[2];
-  const userDisplay = sessionUser?.email.split("@")[0] ?? "learner";
+  const userDisplay = IS_PAM_DEMO_MODE
+    ? "demo.learner"
+    : (sessionUser?.email.split("@")[0] ?? "learner");
 
   async function handleEmailAuth(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -867,6 +948,10 @@ export function PamAcademy() {
   }
 
   async function handleSocialAuth(provider: "google" | "lovable") {
+    if (IS_PAM_DEMO_MODE) {
+      toast.info("Authentication bypass active: Google/Lovable OAuth is disabled in Demo Mode.");
+      return;
+    }
     setAuthIssue("");
     const result = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
@@ -875,6 +960,14 @@ export function PamAcademy() {
   }
 
   async function handleSignOut() {
+    if (IS_PAM_DEMO_MODE) {
+      demoStorageAdapter.clear();
+      setState(makeInitialPamState());
+      setActive("overview");
+      setAuthMessage("");
+      toast.info("Demo session reset to baseline initial state.");
+      return;
+    }
     await supabase.auth.signOut();
     setActive("overview");
     setAuthMessage("");
@@ -1451,22 +1544,24 @@ export function PamAcademy() {
           <div className="connection">
             <span className="pulse-dot" />
             <div>
-              <strong>All systems operational</strong>
-              <small>Last sync just now</small>
+              <strong>{IS_PAM_DEMO_MODE ? "Demo Mode Active" : "All systems operational"}</strong>
+              <small>
+                {IS_PAM_DEMO_MODE ? "Local Demo Storage · RLS Safe" : "Last sync just now"}
+              </small>
             </div>
           </div>
           <div className="sidebar-user">
             <div className="user-avatar">{initials(sessionUser.email)}</div>
             <div className="sidebar-user-info">
               <strong>{userDisplay}</strong>
-              <small>LEARNER ACCOUNT</small>
+              <small>{IS_PAM_DEMO_MODE ? "DEMO OPERATOR" : "LEARNER ACCOUNT"}</small>
             </div>
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              title="Sign out"
-              aria-label="Sign out"
+              title={IS_PAM_DEMO_MODE ? "Reset demo session" : "Sign out"}
+              aria-label={IS_PAM_DEMO_MODE ? "Reset demo session" : "Sign out"}
               onClick={() => void handleSignOut()}
             >
               <LogOut size={15} />
@@ -1494,6 +1589,12 @@ export function PamAcademy() {
               <span />
               CORP-PAM-LAB
             </span>
+            {IS_PAM_DEMO_MODE && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold tracking-wide bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                DEMO MODE · AUTH BYPASS
+              </span>
+            )}
           </div>
           <div className="topbar-right">
             <span className="topbar-save">

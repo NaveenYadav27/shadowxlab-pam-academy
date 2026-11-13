@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "dev:8080": "vite dev --port 8080 --host",
+    "preview:8080": "vite preview --port 8080 --host"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -101,5 +103,3 @@
     "vitest": "^4.1.10"
   }
 }
-
-
