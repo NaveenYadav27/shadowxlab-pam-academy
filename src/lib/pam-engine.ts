@@ -364,6 +364,30 @@ export function runCpmOperation(state: PamState, accountId: string, operation: C
   };
 }
 
+export function repairCpmFailure(state: PamState, accountId: string, repair: "unlock" | "reconcile-access" | "target-connectivity", actor: string): {
+  state: PamState;
+  error?: string;
+} {
+  const account = state.accounts.find((item) => item.id === accountId);
+  if (!account) return { state, error: "Account not found." };
+  if (!canSafeMemberPerform(state.safes.find((safe) => safe.name === account.safe), actor, "Manage accounts")) {
+    return { state, error: `${actor} lacks Manage accounts in ${account.safe}.` };
+  }
+  const repairLabel = repair === "unlock" ? "target account unlocked" : repair === "reconcile-access" ? "reconcile access verified" : "target connectivity restored";
+  const updated: PamAccount = { ...account, failureCause: undefined, status: "Managed" };
+  return {
+    state: {
+      ...state,
+      accounts: state.accounts.map((item) => item.id === accountId ? updated : item),
+      audit: [auditEvent(actor, "Resolve CPM incident", `${account.username} · ${account.address}`, "Success", repairLabel), ...state.audit],
+    },
+  };
+}
+
+export function resetPamState(): PamState {
+  return makeInitialPamState();
+}
+
 export function launchPsmSession(state: PamState, input: { target: string; account: PamAccount; ticket: string; reason: string }, actor: string): {
   state: PamState;
   error?: string;
