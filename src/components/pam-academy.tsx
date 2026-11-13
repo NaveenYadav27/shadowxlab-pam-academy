@@ -735,7 +735,7 @@ const VALID_SECTIONS: SectionId[] = NAV_GROUPS.flatMap((group) =>
 );
 
 function getInitialSection(): SectionId {
-  if (typeof window === "undefined") return "overview";
+  if (typeof window === "undefined") return "accounts";
   try {
     const params = new URLSearchParams(window.location.search);
     const fromQuery = params.get("section") as SectionId;
@@ -745,7 +745,7 @@ function getInitialSection(): SectionId {
   } catch {
     // Ignore URL parse error in non-browser environments
   }
-  return "overview";
+  return "accounts";
 }
 
 export function PamAcademy() {
@@ -3355,6 +3355,50 @@ function AccountsView({
   const [safeFilter, setSafeFilter] = useState("all");
   const [platformFilter, setPlatformFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [treeFilter, setTreeFilter] = useState<string>("all");
+
+  const handleTreeFilter = (id: string) => {
+    setTreeFilter(id);
+    if (id === "all") {
+      setSafeFilter("all");
+      setPlatformFilter("all");
+      setTypeFilter("all");
+      setFilterStatus("all");
+      setFilterSearch("");
+    } else if (id === "windows") {
+      setPlatformFilter("Windows Server Local");
+      setSafeFilter("all");
+      setFilterStatus("all");
+    } else if (id === "linux") {
+      setPlatformFilter("Unix SSH");
+      setSafeFilter("all");
+      setFilterStatus("all");
+    } else if (id === "database") {
+      setTypeFilter("Database account");
+      setSafeFilter("all");
+      setFilterStatus("all");
+    } else if (id === "service") {
+      setTypeFilter("Service account");
+      setSafeFilter("all");
+      setFilterStatus("all");
+    } else if (id === "managed") {
+      setFilterStatus("Managed");
+      setSafeFilter("all");
+      setPlatformFilter("all");
+    } else if (id === "verify") {
+      setFilterStatus("Verify required");
+      setSafeFilter("all");
+      setPlatformFilter("all");
+    } else if (id === "failed") {
+      setFilterStatus("Rotation failed");
+      setSafeFilter("all");
+      setPlatformFilter("all");
+    } else if (id.startsWith("safe:")) {
+      setSafeFilter(id.replace("safe:", ""));
+      setPlatformFilter("all");
+      setFilterStatus("all");
+    }
+  };
   const [accountTab, setAccountTab] = useState<
     "general" | "management" | "activities" | "sessions"
   >("general");
@@ -3406,836 +3450,960 @@ function AccountsView({
   );
 
   return (
-    <>
-      {/* Page Title & Context Toolbar */}
-      <div className="pvwa-page-header">
-        <div className="pvwa-page-title-block">
-          <h1>
-            <KeyRound size={20} className="text-[#00A8E8]" />
-            Accounts
-          </h1>
-          <p>CyberArk PVWA Classic privileged account administration and lifecycle operations</p>
-        </div>
-        <div className="pvwa-toolbar">
+    <div className="pvwa-accounts-layout">
+      {/* CyberArk PVWA Classic Left-Hand Accounts Navigation Tree */}
+      <div className="pvwa-accounts-tree">
+        <div className="pvwa-tree-section">
+          <div className="pvwa-tree-heading">ACCOUNT VIEWS</div>
           <button
             type="button"
-            className="pvwa-btn pvwa-btn-primary"
-            onClick={() => setShowAddModal(true)}
+            className={cx("pvwa-tree-item", treeFilter === "all" && "active")}
+            onClick={() => handleTreeFilter("all")}
           >
-            <Plus size={14} />
-            Add Account
+            <span>All Accounts</span>
+            <span className="pvwa-tree-count">{state.accounts.length}</span>
           </button>
           <button
             type="button"
-            className="pvwa-btn pvwa-btn-connect"
-            disabled={!focused}
-            onClick={() => {
-              if (focused) {
-                if (onConnectPsm) onConnectPsm(focused);
-                else if (setActive) {
-                  setActive("psm");
-                  toast.info(`Connecting to ${focused.username} on ${focused.address}`);
-                }
+            className={cx("pvwa-tree-item", treeFilter === "windows" && "active")}
+            onClick={() => handleTreeFilter("windows")}
+          >
+            <span>Windows Accounts</span>
+            <span className="pvwa-tree-count">
+              {state.accounts.filter((a) => a.platform.includes("Windows")).length}
+            </span>
+          </button>
+          <button
+            type="button"
+            className={cx("pvwa-tree-item", treeFilter === "linux" && "active")}
+            onClick={() => handleTreeFilter("linux")}
+          >
+            <span>Unix / Linux Accounts</span>
+            <span className="pvwa-tree-count">
+              {
+                state.accounts.filter(
+                  (a) => a.platform.includes("Unix") || a.platform.includes("Linux"),
+                ).length
               }
-            }}
-          >
-            <MonitorPlay size={14} />
-            Connect (PSM)
+            </span>
           </button>
           <button
             type="button"
-            className="pvwa-btn pvwa-btn-secondary"
-            disabled={!focused}
-            onClick={() => onCpmOperation?.("Verify")}
+            className={cx("pvwa-tree-item", treeFilter === "database" && "active")}
+            onClick={() => handleTreeFilter("database")}
           >
-            <SearchCheck size={14} />
-            Verify
+            <span>Database Accounts</span>
+            <span className="pvwa-tree-count">
+              {
+                state.accounts.filter(
+                  (a) =>
+                    a.platform.includes("Oracle") ||
+                    a.platform.includes("SQL") ||
+                    a.platform.includes("Postgre") ||
+                    a.type.includes("Database"),
+                ).length
+              }
+            </span>
           </button>
           <button
             type="button"
-            className="pvwa-btn pvwa-btn-secondary"
-            disabled={!focused}
-            onClick={() => onCpmOperation?.("Change")}
+            className={cx("pvwa-tree-item", treeFilter === "service" && "active")}
+            onClick={() => handleTreeFilter("service")}
           >
-            <RotateCcw size={14} />
-            Change
+            <span>Service Accounts</span>
+            <span className="pvwa-tree-count">
+              {state.accounts.filter((a) => a.type.includes("Service")).length}
+            </span>
+          </button>
+        </div>
+
+        <div className="pvwa-tree-section">
+          <div className="pvwa-tree-heading">CPM STATUS</div>
+          <button
+            type="button"
+            className={cx("pvwa-tree-item", treeFilter === "managed" && "active")}
+            onClick={() => handleTreeFilter("managed")}
+          >
+            <span>In Compliance</span>
+            <span className="pvwa-tree-count" style={{ color: "#03543F" }}>
+              {state.accounts.filter((a) => a.status === "Managed").length}
+            </span>
           </button>
           <button
             type="button"
-            className="pvwa-btn pvwa-btn-secondary"
-            disabled={!focused}
-            onClick={() => onCpmOperation?.("Reconcile")}
+            className={cx("pvwa-tree-item", treeFilter === "verify" && "active")}
+            onClick={() => handleTreeFilter("verify")}
           >
-            <Activity size={14} />
-            Reconcile
+            <span>Verify Required</span>
+            <span className="pvwa-tree-count" style={{ color: "#713F12" }}>
+              {state.accounts.filter((a) => a.status === "Verify required").length}
+            </span>
           </button>
+          <button
+            type="button"
+            className={cx("pvwa-tree-item", treeFilter === "failed" && "active")}
+            onClick={() => handleTreeFilter("failed")}
+          >
+            <span>Rotation Failed</span>
+            <span className="pvwa-tree-count" style={{ color: "#9B1C1C", fontWeight: 700 }}>
+              {state.accounts.filter((a) => a.status === "Rotation failed").length}
+            </span>
+          </button>
+        </div>
+
+        <div className="pvwa-tree-section">
+          <div className="pvwa-tree-heading">SAFES</div>
+          {state.safes.map((s) => {
+            const count = state.accounts.filter((a) => a.safe === s.name).length;
+            return (
+              <button
+                key={s.name}
+                type="button"
+                className={cx("pvwa-tree-item", treeFilter === "safe:" + s.name && "active")}
+                onClick={() => handleTreeFilter("safe:" + s.name)}
+              >
+                <span className="truncate">{s.name}</span>
+                <span className="pvwa-tree-count">{count}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="pvwa-filter-strip">
-        <div className="pvwa-search-box">
-          <Search size={14} className="text-[#6F8094]" />
-          <input
-            type="text"
-            aria-label="Search accounts"
-            placeholder="Search username, target, safe, platform, owner..."
-            value={searchVal}
-            onChange={(e) => setFilterSearch(e.target.value)}
-          />
-        </div>
-        <div className="pvwa-filter-dropdowns">
-          <Select value={safeFilter} onValueChange={setSafeFilter}>
-            <SelectTrigger className="pvwa-select h-7 text-xs w-[130px]">
-              <SelectValue placeholder="All Safes" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Safes</SelectItem>
-              {allSafes.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={platformFilter} onValueChange={setPlatformFilter}>
-            <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
-              <SelectValue placeholder="All Platforms" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Platforms</SelectItem>
-              {allPlatforms.map((p) => (
-                <SelectItem key={p} value={p}>
-                  {p}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Account Types</SelectItem>
-              {allTypes.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={statusVal} onValueChange={setFilterStatus}>
-            <SelectTrigger className="pvwa-select h-7 text-xs w-[150px]">
-              <SelectValue placeholder="All States" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Management States</SelectItem>
-              {["Managed", "Verify required", "Rotation failed", "Unmanaged"].map((st) => (
-                <SelectItem key={st} value={st}>
-                  {st}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {(safeFilter !== "all" ||
-            platformFilter !== "all" ||
-            typeFilter !== "all" ||
-            statusVal !== "all" ||
-            searchVal) && (
+      {/* Main Accounts Area */}
+      <div className="pvwa-accounts-main">
+        {/* Page Title & Context Toolbar */}
+        <div className="pvwa-page-header">
+          <div className="pvwa-page-title-block">
+            <h1>
+              <KeyRound size={20} className="text-[#00A8E8]" />
+              Accounts
+            </h1>
+            <p>CyberArk PVWA Classic privileged account administration and lifecycle operations</p>
+          </div>
+          <div className="pvwa-toolbar">
             <button
               type="button"
-              className="text-xs text-[#00A8E8] hover:underline px-2 py-1"
+              className="pvwa-btn pvwa-btn-primary"
+              onClick={() => setShowAddModal(true)}
+            >
+              <Plus size={14} />
+              Add Account
+            </button>
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-connect"
+              disabled={!focused}
               onClick={() => {
-                setSafeFilter("all");
-                setPlatformFilter("all");
-                setTypeFilter("all");
-                setFilterStatus("all");
-                setFilterSearch("");
+                if (focused) {
+                  if (onConnectPsm) onConnectPsm(focused);
+                  else if (setActive) {
+                    setActive("psm");
+                    toast.info(`Connecting to ${focused.username} on ${focused.address}`);
+                  }
+                }
               }}
             >
-              Reset Filters
+              <MonitorPlay size={14} />
+              Connect (PSM)
             </button>
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-secondary"
+              disabled={!focused}
+              onClick={() => onCpmOperation?.("Verify")}
+            >
+              <SearchCheck size={14} />
+              Verify
+            </button>
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-secondary"
+              disabled={!focused}
+              onClick={() => onCpmOperation?.("Change")}
+            >
+              <RotateCcw size={14} />
+              Change
+            </button>
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-secondary"
+              disabled={!focused}
+              onClick={() => onCpmOperation?.("Reconcile")}
+            >
+              <Activity size={14} />
+              Reconcile
+            </button>
+          </div>
+        </div>
+
+        {/* Filter and Search Bar */}
+        <div className="pvwa-filter-strip">
+          <div className="pvwa-search-box">
+            <Search size={14} className="text-[#6F8094]" />
+            <input
+              type="text"
+              aria-label="Search accounts"
+              placeholder="Search username, target, safe, platform, owner..."
+              value={searchVal}
+              onChange={(e) => setFilterSearch(e.target.value)}
+            />
+          </div>
+          <div className="pvwa-filter-dropdowns">
+            <Select value={safeFilter} onValueChange={setSafeFilter}>
+              <SelectTrigger className="pvwa-select h-7 text-xs w-[130px]">
+                <SelectValue placeholder="All Safes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Safes</SelectItem>
+                {allSafes.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={platformFilter} onValueChange={setPlatformFilter}>
+              <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
+                <SelectValue placeholder="All Platforms" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Platforms</SelectItem>
+                {allPlatforms.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="pvwa-select h-7 text-xs w-[140px]">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Account Types</SelectItem>
+                {allTypes.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusVal} onValueChange={setFilterStatus}>
+              <SelectTrigger className="pvwa-select h-7 text-xs w-[150px]">
+                <SelectValue placeholder="All States" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Management States</SelectItem>
+                {["Managed", "Verify required", "Rotation failed", "Unmanaged"].map((st) => (
+                  <SelectItem key={st} value={st}>
+                    {st}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {(safeFilter !== "all" ||
+              platformFilter !== "all" ||
+              typeFilter !== "all" ||
+              statusVal !== "all" ||
+              searchVal) && (
+              <button
+                type="button"
+                className="text-xs text-[#00A8E8] hover:underline px-2 py-1"
+                onClick={() => {
+                  setSafeFilter("all");
+                  setPlatformFilter("all");
+                  setTypeFilter("all");
+                  setFilterStatus("all");
+                  setFilterSearch("");
+                }}
+              >
+                Reset Filters
+              </button>
+            )}
+          </div>
+          <span className="pvwa-record-count">{accounts.length} ACCOUNTS</span>
+        </div>
+
+        {/* Dense PVWA Accounts Data Grid */}
+        <div className="pvwa-grid-wrap">
+          <table className="pvwa-grid">
+            <thead>
+              <tr>
+                <th>USERNAME</th>
+                <th>TARGET SYSTEM</th>
+                <th>PLATFORM</th>
+                <th>SAFE</th>
+                <th>ACCOUNT TYPE</th>
+                <th>OWNER</th>
+                <th>CPM STATUS</th>
+                <th>LAST VERIFIED</th>
+                <th>LAST CHANGE</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {accounts.map((account) => {
+                const isSelected = focused?.id === account.id;
+                return (
+                  <tr
+                    key={account.id}
+                    onClick={() => setSelectedAccount(account.id)}
+                    className={isSelected ? "selected" : ""}
+                  >
+                    <td>
+                      <strong>{account.username}</strong>
+                      {account.name && account.name !== account.username && (
+                        <span className="block text-[11px] text-[#8E9EB2]">{account.name}</span>
+                      )}
+                    </td>
+                    <td>{account.address}</td>
+                    <td>
+                      <span className="text-[11px] text-[#9AA9BA] bg-[#141C26] px-1.5 py-0.5 rounded border border-[#263241]">
+                        {account.platform}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="pvwa-code-cell">{account.safe}</span>
+                    </td>
+                    <td>
+                      <span className="text-[#9AA9BA]">{account.type}</span>
+                    </td>
+                    <td>{account.owner}</td>
+                    <td>
+                      <span
+                        className={cx(
+                          "pvwa-status-pill",
+                          account.status === "Managed"
+                            ? "managed"
+                            : account.status === "Verify required"
+                              ? "verify"
+                              : account.status === "Rotation failed"
+                                ? "failed"
+                                : "unmanaged",
+                        )}
+                      >
+                        <i className="pvwa-pulse-dot" />
+                        {account.status}
+                      </span>
+                    </td>
+                    <td>
+                      <small className="text-[#8E9EB2]">{account.lastVerify}</small>
+                    </td>
+                    <td>
+                      <small className="text-[#8E9EB2]">{account.lastChange}</small>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          type="button"
+                          className="pvwa-btn pvwa-btn-sm pvwa-btn-connect"
+                          title="Connect with PSM"
+                          onClick={() => {
+                            setSelectedAccount(account.id);
+                            if (onConnectPsm) onConnectPsm(account);
+                            else if (setActive) {
+                              setActive("psm");
+                              toast.info(`Connecting to ${account.username} on ${account.address}`);
+                            }
+                          }}
+                        >
+                          Connect
+                        </button>
+                        <button
+                          type="button"
+                          className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                          title="Verify credential"
+                          onClick={() => {
+                            setSelectedAccount(account.id);
+                            onCpmOperation?.("Verify");
+                          }}
+                        >
+                          Verify
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {accounts.length === 0 && (
+            <div style={{ padding: 32, textAlign: "center", color: "#8E9EB2" }}>
+              <KeyRound size={28} className="mx-auto mb-2 text-[#6F8094]" />
+              <strong className="block text-sm text-[#E8EEF5]">No matching accounts found</strong>
+              <p className="text-xs text-[#6F8094] m-0">
+                Adjust the search filter or onboarding criteria.
+              </p>
+            </div>
           )}
         </div>
-        <span className="pvwa-record-count">{accounts.length} ACCOUNTS</span>
-      </div>
 
-      {/* Dense PVWA Accounts Data Grid */}
-      <div className="pvwa-grid-wrap">
-        <table className="pvwa-grid">
-          <thead>
-            <tr>
-              <th>USERNAME</th>
-              <th>TARGET SYSTEM</th>
-              <th>PLATFORM</th>
-              <th>SAFE</th>
-              <th>ACCOUNT TYPE</th>
-              <th>OWNER</th>
-              <th>CPM STATUS</th>
-              <th>LAST VERIFIED</th>
-              <th>LAST CHANGE</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {accounts.map((account) => {
-              const isSelected = focused?.id === account.id;
-              return (
-                <tr
-                  key={account.id}
-                  onClick={() => setSelectedAccount(account.id)}
-                  className={isSelected ? "selected" : ""}
-                >
-                  <td>
-                    <strong>{account.username}</strong>
-                    {account.name && account.name !== account.username && (
-                      <span className="block text-[11px] text-[#8E9EB2]">{account.name}</span>
-                    )}
-                  </td>
-                  <td>{account.address}</td>
-                  <td>
-                    <span className="text-[11px] text-[#9AA9BA] bg-[#141C26] px-1.5 py-0.5 rounded border border-[#263241]">
-                      {account.platform}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="pvwa-code-cell">{account.safe}</span>
-                  </td>
-                  <td>
-                    <span className="text-[#9AA9BA]">{account.type}</span>
-                  </td>
-                  <td>{account.owner}</td>
-                  <td>
-                    <span
-                      className={cx(
-                        "pvwa-status-pill",
-                        account.status === "Managed"
-                          ? "managed"
-                          : account.status === "Verify required"
-                            ? "verify"
-                            : account.status === "Rotation failed"
-                              ? "failed"
-                              : "unmanaged",
-                      )}
-                    >
-                      <i className="pvwa-pulse-dot" />
-                      {account.status}
-                    </span>
-                  </td>
-                  <td>
-                    <small className="text-[#8E9EB2]">{account.lastVerify}</small>
-                  </td>
-                  <td>
-                    <small className="text-[#8E9EB2]">{account.lastChange}</small>
-                  </td>
-                  <td>
-                    <div style={{ display: "flex", gap: 4 }} onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        className="pvwa-btn pvwa-btn-sm pvwa-btn-connect"
-                        title="Connect with PSM"
-                        onClick={() => {
-                          setSelectedAccount(account.id);
-                          if (onConnectPsm) onConnectPsm(account);
-                          else if (setActive) {
-                            setActive("psm");
-                            toast.info(`Connecting to ${account.username} on ${account.address}`);
-                          }
-                        }}
-                      >
-                        Connect
-                      </button>
-                      <button
-                        type="button"
-                        className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
-                        title="Verify credential"
-                        onClick={() => {
-                          setSelectedAccount(account.id);
-                          onCpmOperation?.("Verify");
-                        }}
-                      >
-                        Verify
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-        {accounts.length === 0 && (
-          <div style={{ padding: 32, textAlign: "center", color: "#8E9EB2" }}>
-            <KeyRound size={28} className="mx-auto mb-2 text-[#6F8094]" />
-            <strong className="block text-sm text-[#E8EEF5]">No matching accounts found</strong>
-            <p className="text-xs text-[#6F8094] m-0">
-              Adjust the search filter or onboarding criteria.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Classic Account Details Panel (Lower Master-Detail) */}
-      {focused && (
-        <div className="pvwa-detail-panel">
-          <div className="pvwa-detail-header">
-            <div className="pvwa-detail-title">
-              <KeyRound size={16} className="text-[#00A8E8]" />
-              <h3>Account Details: {focused.username}</h3>
-              <span>
-                · {focused.address} ({focused.platform})
-              </span>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span
-                className={cx(
-                  "pvwa-status-pill",
-                  focused.status === "Managed"
-                    ? "managed"
-                    : focused.status === "Verify required"
-                      ? "verify"
-                      : focused.status === "Rotation failed"
-                        ? "failed"
-                        : "unmanaged",
-                )}
-              >
-                {focused.status}
-              </span>
-            </div>
-          </div>
-
-          {/* Master-Detail Tabs */}
-          <div className="pvwa-detail-tabs">
-            <button
-              type="button"
-              className={cx("pvwa-tab-btn", accountTab === "general" && "active")}
-              onClick={() => setAccountTab("general")}
-            >
-              General
-            </button>
-            <button
-              type="button"
-              className={cx("pvwa-tab-btn", accountTab === "management" && "active")}
-              onClick={() => setAccountTab("management")}
-            >
-              Management (CPM)
-            </button>
-            <button
-              type="button"
-              className={cx("pvwa-tab-btn", accountTab === "activities" && "active")}
-              onClick={() => setAccountTab("activities")}
-            >
-              Activities ({accountAudits.length})
-            </button>
-            <button
-              type="button"
-              className={cx("pvwa-tab-btn", accountTab === "sessions" && "active")}
-              onClick={() => setAccountTab("sessions")}
-            >
-              Sessions ({accountSessions.length})
-            </button>
-          </div>
-
-          <div className="pvwa-detail-body">
-            {accountTab === "general" && (
-              <div>
-                <div className="pvwa-facts-grid">
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">USERNAME</span>
-                    <span className="pvwa-fact-value">{focused.username}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">ACCOUNT NAME</span>
-                    <span className="pvwa-fact-value">{focused.name}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">TARGET SYSTEM</span>
-                    <span className="pvwa-fact-value">{focused.address}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">SAFE</span>
-                    <span className="pvwa-fact-value">{focused.safe}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">PLATFORM</span>
-                    <span className="pvwa-fact-value">{focused.platform}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">ACCOUNT TYPE</span>
-                    <span className="pvwa-fact-value">{focused.type}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">OWNER</span>
-                    <span className="pvwa-fact-value">{focused.owner}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">DEFAULT PORT</span>
-                    <span className="pvwa-fact-value">
-                      {focused.platform.includes("Windows")
-                        ? "3389 (RDP)"
-                        : focused.platform.includes("Unix") || focused.platform.includes("Linux")
-                          ? "22 (SSH)"
-                          : focused.platform.includes("Oracle")
-                            ? "1521 (TNS)"
-                            : focused.platform.includes("SQL")
-                              ? "1433 (TDS)"
-                              : "443 (HTTPS)"}
-                    </span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">BUSINESS PURPOSE</span>
-                    <span className="pvwa-fact-value">{focused.purpose}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">DEPENDENCY</span>
-                    <span className="pvwa-fact-value">{focused.dependency || "None recorded"}</span>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 14,
-                    padding: 10,
-                    background: "#0B0F14",
-                    border: "1px solid #1C2633",
-                    borderRadius: 4,
-                    fontSize: 12,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 700,
-                      color: "#6F8094",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    LEAST-PRIVILEGE SAFE MEMBERSHIP VERIFICATION
-                  </span>
-                  <p style={{ margin: "4px 0 0 0", color: "#E8EEF5" }}>
-                    Operating identity <strong>{learner}</strong>{" "}
-                    {canSafeMemberPerform(
-                      state.safes.find((s) => s.name === focused.safe),
-                      learner,
-                      "List accounts",
-                    )
-                      ? "is authorized to list accounts in this Safe."
-                      : "does not have List accounts permission in this Safe."}
-                  </p>
-                </div>
+        {/* Classic Account Details Panel (Lower Master-Detail) */}
+        {focused && (
+          <div className="pvwa-detail-panel">
+            <div className="pvwa-detail-header">
+              <div className="pvwa-detail-title">
+                <KeyRound size={16} className="text-[#00A8E8]" />
+                <h3>Account Details: {focused.username}</h3>
+                <span>
+                  · {focused.address} ({focused.platform})
+                </span>
               </div>
-            )}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span
+                  className={cx(
+                    "pvwa-status-pill",
+                    focused.status === "Managed"
+                      ? "managed"
+                      : focused.status === "Verify required"
+                        ? "verify"
+                        : focused.status === "Rotation failed"
+                          ? "failed"
+                          : "unmanaged",
+                  )}
+                >
+                  {focused.status}
+                </span>
+              </div>
+            </div>
 
-            {accountTab === "management" && (
-              <div>
-                <div className="pvwa-facts-grid">
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">CPM MANAGEMENT STATE</span>
-                    <span className="pvwa-fact-value">{focused.status}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">ROTATION POLICY</span>
-                    <span className="pvwa-fact-value">{focused.policy}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">LAST VERIFY OPERATION</span>
-                    <span className="pvwa-fact-value">{focused.lastVerify}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">LAST PASSWORD CHANGE</span>
-                    <span className="pvwa-fact-value">{focused.lastChange}</span>
-                  </div>
-                  <div className="pvwa-fact">
-                    <span className="pvwa-fact-label">LAST RECONCILE OPERATION</span>
-                    <span className="pvwa-fact-value">{focused.lastReconcile}</span>
-                  </div>
-                </div>
+            {/* Master-Detail Tabs */}
+            <div className="pvwa-detail-tabs">
+              <button
+                type="button"
+                className={cx("pvwa-tab-btn", accountTab === "general" && "active")}
+                onClick={() => setAccountTab("general")}
+              >
+                General
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-tab-btn", accountTab === "management" && "active")}
+                onClick={() => setAccountTab("management")}
+              >
+                Management (CPM)
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-tab-btn", accountTab === "activities" && "active")}
+                onClick={() => setAccountTab("activities")}
+              >
+                Activities ({accountAudits.length})
+              </button>
+              <button
+                type="button"
+                className={cx("pvwa-tab-btn", accountTab === "sessions" && "active")}
+                onClick={() => setAccountTab("sessions")}
+              >
+                Sessions ({accountSessions.length})
+              </button>
+            </div>
 
-                {focused.failureCause && (
-                  <div className="pvwa-failure-box">
-                    <AlertTriangle size={18} />
-                    <div>
-                      <strong>CPM Operation Exception Detected</strong>
-                      <p>{focused.failureCause}</p>
+            <div className="pvwa-detail-body">
+              {accountTab === "general" && (
+                <div>
+                  <div className="pvwa-facts-grid">
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">USERNAME</span>
+                      <span className="pvwa-fact-value">{focused.username}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">ACCOUNT NAME</span>
+                      <span className="pvwa-fact-value">{focused.name}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">TARGET SYSTEM</span>
+                      <span className="pvwa-fact-value">{focused.address}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">SAFE</span>
+                      <span className="pvwa-fact-value">{focused.safe}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">PLATFORM</span>
+                      <span className="pvwa-fact-value">{focused.platform}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">ACCOUNT TYPE</span>
+                      <span className="pvwa-fact-value">{focused.type}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">OWNER</span>
+                      <span className="pvwa-fact-value">{focused.owner}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">DEFAULT PORT</span>
+                      <span className="pvwa-fact-value">
+                        {focused.platform.includes("Windows")
+                          ? "3389 (RDP)"
+                          : focused.platform.includes("Unix") || focused.platform.includes("Linux")
+                            ? "22 (SSH)"
+                            : focused.platform.includes("Oracle")
+                              ? "1521 (TNS)"
+                              : focused.platform.includes("SQL")
+                                ? "1433 (TDS)"
+                                : "443 (HTTPS)"}
+                      </span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">BUSINESS PURPOSE</span>
+                      <span className="pvwa-fact-value">{focused.purpose}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">DEPENDENCY</span>
+                      <span className="pvwa-fact-value">
+                        {focused.dependency || "None recorded"}
+                      </span>
                     </div>
                   </div>
-                )}
 
-                {focused.failureCause && onRepairCpm && (
                   <div
                     style={{
                       marginTop: 14,
-                      padding: 12,
+                      padding: 10,
                       background: "#0B0F14",
-                      border: "1px solid #263241",
+                      border: "1px solid #1C2633",
                       borderRadius: 4,
+                      fontSize: 12,
                     }}
                   >
                     <span
                       style={{
                         fontSize: 10,
                         fontWeight: 700,
-                        color: "#F87171",
+                        color: "#6F8094",
                         textTransform: "uppercase",
-                        display: "block",
-                        marginBottom: 8,
                       }}
                     >
-                      ONE-CLICK INCIDENT RECOVERY ACTIONS
+                      LEAST-PRIVILEGE SAFE MEMBERSHIP VERIFICATION
                     </span>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button
-                        type="button"
-                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
-                        onClick={() => onRepairCpm("unlock")}
-                      >
-                        <Power size={13} />
-                        Unlock Target Account
-                      </button>
-                      <button
-                        type="button"
-                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
-                        onClick={() => onRepairCpm("reconcile-access")}
-                      >
-                        <KeyRound size={13} />
-                        Restore Reconcile Access
-                      </button>
-                      <button
-                        type="button"
-                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
-                        onClick={() => onRepairCpm("target-connectivity")}
-                      >
-                        <Network size={13} />
-                        Repair Target Connectivity
-                      </button>
+                    <p style={{ margin: "4px 0 0 0", color: "#E8EEF5" }}>
+                      Operating identity <strong>{learner}</strong>{" "}
+                      {canSafeMemberPerform(
+                        state.safes.find((s) => s.name === focused.safe),
+                        learner,
+                        "List accounts",
+                      )
+                        ? "is authorized to list accounts in this Safe."
+                        : "does not have List accounts permission in this Safe."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {accountTab === "management" && (
+                <div>
+                  <div className="pvwa-facts-grid">
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">CPM MANAGEMENT STATE</span>
+                      <span className="pvwa-fact-value">{focused.status}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">ROTATION POLICY</span>
+                      <span className="pvwa-fact-value">{focused.policy}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">LAST VERIFY OPERATION</span>
+                      <span className="pvwa-fact-value">{focused.lastVerify}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">LAST PASSWORD CHANGE</span>
+                      <span className="pvwa-fact-value">{focused.lastChange}</span>
+                    </div>
+                    <div className="pvwa-fact">
+                      <span className="pvwa-fact-label">LAST RECONCILE OPERATION</span>
+                      <span className="pvwa-fact-value">{focused.lastReconcile}</span>
                     </div>
                   </div>
-                )}
 
-                <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
-                  <button
-                    type="button"
-                    className="pvwa-btn pvwa-btn-secondary"
-                    onClick={() => onCpmOperation?.("Verify")}
-                  >
-                    <SearchCheck size={14} />
-                    Run Verify Now
-                  </button>
-                  <button
-                    type="button"
-                    className="pvwa-btn pvwa-btn-primary"
-                    onClick={() => onCpmOperation?.("Change")}
-                  >
-                    <RotateCcw size={14} />
-                    Run Change Now
-                  </button>
-                  <button
-                    type="button"
-                    className="pvwa-btn pvwa-btn-secondary"
-                    onClick={() => onCpmOperation?.("Reconcile")}
-                  >
-                    <Activity size={14} />
-                    Run Reconcile Now
-                  </button>
+                  {focused.failureCause && (
+                    <div className="pvwa-failure-box">
+                      <AlertTriangle size={18} />
+                      <div>
+                        <strong>CPM Operation Exception Detected</strong>
+                        <p>{focused.failureCause}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {focused.failureCause && onRepairCpm && (
+                    <div
+                      style={{
+                        marginTop: 14,
+                        padding: 12,
+                        background: "#0B0F14",
+                        border: "1px solid #263241",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: "#F87171",
+                          textTransform: "uppercase",
+                          display: "block",
+                          marginBottom: 8,
+                        }}
+                      >
+                        ONE-CLICK INCIDENT RECOVERY ACTIONS
+                      </span>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          type="button"
+                          className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                          onClick={() => onRepairCpm("unlock")}
+                        >
+                          <Power size={13} />
+                          Unlock Target Account
+                        </button>
+                        <button
+                          type="button"
+                          className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                          onClick={() => onRepairCpm("reconcile-access")}
+                        >
+                          <KeyRound size={13} />
+                          Restore Reconcile Access
+                        </button>
+                        <button
+                          type="button"
+                          className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                          onClick={() => onRepairCpm("target-connectivity")}
+                        >
+                          <Network size={13} />
+                          Repair Target Connectivity
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 14, display: "flex", gap: 8 }}>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-secondary"
+                      onClick={() => onCpmOperation?.("Verify")}
+                    >
+                      <SearchCheck size={14} />
+                      Run Verify Now
+                    </button>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-primary"
+                      onClick={() => onCpmOperation?.("Change")}
+                    >
+                      <RotateCcw size={14} />
+                      Run Change Now
+                    </button>
+                    <button
+                      type="button"
+                      className="pvwa-btn pvwa-btn-secondary"
+                      onClick={() => onCpmOperation?.("Reconcile")}
+                    >
+                      <Activity size={14} />
+                      Run Reconcile Now
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {accountTab === "activities" && (
-              <div className="pvwa-grid-wrap">
-                <table className="pvwa-grid">
-                  <thead>
-                    <tr>
-                      <th>TIME</th>
-                      <th>ACTOR</th>
-                      <th>ACTION</th>
-                      <th>RESULT</th>
-                      <th>DETAIL</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {accountAudits.map((a) => (
-                      <tr key={a.id}>
-                        <td>{a.time}</td>
-                        <td>
-                          <strong>{a.actor}</strong>
-                        </td>
-                        <td>{a.action}</td>
-                        <td>
-                          <span
-                            className={cx(
-                              "pvwa-status-pill",
-                              a.result === "Success"
-                                ? "managed"
-                                : a.result === "Warning"
-                                  ? "verify"
-                                  : "failed",
-                            )}
-                          >
-                            {a.result}
-                          </span>
-                        </td>
-                        <td>
-                          <small className="text-[#8E9EB2]">{a.detail}</small>
-                        </td>
+              {accountTab === "activities" && (
+                <div className="pvwa-grid-wrap">
+                  <table className="pvwa-grid">
+                    <thead>
+                      <tr>
+                        <th>TIME</th>
+                        <th>ACTOR</th>
+                        <th>ACTION</th>
+                        <th>RESULT</th>
+                        <th>DETAIL</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {accountAudits.length === 0 && (
-                  <p
-                    style={{
-                      padding: 16,
-                      textAlign: "center",
-                      color: "#6F8094",
-                      margin: 0,
-                      fontSize: 12,
-                    }}
-                  >
-                    No audit activities recorded for this account.
-                  </p>
-                )}
-              </div>
-            )}
+                    </thead>
+                    <tbody>
+                      {accountAudits.map((a) => (
+                        <tr key={a.id}>
+                          <td>{a.time}</td>
+                          <td>
+                            <strong>{a.actor}</strong>
+                          </td>
+                          <td>{a.action}</td>
+                          <td>
+                            <span
+                              className={cx(
+                                "pvwa-status-pill",
+                                a.result === "Success"
+                                  ? "managed"
+                                  : a.result === "Warning"
+                                    ? "verify"
+                                    : "failed",
+                              )}
+                            >
+                              {a.result}
+                            </span>
+                          </td>
+                          <td>
+                            <small className="text-[#8E9EB2]">{a.detail}</small>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {accountAudits.length === 0 && (
+                    <p
+                      style={{
+                        padding: 16,
+                        textAlign: "center",
+                        color: "#6F8094",
+                        margin: 0,
+                        fontSize: 12,
+                      }}
+                    >
+                      No audit activities recorded for this account.
+                    </p>
+                  )}
+                </div>
+              )}
 
-            {accountTab === "sessions" && (
-              <div className="pvwa-grid-wrap">
-                <table className="pvwa-grid">
-                  <thead>
-                    <tr>
-                      <th>TARGET</th>
-                      <th>COMPONENT</th>
-                      <th>TICKET</th>
-                      <th>STARTED</th>
-                      <th>COMMANDS</th>
-                      <th>STATUS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {accountSessions.map((s) => (
-                      <tr key={s.id}>
-                        <td>
-                          <strong>{s.target}</strong>
-                        </td>
-                        <td>{s.component}</td>
-                        <td>
-                          <span className="pvwa-code-cell">{s.ticket}</span>
-                        </td>
-                        <td>{s.started}</td>
-                        <td>{s.commands.length} executed</td>
-                        <td>
-                          <span
-                            className={cx(
-                              "pvwa-status-pill",
-                              s.status === "Active" ? "managed" : "unmanaged",
-                            )}
-                          >
-                            {s.status}
-                          </span>
-                        </td>
+              {accountTab === "sessions" && (
+                <div className="pvwa-grid-wrap">
+                  <table className="pvwa-grid">
+                    <thead>
+                      <tr>
+                        <th>TARGET</th>
+                        <th>COMPONENT</th>
+                        <th>TICKET</th>
+                        <th>STARTED</th>
+                        <th>COMMANDS</th>
+                        <th>STATUS</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {accountSessions.length === 0 && (
-                  <p
-                    style={{
-                      padding: 16,
-                      textAlign: "center",
-                      color: "#6F8094",
-                      margin: 0,
-                      fontSize: 12,
-                    }}
-                  >
-                    No recorded PSM sessions for this target system.
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Add Account Modal */}
-      {showAddModal && (
-        <div className="pvwa-modal-backdrop" onClick={() => setShowAddModal(false)}>
-          <div className="pvwa-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="pvwa-modal-header">
-              <h3>Onboard Privileged Account</h3>
-              <button
-                type="button"
-                className="text-[#8E9EB2] hover:text-white"
-                onClick={() => setShowAddModal(false)}
-              >
-                <X size={16} />
-              </button>
+                    </thead>
+                    <tbody>
+                      {accountSessions.map((s) => (
+                        <tr key={s.id}>
+                          <td>
+                            <strong>{s.target}</strong>
+                          </td>
+                          <td>{s.component}</td>
+                          <td>
+                            <span className="pvwa-code-cell">{s.ticket}</span>
+                          </td>
+                          <td>{s.started}</td>
+                          <td>{s.commands.length} executed</td>
+                          <td>
+                            <span
+                              className={cx(
+                                "pvwa-status-pill",
+                                s.status === "Active" ? "managed" : "unmanaged",
+                              )}
+                            >
+                              {s.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {accountSessions.length === 0 && (
+                    <p
+                      style={{
+                        padding: 16,
+                        textAlign: "center",
+                        color: "#6F8094",
+                        margin: 0,
+                        fontSize: 12,
+                      }}
+                    >
+                      No recorded PSM sessions for this target system.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-            <form
-              onSubmit={(e) => {
-                onAdd(e);
-                setShowAddModal(false);
-              }}
-            >
-              <div className="pvwa-modal-body">
-                <div className="pvwa-form-grid">
-                  <div className="pvwa-field">
-                    <label>Account Name</label>
-                    <input
-                      required
-                      className="pvwa-input"
-                      value={draft.name}
-                      onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                      placeholder="e.g. Administrator"
-                    />
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Username</label>
-                    <input
-                      required
-                      className="pvwa-input"
-                      value={draft.username}
-                      onChange={(e) => setDraft({ ...draft, username: e.target.value })}
-                      placeholder="e.g. Administrator"
-                    />
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Target Address / Hostname</label>
-                    <input
-                      required
-                      className="pvwa-input"
-                      value={draft.address}
-                      onChange={(e) =>
-                        setDraft({ ...draft, address: e.target.value.toUpperCase() })
-                      }
-                      placeholder="e.g. WIN-SRV-01"
-                    />
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Platform</label>
-                    <Select
-                      value={draft.platform}
-                      onValueChange={(platform) => setDraft({ ...draft, platform })}
-                    >
-                      <SelectTrigger className="pvwa-select">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[...SUPPORTED_PLATFORMS, "Unsupported platform"].map((p) => (
-                          <SelectItem key={p} value={p}>
-                            {p}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Safe</label>
-                    <Select
-                      value={draft.safe}
-                      onValueChange={(safe) => setDraft({ ...draft, safe })}
-                    >
-                      <SelectTrigger className="pvwa-select">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {state.safes.map((s) => (
-                          <SelectItem key={s.name} value={s.name}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Account Type</label>
-                    <Select
-                      value={draft.type}
-                      onValueChange={(type) => setDraft({ ...draft, type })}
-                    >
-                      <SelectTrigger className="pvwa-select">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[
-                          "Human administrator",
-                          "Domain administrator",
-                          "Service account",
-                          "Database account",
-                          "Application account",
-                          "Shared privileged",
-                        ].map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Account Owner</label>
-                    <Select
-                      value={draft.owner}
-                      onValueChange={(owner) => setDraft({ ...draft, owner })}
-                    >
-                      <SelectTrigger className="pvwa-select">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[...new Set([...LEARNERS, ...owners])].map((o) => (
-                          <SelectItem key={o} value={o}>
-                            {o}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="pvwa-field">
-                    <label>Rotation Policy</label>
-                    <input
-                      disabled
-                      className="pvwa-input text-[#6F8094]"
-                      value="Enterprise · verify before change"
-                    />
-                  </div>
-                  <div className="pvwa-field span-2">
-                    <label>Business Purpose</label>
-                    <textarea
-                      required
-                      rows={2}
-                      className="pvwa-textarea"
-                      value={draft.purpose}
-                      onChange={(e) => setDraft({ ...draft, purpose: e.target.value })}
-                      placeholder="Administrative responsibility and operational scope"
-                    />
-                  </div>
-                  <div className="pvwa-field span-2">
-                    <label>Application Dependency (Optional)</label>
-                    <input
-                      className="pvwa-input"
-                      value={draft.dependency}
-                      onChange={(e) => setDraft({ ...draft, dependency: e.target.value })}
-                      placeholder="e.g. Core Banking Service"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="pvwa-modal-footer">
+          </div>
+        )}
+
+        {/* Add Account Modal */}
+        {showAddModal && (
+          <div className="pvwa-modal-backdrop" onClick={() => setShowAddModal(false)}>
+            <div className="pvwa-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="pvwa-modal-header">
+                <h3>Onboard Privileged Account</h3>
                 <button
                   type="button"
-                  className="pvwa-btn pvwa-btn-secondary"
+                  className="text-[#8E9EB2] hover:text-white"
                   onClick={() => setShowAddModal(false)}
                 >
-                  Cancel
-                </button>
-                <button type="submit" className="pvwa-btn pvwa-btn-primary">
-                  <Plus size={14} />
-                  Onboard Account
+                  <X size={16} />
                 </button>
               </div>
-            </form>
+              <form
+                onSubmit={(e) => {
+                  onAdd(e);
+                  setShowAddModal(false);
+                }}
+              >
+                <div className="pvwa-modal-body">
+                  <div className="pvwa-form-grid">
+                    <div className="pvwa-field">
+                      <label>Account Name</label>
+                      <input
+                        required
+                        className="pvwa-input"
+                        value={draft.name}
+                        onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                        placeholder="e.g. Administrator"
+                      />
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Username</label>
+                      <input
+                        required
+                        className="pvwa-input"
+                        value={draft.username}
+                        onChange={(e) => setDraft({ ...draft, username: e.target.value })}
+                        placeholder="e.g. Administrator"
+                      />
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Target Address / Hostname</label>
+                      <input
+                        required
+                        className="pvwa-input"
+                        value={draft.address}
+                        onChange={(e) =>
+                          setDraft({ ...draft, address: e.target.value.toUpperCase() })
+                        }
+                        placeholder="e.g. WIN-SRV-01"
+                      />
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Platform</label>
+                      <Select
+                        value={draft.platform}
+                        onValueChange={(platform) => setDraft({ ...draft, platform })}
+                      >
+                        <SelectTrigger className="pvwa-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[...SUPPORTED_PLATFORMS, "Unsupported platform"].map((p) => (
+                            <SelectItem key={p} value={p}>
+                              {p}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Safe</label>
+                      <Select
+                        value={draft.safe}
+                        onValueChange={(safe) => setDraft({ ...draft, safe })}
+                      >
+                        <SelectTrigger className="pvwa-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {state.safes.map((s) => (
+                            <SelectItem key={s.name} value={s.name}>
+                              {s.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Account Type</label>
+                      <Select
+                        value={draft.type}
+                        onValueChange={(type) => setDraft({ ...draft, type })}
+                      >
+                        <SelectTrigger className="pvwa-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[
+                            "Human administrator",
+                            "Domain administrator",
+                            "Service account",
+                            "Database account",
+                            "Application account",
+                            "Shared privileged",
+                          ].map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Account Owner</label>
+                      <Select
+                        value={draft.owner}
+                        onValueChange={(owner) => setDraft({ ...draft, owner })}
+                      >
+                        <SelectTrigger className="pvwa-select">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[...new Set([...LEARNERS, ...owners])].map((o) => (
+                            <SelectItem key={o} value={o}>
+                              {o}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="pvwa-field">
+                      <label>Rotation Policy</label>
+                      <input
+                        disabled
+                        className="pvwa-input text-[#6F8094]"
+                        value="Enterprise · verify before change"
+                      />
+                    </div>
+                    <div className="pvwa-field span-2">
+                      <label>Business Purpose</label>
+                      <textarea
+                        required
+                        rows={2}
+                        className="pvwa-textarea"
+                        value={draft.purpose}
+                        onChange={(e) => setDraft({ ...draft, purpose: e.target.value })}
+                        placeholder="Administrative responsibility and operational scope"
+                      />
+                    </div>
+                    <div className="pvwa-field span-2">
+                      <label>Application Dependency (Optional)</label>
+                      <input
+                        className="pvwa-input"
+                        value={draft.dependency}
+                        onChange={(e) => setDraft({ ...draft, dependency: e.target.value })}
+                        placeholder="e.g. Core Banking Service"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="pvwa-modal-footer">
+                  <button
+                    type="button"
+                    className="pvwa-btn pvwa-btn-secondary"
+                    onClick={() => setShowAddModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="pvwa-btn pvwa-btn-primary">
+                    <Plus size={14} />
+                    Onboard Account
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 }
 
