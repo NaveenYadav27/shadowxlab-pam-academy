@@ -17,8 +17,32 @@ import {
   Building2,
   FileText,
   KeyRound,
+  Workflow,
 } from "lucide-react";
 import type { Lesson } from "@/lib/academy/types";
+import { VisualLearningCard } from "./visual/VisualLearningCard";
+import { ArchitectureExplorer } from "./visual/ArchitectureExplorer";
+import { WorkflowVisualizer, type WorkflowType } from "./visual/WorkflowVisualizer";
+
+function getWorkflowForLesson(num: string): WorkflowType {
+  if (num.startsWith("2.")) return "safe-auth";
+  if (num.startsWith("3.")) return "onboarding";
+  if (num.startsWith("4.")) return "onboarding";
+  if (num.startsWith("5.")) return "rotation";
+  if (num.startsWith("6.")) return "session";
+  return "onboarding";
+}
+
+function getDefaultComponentForLesson(num: string): string {
+  if (num.startsWith("1.1")) return "workstation";
+  if (num.startsWith("1.2")) return "vault";
+  if (num.startsWith("2.")) return "vault";
+  if (num.startsWith("3.")) return "pvwa";
+  if (num.startsWith("4.")) return "target";
+  if (num.startsWith("5.")) return "cpm";
+  if (num.startsWith("6.")) return "psm";
+  return "vault";
+}
 
 interface LessonRendererProps {
   lesson: Lesson;
@@ -33,60 +57,25 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
   onMarkComplete,
   onJumpConsole,
 }) => {
+  function handleScrollToArchitecture() {
+    const el = document.getElementById("architecture-explorer-section");
+    el?.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function handleScrollToLab() {
+    const el = document.getElementById("lesson-completion-section");
+    el?.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <div className="academy-center-reader">
-      {/* 1. Lesson Header */}
-      <div className="academy-lesson-header">
-        <span className="academy-lesson-tag">
-          Lesson {lesson.number} · Enterprise Core Curriculum
-        </span>
-        <h1>{lesson.title}</h1>
-        <p className="subtitle">{lesson.subtitle}</p>
-
-        <div className="academy-meta-pills">
-          <span className="academy-meta-pill">
-            <Clock size={13} />
-            {lesson.estimatedMinutes} Mins Duration
-          </span>
-          {lesson.prerequisites.map((prereq, idx) => (
-            <span key={idx} className="academy-meta-pill">
-              <KeyRound size={12} />
-              Prereq: {prereq}
-            </span>
-          ))}
-          {isCompleted && (
-            <span
-              className="academy-meta-pill"
-              style={{ background: "#E6F4EA", borderColor: "#CEEAD6", color: "#137333" }}
-            >
-              <CheckCircle2 size={13} />
-              Lesson Completed
-            </span>
-          )}
-        </div>
-
-        {/* Learning Objectives */}
-        <div
-          style={{
-            marginTop: 14,
-            padding: 12,
-            background: "#F8FAFC",
-            border: "1px solid #E2E8F0",
-            borderRadius: 2,
-          }}
-        >
-          <strong style={{ fontSize: 12, color: "#1E293B", display: "block", marginBottom: 6 }}>
-            Core Learning Objectives:
-          </strong>
-          <ul
-            style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: "#334155", lineHeight: 1.6 }}
-          >
-            {lesson.learningObjectives.map((obj, idx) => (
-              <li key={idx}>{obj}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      {/* Visual Learning Card Hero */}
+      <VisualLearningCard
+        lesson={lesson}
+        isCompleted={isCompleted}
+        onExploreArchitecture={handleScrollToArchitecture}
+        onJumpLab={handleScrollToLab}
+      />
 
       {/* 2. Concept Introduction & Why It Exists */}
       <section className="academy-section-block">
@@ -113,28 +102,18 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
       </section>
 
       {/* 3. Enterprise Architecture & Control Flow */}
-      <section className="academy-section-block">
+      <section className="academy-section-block" id="architecture-explorer-section">
         <h2 className="academy-section-title">
           <Layers size={16} className="text-[#0078D4]" />
-          2. Enterprise Architecture & Control Flow
+          2. Enterprise Architecture & Interactive Topology
         </h2>
         <p className="academy-prose">{lesson.architecture.overview}</p>
 
-        {lesson.architecture.diagramAscii && (
-          <div style={{ marginBottom: 14 }}>
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: "#64748B",
-                textTransform: "uppercase",
-              }}
-            >
-              Technical Protocol & Component Architecture:
-            </span>
-            <pre className="pvwa-arch-box">{lesson.architecture.diagramAscii}</pre>
-          </div>
-        )}
+        {/* Interactive SVG Architecture Topology Explorer */}
+        <ArchitectureExplorer
+          initialComponent={getDefaultComponentForLesson(lesson.number)}
+          onJumpConsole={onJumpConsole}
+        />
 
         {/* Component Responsibilities Table */}
         <span
@@ -220,7 +199,16 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
         </div>
       </section>
 
-      {/* 4. Technical Terminology */}
+      {/* 4. Operational Workflow Simulation */}
+      <section className="academy-section-block">
+        <h2 className="academy-section-title">
+          <Workflow size={16} className="text-[#0078D4]" />
+          3. Stepwise Operational Workflow Simulation
+        </h2>
+        <WorkflowVisualizer workflowId={getWorkflowForLesson(lesson.number)} />
+      </section>
+
+      {/* 5. Technical Terminology */}
       {lesson.terminology.length > 0 && (
         <section className="academy-section-block">
           <h2 className="academy-section-title">

@@ -2154,3 +2154,188 @@ body {
   border: 1px solid #feefc3;
   color: #b06000;
 }
+
+/* ==========================================================================
+   ACADEMY VISUAL LEARNING EXPERIENCE RECONSTRUCTION (V3.2)
+   ========================================================================== */
+
+.visual-learning-hero-card {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-left: 4px solid #0078d4;
+  border-radius: 2px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.visual-learning-card-inner {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.visual-card-artwork {
+  width: 110px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 14px 10px;
+}
+
+.visual-card-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+}
+
+.visual-card-status-badge {
+  width: 100%;
+  text-align: center;
+}
+
+.badge-completed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #137333;
+  background: #e6f4ea;
+  border: 1px solid #ceead6;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.badge-in-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #0078d4;
+  background: #e1f0fa;
+  border: 1px solid #b3d7f4;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.visual-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.visual-card-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.visual-card-eyebrow span {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0078d4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.visual-card-meta-tags {
+  display: flex;
+  gap: 6px;
+}
+
+.meta-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 1px 6px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.visual-card-title {
+  margin: 0 0 2px 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.visual-card-subtitle {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.visual-card-summary {
+  margin: 0 0 10px 0;
+  font-size: 12.5px;
+  color: #334155;
+  line-height: 1.55;
+}
+
+.visual-card-relevance-box {
+  background: #f8fafc;
+  border-left: 3px solid #0078d4;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.visual-card-relevance-box strong {
+  color: #1e293b;
+}
+
+.visual-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.component-inspector-panel {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-top: none;
+  border-radius: 0 0 2px 2px;
+  padding: 16px 20px;
+}
+
+.component-inspector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pam-svg-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.pam-svg-icon:hover {
+  transform: scale(1.05);
+}
+
+.pam-svg-icon.highlighted {
+  filter: drop-shadow(0 0 8px rgba(0, 120, 212, 0.6));
+}

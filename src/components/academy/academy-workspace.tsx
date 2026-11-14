@@ -28,8 +28,7 @@ import {
 } from "@/lib/academy/progress";
 import { LessonTree } from "./lesson-tree";
 import { LessonRenderer } from "./lesson-renderer";
-import { KnowledgeCheckpoint } from "./knowledge-checkpoint";
-import { PracticalExerciseCard } from "./practical-exercise-card";
+import { LearningObjectivesPanel } from "./visual/LearningObjectivesPanel";
 import type { PamState } from "@/lib/pam-engine";
 
 interface AcademyWorkspaceProps {
@@ -159,7 +158,7 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           onSelectLesson={handleSelectLesson}
         />
 
-        {/* CENTER PANEL: In-Depth Instructional Lesson Reader */}
+        {/* CENTER PANEL: In-Depth Instructional Lesson Reader with Visual Architecture & Workflows */}
         <LessonRenderer
           lesson={currentLesson}
           isCompleted={progress.completedLessons.includes(currentLesson.id)}
@@ -167,76 +166,16 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           onJumpConsole={onJumpConsole}
         />
 
-        {/* RIGHT PANEL: Objectives, Knowledge Checkpoint & Simulator Lab */}
-        <div className="academy-right-sidebar">
-          {/* Operations Console Quick Jump Shortcuts */}
-          <div className="pvwa-academy-card" style={{ marginBottom: 12 }}>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                color: "#64748B",
-                textTransform: "uppercase",
-                display: "block",
-                marginBottom: 6,
-              }}
-            >
-              Quick Jump to Operations Console:
-            </span>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-              <button
-                type="button"
-                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
-                style={{ fontSize: 10, justifyContent: "center" }}
-                onClick={() => onJumpConsole?.("safes")}
-              >
-                Safes Console
-              </button>
-              <button
-                type="button"
-                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
-                style={{ fontSize: 10, justifyContent: "center" }}
-                onClick={() => onJumpConsole?.("accounts")}
-              >
-                Accounts Console
-              </button>
-              <button
-                type="button"
-                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
-                style={{ fontSize: 10, justifyContent: "center" }}
-                onClick={() => onJumpConsole?.("cpm")}
-              >
-                CPM Console
-              </button>
-              <button
-                type="button"
-                className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
-                style={{ fontSize: 10, justifyContent: "center" }}
-                onClick={() => onJumpConsole?.("psm")}
-              >
-                PSM Console
-              </button>
-            </div>
-          </div>
-
-          {/* Practical Operational Exercise Card */}
-          {currentLesson.practicalExercise && (
-            <PracticalExerciseCard
-              exercise={currentLesson.practicalExercise}
-              state={state}
-              isCompleted={progress.completedExercises.includes(currentLesson.practicalExercise.id)}
-              onRecordExerciseComplete={handleRecordExerciseComplete}
-              onJumpConsole={onJumpConsole}
-            />
-          )}
-
-          {/* Interactive Knowledge Checkpoint */}
-          <KnowledgeCheckpoint
-            questions={currentLesson.knowledgeCheck}
-            savedAnswers={progress.checkpointAnswers}
-            onRecordAnswer={handleRecordAnswer}
-          />
-        </div>
+        {/* RIGHT PANEL: Objectives, Terminology, Knowledge Checkpoint & Simulator Lab */}
+        <LearningObjectivesPanel
+          lesson={currentLesson}
+          state={state}
+          completedExercises={progress.completedExercises}
+          savedAnswers={progress.checkpointAnswers}
+          onRecordAnswer={handleRecordAnswer}
+          onRecordExerciseComplete={handleRecordExerciseComplete}
+          onJumpConsole={onJumpConsole}
+        />
       </div>
     </>
   );
