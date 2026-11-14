@@ -1,3 +1,4 @@
+import { AcademyWorkspace } from "./academy/academy-workspace";
 import { ACADEMY_CLASSES, SHADOWXLAB_CORE_VISION } from "@/lib/academy-curriculum";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
@@ -1374,21 +1375,7 @@ export function PamAcademy() {
         />
       );
     if (active === "academy")
-      return (
-        <AcademyView
-          classes={CLASSES}
-          selectedClass={selectedClass}
-          setSelectedClass={setSelectedClass}
-          activeClass={activeClass}
-          state={state}
-          selectedLabId={labId}
-          setSelectedLabId={setLabId}
-          markLabComplete={markLabComplete}
-          resetLab={resetLab}
-          labFeedback={labFeedback}
-          setActive={setActive}
-        />
-      );
+      return <AcademyWorkspace state={state} onResetState={resetLab} onJumpConsole={setActive} />;
     if (active === "environment")
       return (
         <EnvironmentView
