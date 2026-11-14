@@ -1,3 +1,4 @@
+import { ACADEMY_CLASSES, SHADOWXLAB_CORE_VISION } from "@/lib/academy-curriculum";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   Activity,
@@ -1385,6 +1386,7 @@ export function PamAcademy() {
           markLabComplete={markLabComplete}
           resetLab={resetLab}
           labFeedback={labFeedback}
+          setActive={setActive}
         />
       );
     if (active === "environment")
@@ -2025,9 +2027,13 @@ function AcademyView({
   labFeedback: string;
   setActive?: (section: SectionId) => void;
 }) {
+  const [activeTab, setActiveTab] = useState<"concepts" | "lab" | "roles" | "interview" | "vision">(
+    "concepts",
+  );
   const current = activeClass ?? classes[0];
-  const topics = CLASS_TOPICS[current?.id ?? "class-01"] ?? [];
+  const curriculum = ACADEMY_CLASSES.find((c) => c.id === current?.id) ?? ACADEMY_CLASSES[0];
   const currentLab = selectedLabId || (current?.labs[0] ?? "");
+
   const evaluation: LabEvaluationResult = useMemo(
     () => evaluateLabObjectives(state, currentLab),
     [state, currentLab],
@@ -2048,13 +2054,13 @@ function AcademyView({
       <div className="pvwa-page-header">
         <div className="pvwa-page-title-block">
           <h1>
-            <GraduationCap size={20} className="text-[#00A8E8]" />
+            <GraduationCap size={20} className="text-[#0078D4]" />
             Learning Academy
           </h1>
           <p>SHADOWXLAB PAM ADMINISTRATOR ACADEMY · Six-Class Enterprise Operations Curriculum</p>
         </div>
         <div className="pvwa-toolbar">
-          <span style={{ fontSize: 12, color: "#8E9EB2", marginRight: 8 }}>
+          <span style={{ fontSize: 12, color: "#64748B", marginRight: 8 }}>
             Curriculum Progress: <strong>{state.completedLabs.length}/8</strong> Labs Complete
           </span>
           <button
@@ -2071,16 +2077,16 @@ function AcademyView({
 
       {/* Two-Column Dedicated Academy Layout */}
       <div className="pvwa-academy-layout">
-        {/* Left Class Navigator */}
+        {/* Left Class Navigator - Sequential C01 through C06 */}
         <div className="pvwa-academy-classes">
           <div className="pvwa-academy-classes-head">
             <h3>Training Curriculum</h3>
           </div>
-          {classes.map((course) => {
-            const completedCount = course.labs.filter((l) =>
-              state.completedLabs.includes(l),
-            ).length;
-            const isSelected = selectedClass === course.id;
+          {ACADEMY_CLASSES.map((course) => {
+            const classObj = classes.find((c) => c.id === course.id);
+            const classLabs = classObj?.labs ?? [];
+            const completedCount = classLabs.filter((l) => state.completedLabs.includes(l)).length;
+            const isSelected = (selectedClass || "class-01") === course.id;
             return (
               <button
                 key={course.id}
@@ -2088,29 +2094,31 @@ function AcademyView({
                 className={cx("pvwa-class-item", isSelected && "active")}
                 onClick={() => {
                   setSelectedClass(course.id);
-                  const first = course.labs[0];
+                  const first = classLabs[0];
                   if (first) setSelectedLabId(first);
                 }}
               >
-                <div className="pvwa-class-copy" style={{ flex: 1 }}>
-                  <small>{course.label} · 1H 20M</small>
+                <div className="pvwa-class-copy">
+                  <small>
+                    {course.label} · {course.duration}
+                  </small>
                   <strong>{course.title}</strong>
                   <span>
-                    {completedCount}/{course.labs.length} labs complete
+                    {completedCount}/{classLabs.length} labs complete
                   </span>
                 </div>
-                {completedCount === course.labs.length && (
-                  <CheckCircle2 size={16} className="text-emerald-400" />
+                {classLabs.length > 0 && completedCount === classLabs.length && (
+                  <CheckCircle2 size={16} className="text-emerald-600" />
                 )}
               </button>
             );
           })}
         </div>
 
-        {/* Right Active Class & Lab Area */}
+        {/* Right Active Class & Multi-Tab Content Area */}
         <div className="pvwa-academy-main">
           {/* Active Class Header Card */}
-          <div className="pvwa-academy-card">
+          <div className="pvwa-academy-card" style={{ marginBottom: 12 }}>
             <div
               style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}
             >
@@ -2119,33 +2127,40 @@ function AcademyView({
                   style={{
                     fontSize: 10,
                     fontWeight: 700,
-                    color: "#00A8E8",
+                    color: "#0078D4",
                     textTransform: "uppercase",
+                    letterSpacing: "0.5px",
                   }}
                 >
-                  {current?.label} · CORE MODULE
+                  {curriculum.label} · {curriculum.level.toUpperCase()} MODULE
                 </span>
-                <h2 style={{ margin: "4px 0", fontSize: 16, fontWeight: 700, color: "#FFFFFF" }}>
-                  {current?.title}
+                <h2
+                  style={{ margin: "4px 0 2px 0", fontSize: 16, fontWeight: 700, color: "#1E293B" }}
+                >
+                  {curriculum.title}
                 </h2>
-                <p style={{ margin: 0, fontSize: 12, color: "#8E9EB2" }}>{current?.subtitle}</p>
+                <p style={{ margin: 0, fontSize: 12, color: "#64748B" }}>{curriculum.subtitle}</p>
               </div>
-              <span className="pvwa-status-pill managed">INTERACTIVE SESSION</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <span className="pvwa-status-pill managed">DETERMINISTIC SIM ACTIVE</span>
+                <span className="pvwa-status-pill managed">ZERO LEAKAGE</span>
+              </div>
             </div>
 
             {/* Quick jump to relevant PAM console */}
             <div
               style={{
-                marginTop: 12,
+                marginTop: 10,
                 display: "flex",
-                gap: 8,
+                gap: 6,
                 flexWrap: "wrap",
-                borderTop: "1px solid #1C2633",
-                paddingTop: 10,
+                borderTop: "1px solid #E2E8F0",
+                paddingTop: 8,
+                alignItems: "center",
               }}
             >
-              <span style={{ fontSize: 11, color: "#8E9EB2", alignSelf: "center" }}>
-                Jump to Console:
+              <span style={{ fontSize: 11, color: "#64748B", fontWeight: 600 }}>
+                Jump to Operations Console:
               </span>
               <button
                 type="button"
@@ -2178,127 +2193,518 @@ function AcademyView({
             </div>
           </div>
 
-          {/* Interactive Lab Validation Card */}
-          <div className="pvwa-academy-card">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 12,
-              }}
+          {/* Sub-Navigation Tabs */}
+          <div className="pvwa-academy-tab-bar">
+            <button
+              type="button"
+              className={cx("pvwa-academy-tab", activeTab === "concepts" && "active")}
+              onClick={() => setActiveTab("concepts")}
             >
-              <div>
-                <strong style={{ fontSize: 14, color: "#FFFFFF" }}>Active Lab: {currentLab}</strong>
-                <span className="block text-[11px] text-[#8E9EB2]">
-                  OBJECTIVE-DRIVEN VALIDATION ENGINE
-                </span>
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#FFFFFF" }}>
-                  Score: {evaluation.score}/100
-                </span>
-                <button
-                  type="button"
-                  className={cx(
-                    "pvwa-btn pvwa-btn-sm",
-                    evaluation.completed ? "pvwa-btn-primary" : "pvwa-btn-secondary",
-                  )}
-                  onClick={handleValidateLab}
-                >
-                  <ClipboardCheck size={13} />
-                  Validate & Complete Lab
-                </button>
-              </div>
-            </div>
+              <BookOpen size={14} /> 1. Concepts & Architecture
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-academy-tab", activeTab === "lab" && "active")}
+              onClick={() => setActiveTab("lab")}
+            >
+              <Terminal size={14} /> 2. Hands-on Lab & Objectives
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-academy-tab", activeTab === "roles" && "active")}
+              onClick={() => setActiveTab("roles")}
+            >
+              <UsersRound size={14} /> 3. Enterprise Job Roles
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-academy-tab", activeTab === "interview" && "active")}
+              onClick={() => setActiveTab("interview")}
+            >
+              <Shield size={14} /> 4. Interview Preparation
+            </button>
+            <button
+              type="button"
+              className={cx("pvwa-academy-tab", activeTab === "vision" && "active")}
+              onClick={() => setActiveTab("vision")}
+            >
+              <Fingerprint size={14} /> 5. ShadowXLab Vision & Values
+            </button>
+          </div>
 
-            {/* Checklist of objectives */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
-              {evaluation.objectives.map((obj: LabObjective) => (
+          {/* TAB 1: CONCEPTS & ARCHITECTURE */}
+          {activeTab === "concepts" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {curriculum.concepts.map((concept, idx) => (
+                <div key={concept.title} className="pvwa-concept-card">
+                  <div className="pvwa-concept-title">
+                    <span style={{ color: "#0078D4", fontSize: 13, fontWeight: 800 }}>
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <span>{concept.title}</span>
+                  </div>
+                  <p className="pvwa-concept-summary">{concept.summary}</p>
+                  <ul className="pvwa-concept-points">
+                    {concept.keyPoints.map((pt, pIdx) => (
+                      <li key={pIdx}>{pt}</li>
+                    ))}
+                  </ul>
+                  {concept.architectureDiagram && (
+                    <pre className="pvwa-arch-box">{concept.architectureDiagram}</pre>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAB 2: HANDS-ON LAB & OBJECTIVES */}
+          {activeTab === "lab" && (
+            <div>
+              {/* If multiple labs exist in class, show lab switcher */}
+              {current?.labs && current.labs.length > 1 && (
+                <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                  {current.labs.map((labName) => (
+                    <button
+                      key={labName}
+                      type="button"
+                      className={cx(
+                        "pvwa-btn pvwa-btn-sm",
+                        currentLab === labName ? "pvwa-btn-primary" : "pvwa-btn-secondary",
+                      )}
+                      onClick={() => setSelectedLabId(labName)}
+                    >
+                      {labName}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Lab Scenario Card */}
+              <div className="pvwa-academy-card">
                 <div
-                  key={obj.id}
                   style={{
                     display: "flex",
+                    justifyContent: "space-between",
                     alignItems: "flex-start",
-                    gap: 8,
-                    padding: 8,
-                    background: "#0B0F14",
-                    border: "1px solid #1C2633",
-                    borderRadius: 3,
-                    fontSize: 12,
+                    marginBottom: 6,
                   }}
                 >
-                  <span style={{ color: obj.done ? "#34D399" : "#FBBF24", marginTop: 2 }}>
-                    {obj.done ? <Check size={14} /> : <Clock3 size={14} />}
-                  </span>
                   <div>
-                    <strong style={{ color: "#E8EEF5" }}>{obj.description}</strong>
-                    {obj.evidence && <small className="block text-[#8E9EB2]">{obj.evidence}</small>}
+                    <h3
+                      style={{
+                        margin: "0 0 4px 0",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: "#1E293B",
+                      }}
+                    >
+                      Lab Scenario: {curriculum.labGuide.title}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+                      {curriculum.labGuide.scenario}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: "#64748B",
+                    marginTop: 8,
+                    borderTop: "1px solid #E2E8F0",
+                    paddingTop: 6,
+                  }}
+                >
+                  <strong>Prerequisites:</strong> {curriculum.labGuide.prerequisites.join(" · ")}
+                </div>
+              </div>
+
+              {/* Step-by-Step Guided Procedure */}
+              <div className="pvwa-academy-card">
+                <strong
+                  style={{ fontSize: 13, color: "#1E293B", display: "block", marginBottom: 8 }}
+                >
+                  Step-by-Step Guided Procedure
+                </strong>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {curriculum.labGuide.steps.map((st) => (
+                    <div
+                      key={st.number}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 10,
+                        padding: "8px 10px",
+                        background: "#F8FAFC",
+                        border: "1px solid #E2E8F0",
+                        borderRadius: 2,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: "50%",
+                          background: "#0078D4",
+                          color: "#FFFFFF",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 10,
+                          fontWeight: 700,
+                          flexShrink: 0,
+                          marginTop: 1,
+                        }}
+                      >
+                        {st.number}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            marginBottom: 2,
+                          }}
+                        >
+                          <strong style={{ fontSize: 12, color: "#1E293B" }}>{st.title}</strong>
+                          {st.consoleSection && (
+                            <button
+                              type="button"
+                              className="pvwa-btn pvwa-btn-sm pvwa-btn-secondary"
+                              style={{ padding: "1px 6px", fontSize: 10 }}
+                              onClick={() => setActive?.(st.consoleSection as SectionId)}
+                            >
+                              Go to {st.consoleSection}
+                            </button>
+                          )}
+                        </div>
+                        <p style={{ margin: "0 0 2px 0", fontSize: 11, color: "#334155" }}>
+                          <b>Action Required:</b> {st.action}
+                        </p>
+                        <small style={{ fontSize: 11, color: "#64748B" }}>
+                          <b>Expected Result:</b> {st.expectedResult}
+                        </small>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Interactive Lab Validation Engine Card */}
+              <div className="pvwa-academy-card">
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  <div>
+                    <strong style={{ fontSize: 13, color: "#1E293B" }}>
+                      Objective-Driven Validation Engine
+                    </strong>
+                    <span className="block text-[11px] text-[#64748B]">
+                      Active Target: {currentLab}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: evaluation.completed ? "#137333" : "#B06000",
+                      }}
+                    >
+                      Score: {evaluation.score}/100
+                    </span>
+                    <button
+                      type="button"
+                      className={cx(
+                        "pvwa-btn pvwa-btn-sm",
+                        evaluation.completed ? "pvwa-btn-primary" : "pvwa-btn-secondary",
+                      )}
+                      onClick={handleValidateLab}
+                    >
+                      <ClipboardCheck size={13} />
+                      Validate & Complete Lab
+                    </button>
+                  </div>
+                </div>
+
+                {/* Checklist of objectives */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+                  {evaluation.objectives.map((obj: LabObjective) => (
+                    <div
+                      key={obj.id}
+                      className={cx("pvwa-objective-item", obj.done ? "done" : "pending")}
+                    >
+                      <span style={{ color: obj.done ? "#137333" : "#B06000", marginTop: 2 }}>
+                        {obj.done ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}
+                      </span>
+                      <div style={{ flex: 1 }}>
+                        <strong style={{ color: "#1E293B", fontSize: 12 }}>
+                          {obj.description}
+                        </strong>
+                        {obj.evidence && (
+                          <small style={{ display: "block", color: "#64748B", fontSize: 11 }}>
+                            {obj.evidence}
+                          </small>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {evaluation.feedback && (
+                  <div
+                    style={{
+                      padding: 8,
+                      borderRadius: 2,
+                      background: evaluation.completed ? "#E6F4EA" : "#FEF7E0",
+                      border: evaluation.completed ? "1px solid #CEEAD6" : "1px solid #FEEFC3",
+                      color: evaluation.completed ? "#137333" : "#B06000",
+                      fontSize: 12,
+                    }}
+                  >
+                    {evaluation.feedback}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: ENTERPRISE JOB ROLES */}
+          {activeTab === "roles" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="pvwa-academy-card" style={{ marginBottom: 4 }}>
+                <h3
+                  style={{ margin: "0 0 2px 0", fontSize: 13, fontWeight: 700, color: "#1E293B" }}
+                >
+                  Real-World Enterprise Career Mappings
+                </h3>
+                <p style={{ margin: 0, fontSize: 12, color: "#64748B" }}>
+                  The skills trained in {curriculum.label} directly qualify you for these enterprise
+                  security roles:
+                </p>
+              </div>
+              {curriculum.jobRoles.map((role) => (
+                <div key={role.title} className="pvwa-job-card">
+                  <div className="pvwa-job-header">
+                    <div>
+                      <div className="pvwa-job-title">{role.title}</div>
+                      <span style={{ fontSize: 11, color: "#64748B" }}>
+                        Enterprise PAM Practitioner
+                      </span>
+                    </div>
+                    <div className="pvwa-job-badges">
+                      <span className="pvwa-job-badge-level">{role.level}</span>
+                      <span className="pvwa-job-badge-salary">{role.salaryRange}</span>
+                    </div>
+                  </div>
+                  <p
+                    style={{
+                      margin: "4px 0 8px 0",
+                      fontSize: 12,
+                      color: "#334155",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {role.overview}
+                  </p>
+                  <strong
+                    style={{
+                      fontSize: 11,
+                      textTransform: "uppercase",
+                      color: "#64748B",
+                      display: "block",
+                      marginBottom: 2,
+                    }}
+                  >
+                    Typical Daily Operations:
+                  </strong>
+                  <ul className="pvwa-job-tasks">
+                    {role.dailyWorkflows.map((t, tIdx) => (
+                      <li key={tIdx}>{t}</li>
+                    ))}
+                  </ul>
+                  <strong
+                    style={{
+                      fontSize: 11,
+                      textTransform: "uppercase",
+                      color: "#64748B",
+                      display: "block",
+                      marginBottom: 4,
+                    }}
+                  >
+                    Core Technical Competencies:
+                  </strong>
+                  <div className="pvwa-job-skills">
+                    {role.requiredSkills.map((c, cIdx) => (
+                      <span key={cIdx} className="pvwa-job-skill-tag">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  {role.certifications && role.certifications.length > 0 && (
+                    <div style={{ marginTop: 8, paddingTop: 6, borderTop: "1px solid #E2E8F0" }}>
+                      <strong
+                        style={{
+                          fontSize: 11,
+                          textTransform: "uppercase",
+                          color: "#64748B",
+                          display: "block",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Recommended Industry Certifications:
+                      </strong>
+                      <div className="pvwa-job-skills">
+                        {role.certifications.map((cert, certIdx) => (
+                          <span
+                            key={certIdx}
+                            className="pvwa-job-badge-level"
+                            style={{ fontSize: 10 }}
+                          >
+                            {cert}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAB 4: TECHNICAL INTERVIEW PREPARATION */}
+          {activeTab === "interview" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="pvwa-academy-card" style={{ marginBottom: 4 }}>
+                <h3
+                  style={{ margin: "0 0 2px 0", fontSize: 13, fontWeight: 700, color: "#1E293B" }}
+                >
+                  Enterprise PAM Technical Interview Question Bank
+                </h3>
+                <p style={{ margin: 0, fontSize: 12, color: "#64748B" }}>
+                  High-frequency questions asked by security leads, architects, and hiring managers
+                  for {curriculum.label}:
+                </p>
+              </div>
+              {curriculum.interviewPrep.map((item, idx) => (
+                <div key={item.question} className="pvwa-interview-card">
+                  <div className="pvwa-interview-q">
+                    <span>
+                      Q{idx + 1}: {item.question}
+                    </span>
+                    <span
+                      className={cx(
+                        "pvwa-diff-badge",
+                        `pvwa-diff-${item.difficulty.toLowerCase()}`,
+                      )}
+                    >
+                      {item.difficulty}
+                    </span>
+                  </div>
+                  <div className="pvwa-interview-answer">
+                    <strong style={{ color: "#0078D4", display: "block", marginBottom: 4 }}>
+                      Suggested Enterprise Response:
+                    </strong>
+                    <p style={{ margin: 0, fontSize: 12, lineHeight: 1.5 }}>{item.answer}</p>
+                  </div>
+                  <div className="pvwa-interview-lens">
+                    <Eye size={12} />
+                    <span>
+                      <b>Interviewer Evaluation Lens:</b> {item.interviewerInsight}
+                    </span>
                   </div>
                 </div>
               ))}
             </div>
+          )}
 
-            {evaluation.feedback && (
-              <div
-                style={{
-                  padding: 8,
-                  borderRadius: 3,
-                  background: evaluation.completed
-                    ? "rgba(16, 185, 129, 0.12)"
-                    : "rgba(245, 158, 11, 0.12)",
-                  border: evaluation.completed
-                    ? "1px solid rgba(16, 185, 129, 0.3)"
-                    : "1px solid rgba(245, 158, 11, 0.3)",
-                  color: evaluation.completed ? "#34D399" : "#FBBF24",
-                  fontSize: 12,
-                }}
-              >
-                {evaluation.feedback}
-              </div>
-            )}
-          </div>
-
-          {/* Technical Concepts */}
-          <div className="pvwa-academy-card">
-            <strong style={{ fontSize: 13, color: "#FFFFFF", display: "block", marginBottom: 8 }}>
-              Technical Concepts & Architecture Notes
-            </strong>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                gap: 8,
-              }}
-            >
-              {topics.map((t, idx) => (
-                <div
-                  key={t}
-                  style={{
-                    padding: 8,
-                    background: "#0B0F14",
-                    border: "1px solid #1C2633",
-                    borderRadius: 3,
-                    fontSize: 11,
-                  }}
-                >
-                  <span style={{ color: "#00A8E8", fontWeight: 700, marginRight: 6 }}>
-                    {String(idx + 1).padStart(2, "0")}
-                  </span>
-                  <strong style={{ color: "#E8EEF5" }}>{t}</strong>
-                  <p style={{ margin: "2px 0 0 0", color: "#8E9EB2" }}>
-                    {topicDetail(current?.id ?? "", idx)}
+          {/* TAB 5: SHADOWXLAB VISION & VALUES */}
+          {activeTab === "vision" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="pvwa-vision-card">
+                <div className="pvwa-vision-pillar">ShadowXLab Core Vision & Mission</div>
+                <div className="pvwa-vision-quote">"{curriculum.visionMission.vision}"</div>
+                <div style={{ marginBottom: 10 }}>
+                  <strong
+                    style={{ fontSize: 12, color: "#1E293B", display: "block", marginBottom: 2 }}
+                  >
+                    Institutional Mission:
+                  </strong>
+                  <p style={{ margin: 0, fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+                    {curriculum.visionMission.mission}
                   </p>
                 </div>
-              ))}
+              </div>
+
+              <div className="pvwa-academy-card">
+                <h3
+                  style={{ margin: "0 0 10px 0", fontSize: 13, fontWeight: 700, color: "#1E293B" }}
+                >
+                  ShadowXLab Core Institutional Pillars
+                </h3>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                    gap: 10,
+                  }}
+                >
+                  {curriculum.visionMission.values.map((v) => (
+                    <div
+                      key={v.name}
+                      style={{
+                        padding: 10,
+                        background: "#F8FAFC",
+                        border: "1px solid #E2E8F0",
+                        borderRadius: 2,
+                      }}
+                    >
+                      <strong
+                        style={{
+                          color: "#0078D4",
+                          fontSize: 12,
+                          display: "block",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {v.name}
+                      </strong>
+                      <p
+                        style={{
+                          margin: "0 0 4px 0",
+                          fontSize: 11,
+                          fontStyle: "italic",
+                          color: "#334155",
+                        }}
+                      >
+                        "{v.principle}"
+                      </p>
+                      <small
+                        style={{
+                          fontSize: 11,
+                          color: "#64748B",
+                          display: "block",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {v.application}
+                      </small>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>
   );
 }
-
 function EnvironmentView({
   selectedComponent,
   setSelectedComponent,
