@@ -1,4 +1,10 @@
 import { AcademyWorkspace } from "./academy/academy-workspace";
+import { PsmOperationsView } from "./psm/psm-operations-view";
+import { PoliciesManagementView } from "./policies/policies-management-view";
+import { AdministrationView } from "./administration/administration-view";
+import { ReportsAuditView } from "./reports/reports-audit-view";
+import { DiscoveryView as ReconstructedDiscoveryView } from "./discovery/discovery-view";
+import { TroubleshootingWorkbench } from "./troubleshooting/troubleshooting-workbench";
 import { ACADEMY_CLASSES, SHADOWXLAB_CORE_VISION } from "@/lib/academy-curriculum";
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
@@ -82,11 +88,21 @@ import {
   resetPamState,
   runCpmOperation,
   setSafeMember,
+  terminatePsmSession,
+  addPolicy,
+  updatePolicy,
+  addUser,
+  updateUserRole,
+  runDiscoveryScan,
+  onboardDiscoveredAccount,
+  remediateIncident,
   type CpmOperation,
   type PamAccount,
   type PamSafe,
   type PamSession,
   type PamState,
+  type PamPolicy,
+  type PamUserRole,
   type SafePermission,
   type LabEvaluationResult,
   type LabObjective,
@@ -1185,6 +1201,123 @@ export function PamAcademy() {
     toast.success("Simulation state reset.");
   }
 
+  function handleTerminateSession(sessionId: string, reason: string) {
+    const res = terminatePsmSession(state, sessionId, reason, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success(`Session ${sessionId} terminated.`);
+    return {};
+  }
+
+  function handleAddPolicy(input: {
+    name: string;
+    platform: string;
+    description: string;
+    rotationIntervalDays: number;
+    minPasswordLength: number;
+    passwordComplexity: string;
+    requireDualControl: boolean;
+    requireTicket: boolean;
+    cpmId?: string;
+  }) {
+    const res = addPolicy(state, input, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success(`Policy '${input.name}' created successfully.`);
+    return {};
+  }
+
+  function handleUpdatePolicy(policyId: string, updates: Partial<PamPolicy>) {
+    const res = updatePolicy(state, policyId, updates, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success("Policy configuration updated.");
+    return {};
+  }
+
+  function handleAddUser(input: {
+    username: string;
+    fullName: string;
+    email: string;
+    role: PamUserRole;
+    department: string;
+    groups?: string[];
+  }) {
+    const res = addUser(state, input, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success(`Operator '${input.username}' provisioned.`);
+    return {};
+  }
+
+  function handleUpdateUserRole(userId: string, newRole: PamUserRole) {
+    const res = updateUserRole(state, userId, newRole, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success(`Role updated to ${newRole}.`);
+    return {};
+  }
+
+  function handleRunDiscoveryScan(subnet: string, source: string) {
+    const res = runDiscoveryScan(state, subnet, source, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success("Discovery sweep complete.");
+    return {};
+  }
+
+  function handleOnboardDiscoveredAccount(
+    candidateId: string,
+    safeName: string,
+    policyName: string,
+    owner?: string,
+  ) {
+    const res = onboardDiscoveredAccount(
+      state,
+      candidateId,
+      safeName,
+      policyName,
+      owner,
+      learner.email,
+    );
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success("Account onboarded and secured in Vault.");
+    return {};
+  }
+
+  function handleRemediateIncident(incidentId: string) {
+    const res = remediateIncident(state, incidentId, learner.email);
+    if (res.error) {
+      toast.error(res.error);
+      return { error: res.error };
+    }
+    updateState(res.state);
+    toast.success("Incident remediated and reconciled.");
+    return {};
+  }
+
   function renderAuthGate() {
     return (
       <div className="auth-screen">
@@ -1434,13 +1567,10 @@ export function PamAcademy() {
       );
     if (active === "access")
       return (
-        <AccessView
+        <AdministrationView
           state={state}
-          selectedSafe={selectedSafe}
-          setSelectedSafe={setSelectedSafe}
-          learner={learner}
-          accessResult={accessResult}
-          setAccessResult={setAccessResult}
+          onAddUser={handleAddUser}
+          onUpdateUserRole={handleUpdateUserRole}
         />
       );
     if (active === "cpm")
@@ -1457,41 +1587,33 @@ export function PamAcademy() {
       );
     if (active === "psm")
       return (
-        <PsmView
+        <PsmOperationsView
           state={state}
-          onLaunch={handlePsmLaunch}
-          onApproval={toggleApproval}
-          onClose={closeSession}
-          onCommand={runTerminal}
+          onLaunchSession={handlePsmLaunch}
+          onTerminateSession={handleTerminateSession}
           onExecuteCommand={executeTerminalCommand}
-          session={activeSession}
-          command={terminalCommand}
-          setCommand={setTerminalCommand}
-          terminalEnd={terminalEnd}
         />
       );
-    if (active === "policies") return <PoliciesView state={state} />;
+    if (active === "policies")
+      return (
+        <PoliciesManagementView
+          state={state}
+          onAddPolicy={handleAddPolicy}
+          onUpdatePolicy={handleUpdatePolicy}
+        />
+      );
     if (active === "discovery")
       return (
-        <DiscoveryView
+        <ReconstructedDiscoveryView
           state={state}
-          onOnboard={() => {
-            setActive("accounts");
-            toast.message(
-              "Choose a discovered identity to onboard it into the shared account inventory.",
-            );
-          }}
+          onRunScan={handleRunDiscoveryScan}
+          onOnboardAccount={handleOnboardDiscoveredAccount}
         />
       );
-    if (active === "audit")
-      return <AuditView state={state} search={search} setSearch={setSearch} />;
+    if (active === "audit") return <ReportsAuditView state={state} />;
     if (active === "troubleshooting")
       return (
-        <TroubleshootingView
-          state={state}
-          setActive={setActive}
-          setSelectedAccount={setSelectedAccount}
-        />
+        <TroubleshootingWorkbench state={state} onRemediateIncident={handleRemediateIncident} />
       );
     if (active === "assessments")
       return (

@@ -99,6 +99,86 @@ export interface PamSession {
   status: "Active" | "Terminated";
   commands: string[];
   started: string;
+  user?: string;
+  safe?: string;
+  duration?: string;
+  terminationReason?: string;
+  approvalStatus?: "Approved" | "Pre-authorized" | "Emergency";
+  recordingAvailable?: boolean;
+}
+
+export interface PamPolicy {
+  id: string;
+  name: string;
+  platform: string;
+  description: string;
+  rotationIntervalDays: number;
+  minPasswordLength: number;
+  passwordComplexity: string;
+  requireDualControl: boolean;
+  requireTicket: boolean;
+  cpmId: string;
+  status: "Active" | "Draft" | "Disabled";
+  accountsCount?: number;
+}
+
+export type PamUserRole =
+  | "PAM Administrator"
+  | "Safe Administrator"
+  | "Auditor"
+  | "Security Operator"
+  | "PSM Operator"
+  | "CPM Operator"
+  | "Learner";
+
+export interface PamUser {
+  id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  role: PamUserRole;
+  department: string;
+  status: "Active" | "Suspended" | "Pending MFA";
+  groups: string[];
+  lastLogin: string;
+  allowedSafes?: string[];
+}
+
+export interface PamDiscoveredAccount {
+  id: string;
+  username: string;
+  target: string;
+  platform: string;
+  source: string;
+  risk: "Critical" | "High" | "Medium" | "Low";
+  reason: string;
+  discoveredAt: string;
+  status: "Unmanaged" | "Onboarded" | "Ignored";
+}
+
+export interface PamDiscoveryJob {
+  id: string;
+  source: string;
+  targetSubnet: string;
+  startTime: string;
+  status: "Completed" | "Scanning" | "Failed";
+  foundCount: number;
+}
+
+export interface PamIncident {
+  id: string;
+  severity: "Critical" | "Warning" | "Info";
+  component: "CPM" | "PSM" | "Vault";
+  accountId?: string;
+  accountUsername: string;
+  targetHost: string;
+  errorCode: string;
+  errorDetail: string;
+  status: "Open" | "Investigating" | "Resolved";
+  assignedOperator: string;
+  createdTime: string;
+  resolvedTime?: string;
+  remediationAction: string;
 }
 
 export interface PamState {
@@ -107,6 +187,11 @@ export interface PamState {
   audit: PamAuditEvent[];
   cpmOperations: PamCpmOperation[];
   sessions: PamSession[];
+  policies: PamPolicy[];
+  users: PamUser[];
+  discoveredAccounts: PamDiscoveredAccount[];
+  discoveryJobs: PamDiscoveryJob[];
+  incidents: PamIncident[];
   completedLabs: string[];
   scores: Record<string, number>;
   approvalGranted: boolean;
@@ -424,6 +509,267 @@ function makeAccount(row: string[], index: number): PamAccount {
   };
 }
 
+export const INITIAL_POLICIES: PamPolicy[] = [
+  {
+    id: "pol-win-90d",
+    name: "Windows-90d",
+    platform: "Windows Server Local",
+    description:
+      "Standard enterprise rotation policy for Windows tier-1 servers with dual-control gating.",
+    rotationIntervalDays: 90,
+    minPasswordLength: 24,
+    passwordComplexity: "Upper, lower, digits, symbols",
+    requireDualControl: true,
+    requireTicket: true,
+    cpmId: "CPM-PROD-01",
+    status: "Active",
+  },
+  {
+    id: "pol-domain-30d",
+    name: "Domain-30d",
+    platform: "Windows Domain Account",
+    description:
+      "Tier-0 Domain Administrator password rotation policy requiring 30-day frequency and ticketing.",
+    rotationIntervalDays: 30,
+    minPasswordLength: 32,
+    passwordComplexity: "High-entropy alphanumeric + special symbols",
+    requireDualControl: true,
+    requireTicket: true,
+    cpmId: "CPM-PROD-01",
+    status: "Active",
+  },
+  {
+    id: "pol-unix-60d",
+    name: "Unix-SSH-60d",
+    platform: "Unix SSH",
+    description:
+      "RHEL & Ubuntu server root and administrative account management with automated SSH key rotation.",
+    rotationIntervalDays: 60,
+    minPasswordLength: 32,
+    passwordComplexity: "High-entropy alphanumeric, no dictionary words",
+    requireDualControl: false,
+    requireTicket: true,
+    cpmId: "CPM-PROD-01",
+    status: "Active",
+  },
+  {
+    id: "pol-dba-30d",
+    name: "DBA-Strong-30d",
+    platform: "SQL Server Account",
+    description:
+      "Strict database SA and SYSDBA credential isolation with immediate checkout rotation.",
+    rotationIntervalDays: 30,
+    minPasswordLength: 28,
+    passwordComplexity: "Database compliant, no repeated characters",
+    requireDualControl: true,
+    requireTicket: true,
+    cpmId: "CPM-PROD-01",
+    status: "Active",
+  },
+  {
+    id: "pol-service-60d",
+    name: "Service-60d",
+    platform: "Service Account",
+    description: "Non-human service account governance with coordinated dependency restarts.",
+    rotationIntervalDays: 60,
+    minPasswordLength: 30,
+    passwordComplexity: "Service token & secret rotation",
+    requireDualControl: true,
+    requireTicket: false,
+    cpmId: "CPM-PROD-01",
+    status: "Active",
+  },
+];
+
+export const INITIAL_USERS: PamUser[] = [
+  {
+    id: "usr-1",
+    username: "pam_admin",
+    fullName: "Alex Rivera",
+    email: "arivera@corp.gfs.local",
+    role: "PAM Administrator",
+    department: "Privileged Access Management",
+    status: "Active",
+    groups: ["PAM-Admins", "Domain-Admins"],
+    lastLogin: "Today 08:30",
+  },
+  {
+    id: "usr-2",
+    username: "pam_operator",
+    fullName: "Sarah Chen",
+    email: "schen@corp.gfs.local",
+    role: "CPM Operator",
+    department: "Security Operations",
+    status: "Active",
+    groups: ["PAM-Operators", "Tier-2-SecOps"],
+    lastLogin: "Today 08:42",
+  },
+  {
+    id: "usr-3",
+    username: "soc_analyst",
+    fullName: "Marcus Johnson",
+    email: "mjohnson@corp.gfs.local",
+    role: "Security Operator",
+    department: "SOC Triage",
+    status: "Active",
+    groups: ["SOC-Tier-1", "Security-Viewers"],
+    lastLogin: "Today 08:31",
+  },
+  {
+    id: "usr-4",
+    username: "windows_admin",
+    fullName: "David Miller",
+    email: "dmiller@corp.gfs.local",
+    role: "Safe Administrator",
+    department: "Windows Infrastructure",
+    status: "Active",
+    groups: ["Windows-Server-Admins"],
+    lastLogin: "Yesterday 17:15",
+  },
+  {
+    id: "usr-5",
+    username: "linux_admin",
+    fullName: "Elena Rostova",
+    email: "erostova@corp.gfs.local",
+    role: "PSM Operator",
+    department: "Unix Systems",
+    status: "Active",
+    groups: ["Unix-Engineers"],
+    lastLogin: "Today 07:45",
+  },
+  {
+    id: "usr-6",
+    username: "dba_user",
+    fullName: "Priya Patel",
+    email: "ppatel@corp.gfs.local",
+    role: "PSM Operator",
+    department: "Database Operations",
+    status: "Active",
+    groups: ["DBA-Team"],
+    lastLogin: "Nov 12 14:20",
+  },
+  {
+    id: "usr-7",
+    username: "auditor",
+    fullName: "Rachel Vance",
+    email: "rvance@corp.gfs.local",
+    role: "Auditor",
+    department: "Internal IT Audit",
+    status: "Active",
+    groups: ["Audit-Compliance"],
+    lastLogin: "Nov 10 11:00",
+  },
+  {
+    id: "usr-8",
+    username: "demo.learner",
+    fullName: "Enterprise Learner",
+    email: "learner@corp.gfs.local",
+    role: "Learner",
+    department: "Academy Student",
+    status: "Active",
+    groups: ["Academy-Students"],
+    lastLogin: "Just now",
+  },
+];
+
+export const INITIAL_DISCOVERED_ACCOUNTS: PamDiscoveredAccount[] = [
+  {
+    id: "disc-1",
+    username: "svc_etl_sync",
+    target: "SQL-PROD-01",
+    platform: "SQL Server Account",
+    source: "Active Directory ServiceScan",
+    risk: "High",
+    reason: "Unmanaged privileged service account with database admin rights",
+    discoveredAt: "Today 06:15",
+    status: "Unmanaged",
+  },
+  {
+    id: "disc-2",
+    username: "deploy_runner",
+    target: "WIN-APP-01",
+    platform: "Windows Server Local",
+    source: "Host Credential Discovery",
+    risk: "Medium",
+    reason: "Interactive local admin account outside Safe protection",
+    discoveredAt: "Today 06:20",
+    status: "Unmanaged",
+  },
+  {
+    id: "disc-3",
+    username: "oracle_sys_ro",
+    target: "DB-FIN-01",
+    platform: "Oracle Database",
+    source: "DBA Inventory Reconciler",
+    risk: "Critical",
+    reason: "Standing SYSDBA role detected without automated rotation",
+    discoveredAt: "Yesterday 23:10",
+    status: "Unmanaged",
+  },
+  {
+    id: "disc-4",
+    username: "ops_backup",
+    target: "WIN-DC-01",
+    platform: "Windows Domain Account",
+    source: "Domain Controller Crawler",
+    risk: "Critical",
+    reason: "Domain Admins member with unmonitored password age > 180 days",
+    discoveredAt: "Yesterday 21:05",
+    status: "Unmanaged",
+  },
+];
+
+export const INITIAL_DISCOVERY_JOBS: PamDiscoveryJob[] = [
+  {
+    id: "job-scan-101",
+    source: "Active Directory ServiceScan",
+    targetSubnet: "10.0.1.0/24 (Production SQL)",
+    startTime: "Today 06:00",
+    status: "Completed",
+    foundCount: 2,
+  },
+  {
+    id: "job-scan-102",
+    source: "Domain Controller Crawler",
+    targetSubnet: "corp.gfs.local (Domain Controllers)",
+    startTime: "Yesterday 21:00",
+    status: "Completed",
+    foundCount: 2,
+  },
+];
+
+export const INITIAL_INCIDENTS: PamIncident[] = [
+  {
+    id: "INC-2041",
+    severity: "Critical",
+    component: "CPM",
+    accountId: "account-3",
+    accountUsername: "svc_backup",
+    targetHost: "WIN-SRV-02",
+    errorCode: "CACPM250E",
+    errorDetail: "Failed to perform reconcile: Target account is locked out on remote Windows SAM.",
+    status: "Open",
+    assignedOperator: "pam_operator",
+    createdTime: "08:18:47",
+    remediationAction: "Run Reconcile Recovery via Domain Reconciler",
+  },
+  {
+    id: "INC-2042",
+    severity: "Warning",
+    component: "CPM",
+    accountId: "account-7",
+    accountUsername: "postgres_admin",
+    targetHost: "DB-PG-01",
+    errorCode: "CACPM072E",
+    errorDetail:
+      "Connection handshake timed out on port 5432; verify required before next rotation.",
+    status: "Investigating",
+    assignedOperator: "dba_user",
+    createdTime: "08:35:10",
+    remediationAction: "Verify Port & Reset Connection Handshake",
+  },
+];
+
 export function makeInitialPamState(): PamState {
   return {
     safes: [
@@ -502,6 +848,11 @@ export function makeInitialPamState(): PamState {
       },
     ],
     sessions: [],
+    policies: INITIAL_POLICIES,
+    users: INITIAL_USERS,
+    discoveredAccounts: INITIAL_DISCOVERED_ACCOUNTS,
+    discoveryJobs: INITIAL_DISCOVERY_JOBS,
+    incidents: INITIAL_INCIDENTS,
     completedLabs: [],
     scores: {},
     approvalGranted: false,
@@ -1174,6 +1525,394 @@ export function appendSessionCommand(
       ),
       ...state.audit,
     ],
+  };
+}
+
+export function terminatePsmSession(
+  state: PamState,
+  sessionId: string,
+  reason: string,
+  actor: string = "pam_admin",
+): { state: PamState; error?: string } {
+  const session = state.sessions.find((s) => s.id === sessionId);
+  if (!session) {
+    return { state, error: `Session '${sessionId}' not found.` };
+  }
+  if (session.status === "Terminated") {
+    return { state, error: `Session '${sessionId}' is already terminated.` };
+  }
+
+  const cleanReason = reason.trim() || "Terminated by administrative operator";
+  const updatedSessions = state.sessions.map((s) =>
+    s.id === sessionId
+      ? {
+          ...s,
+          status: "Terminated" as const,
+          terminationReason: cleanReason,
+          duration: s.duration?.startsWith("Active") ? "Terminated by Admin" : s.duration,
+        }
+      : s,
+  );
+
+  const audit = [
+    auditEvent(
+      actor,
+      "Terminate PSM session",
+      `${session.target} · ${session.account}`,
+      "Success",
+      `Session terminated: ${cleanReason}. Session recording sealed.`,
+    ),
+    ...state.audit,
+  ];
+
+  return {
+    state: {
+      ...state,
+      sessions: updatedSessions,
+      audit,
+    },
+  };
+}
+
+export function addPolicy(
+  state: PamState,
+  input: {
+    name: string;
+    platform: string;
+    description: string;
+    rotationIntervalDays: number;
+    minPasswordLength: number;
+    passwordComplexity: string;
+    requireDualControl: boolean;
+    requireTicket: boolean;
+    cpmId?: string;
+  },
+  actor: string = "pam_admin",
+): { state: PamState; error?: string } {
+  const name = input.name.trim();
+  if (!name) return { state, error: "Policy name is required." };
+  if (state.policies.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
+    return { state, error: `Policy '${name}' already exists.` };
+  }
+
+  const newPolicy: PamPolicy = {
+    id: `pol-${Date.now()}`,
+    name,
+    platform: input.platform || "Windows Server Local",
+    description: input.description.trim() || "Enterprise privilege rotation policy",
+    rotationIntervalDays: input.rotationIntervalDays || 90,
+    minPasswordLength: input.minPasswordLength || 24,
+    passwordComplexity: input.passwordComplexity || "Upper, lower, digits, symbols",
+    requireDualControl: Boolean(input.requireDualControl),
+    requireTicket: Boolean(input.requireTicket),
+    cpmId: input.cpmId || "CPM-PROD-01",
+    status: "Active",
+  };
+
+  return {
+    state: {
+      ...state,
+      policies: [...state.policies, newPolicy],
+      audit: [
+        auditEvent(
+          actor,
+          "Create Policy",
+          newPolicy.name,
+          "Success",
+          `Created policy '${newPolicy.name}' (${newPolicy.platform}, ${newPolicy.rotationIntervalDays}d rotation, ${newPolicy.minPasswordLength} chars)`,
+        ),
+        ...state.audit,
+      ],
+    },
+  };
+}
+
+export function updatePolicy(
+  state: PamState,
+  policyId: string,
+  updates: Partial<PamPolicy>,
+  actor: string = "pam_admin",
+): { state: PamState; error?: string } {
+  const existing = state.policies.find((p) => p.id === policyId);
+  if (!existing) return { state, error: `Policy '${policyId}' not found.` };
+
+  const updatedPolicies = state.policies.map((p) => (p.id === policyId ? { ...p, ...updates } : p));
+
+  return {
+    state: {
+      ...state,
+      policies: updatedPolicies,
+      audit: [
+        auditEvent(
+          actor,
+          "Update Policy",
+          existing.name,
+          "Success",
+          `Updated configuration for policy '${existing.name}'`,
+        ),
+        ...state.audit,
+      ],
+    },
+  };
+}
+
+export function addUser(
+  state: PamState,
+  input: {
+    username: string;
+    fullName: string;
+    email: string;
+    role: PamUserRole;
+    department: string;
+    groups?: string[];
+  },
+  actor: string = "pam_admin",
+): { state: PamState; error?: string } {
+  const username = input.username.trim().toLowerCase();
+  if (!username) return { state, error: "Username is required." };
+  if (state.users.some((u) => u.username.toLowerCase() === username)) {
+    return { state, error: `User '${username}' already exists.` };
+  }
+
+  const newUser: PamUser = {
+    id: `usr-${Date.now()}`,
+    username,
+    fullName: input.fullName.trim() || username,
+    email: input.email.trim() || `${username}@corp.gfs.local`,
+    role: input.role || "Security Operator",
+    department: input.department.trim() || "Operations",
+    status: "Active",
+    groups: input.groups && input.groups.length > 0 ? input.groups : ["PAM-Users"],
+    lastLogin: "Never",
+  };
+
+  return {
+    state: {
+      ...state,
+      users: [...state.users, newUser],
+      audit: [
+        auditEvent(
+          actor,
+          "Create User",
+          newUser.username,
+          "Success",
+          `Created user '${newUser.username}' with role '${newUser.role}' in department '${newUser.department}'`,
+        ),
+        ...state.audit,
+      ],
+    },
+  };
+}
+
+export function updateUserRole(
+  state: PamState,
+  userId: string,
+  newRole: PamUserRole,
+  actor: string = "pam_admin",
+): { state: PamState; error?: string } {
+  const user = state.users.find((u) => u.id === userId);
+  if (!user) return { state, error: `User '${userId}' not found.` };
+
+  const updatedUsers = state.users.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
+
+  return {
+    state: {
+      ...state,
+      users: updatedUsers,
+      audit: [
+        auditEvent(
+          actor,
+          "Update User Role",
+          user.username,
+          "Success",
+          `Changed role for user '${user.username}' from '${user.role}' to '${newRole}'`,
+        ),
+        ...state.audit,
+      ],
+    },
+  };
+}
+
+export function runDiscoveryScan(
+  state: PamState,
+  subnet: string,
+  source: string,
+  actor: string = "pam_admin",
+): { state: PamState; job: PamDiscoveryJob; newAccountsCount: number } {
+  const jobId = `job-scan-${Date.now().toString().slice(-4)}`;
+  const cleanSubnet = subnet.trim() || "10.0.2.0/24 (DMZ Web Tier)";
+  const cleanSource = source.trim() || "Active Directory ServiceScan";
+
+  const candidates: PamDiscoveredAccount[] = [
+    {
+      id: `disc-${Date.now()}-1`,
+      username: "admin_webproxy",
+      target: "LNX-PROXY-01",
+      platform: "Unix SSH",
+      source: cleanSource,
+      risk: "High",
+      reason: "Unmonitored sudoer account on perimeter web proxy",
+      discoveredAt: stamp(),
+      status: "Unmanaged",
+    },
+    {
+      id: `disc-${Date.now()}-2`,
+      username: "svc_payment_api",
+      target: "APP-PAY-02",
+      platform: "Windows Domain Account",
+      source: cleanSource,
+      risk: "Critical",
+      reason: "High-privilege application service account with domain-wide token rights",
+      discoveredAt: stamp(),
+      status: "Unmanaged",
+    },
+  ];
+
+  const job: PamDiscoveryJob = {
+    id: jobId,
+    source: cleanSource,
+    targetSubnet: cleanSubnet,
+    startTime: stamp(),
+    status: "Completed",
+    foundCount: candidates.length,
+  };
+
+  return {
+    state: {
+      ...state,
+      discoveryJobs: [job, ...state.discoveryJobs],
+      discoveredAccounts: [...candidates, ...state.discoveredAccounts],
+      audit: [
+        auditEvent(
+          actor,
+          "Discovery Scan",
+          cleanSubnet,
+          "Success",
+          `Completed discovery scan '${jobId}' on ${cleanSubnet} via ${cleanSource}. Found ${candidates.length} unmanaged privileged candidates.`,
+        ),
+        ...state.audit,
+      ],
+    },
+    job,
+    newAccountsCount: candidates.length,
+  };
+}
+
+export function onboardDiscoveredAccount(
+  state: PamState,
+  candidateId: string,
+  safeName: string,
+  policyName: string,
+  owner: string = "pam_admin",
+  actor: string = "pam_admin",
+): { state: PamState; error?: string; createdAccount?: PamAccount } {
+  const candidate = state.discoveredAccounts.find((c) => c.id === candidateId);
+  if (!candidate) return { state, error: "Discovered candidate not found." };
+  if (candidate.status === "Onboarded") return { state, error: "Candidate is already onboarded." };
+
+  const safe = state.safes.find((s) => s.name === safeName);
+  if (!safe) return { state, error: `Safe '${safeName}' does not exist.` };
+
+  const newAccResult = addAccount(
+    state,
+    {
+      name: `${candidate.username}-${candidate.target}`,
+      username: candidate.username,
+      address: candidate.target,
+      platform: candidate.platform as SupportedPlatform,
+      safe: safeName,
+      accountType: candidate.username.startsWith("svc") ? "Service account" : "Human administrator",
+      owner: owner || "pam_admin",
+      purpose: candidate.reason,
+    },
+    actor,
+  );
+
+  if (newAccResult.error) {
+    return { state, error: newAccResult.error };
+  }
+
+  const updatedCandidates = state.discoveredAccounts.map((c) =>
+    c.id === candidateId ? { ...c, status: "Onboarded" as const } : c,
+  );
+
+  const createdAccount = newAccResult.state.accounts.find(
+    (a) => a.username === candidate.username && a.address === candidate.target,
+  );
+
+  return {
+    state: {
+      ...newAccResult.state,
+      discoveredAccounts: updatedCandidates,
+      audit: [
+        auditEvent(
+          actor,
+          "Onboard Discovered Account",
+          `${candidate.username} · ${candidate.target}`,
+          "Success",
+          `Onboarded discovered identity into Safe '${safeName}' with policy '${policyName}'. Candidate closed in Discovery queue.`,
+        ),
+        ...newAccResult.state.audit,
+      ],
+    },
+    createdAccount,
+  };
+}
+
+export function remediateIncident(
+  state: PamState,
+  incidentId: string,
+  actor: string = "pam_admin",
+): { state: PamState; error?: string; message?: string } {
+  const inc = state.incidents.find((i) => i.id === incidentId);
+  if (!inc) return { state, error: `Incident '${incidentId}' not found.` };
+  if (inc.status === "Resolved") return { state, error: "Incident is already resolved." };
+
+  let nextAccounts = state.accounts;
+  if (inc.accountId) {
+    nextAccounts = state.accounts.map((a) => {
+      if (a.id === inc.accountId || a.username === inc.accountUsername) {
+        return {
+          ...a,
+          status: "Managed",
+          failureCause: undefined,
+          lastReconcile: "Reconciled just now",
+          lastVerify: "Verified just now",
+        };
+      }
+      return a;
+    });
+  }
+
+  const updatedIncidents = state.incidents.map((i) =>
+    i.id === incidentId
+      ? {
+          ...i,
+          status: "Resolved" as const,
+          resolvedTime: stamp(),
+        }
+      : i,
+  );
+
+  const remediationMessage = `Remediation executed: ${inc.remediationAction}. Incident ${inc.id} closed.`;
+
+  return {
+    state: {
+      ...state,
+      accounts: nextAccounts,
+      incidents: updatedIncidents,
+      audit: [
+        auditEvent(
+          actor,
+          "Remediate PAM Incident",
+          `${inc.component} · ${inc.id}`,
+          "Success",
+          remediationMessage,
+        ),
+        ...state.audit,
+      ],
+    },
+    message: remediationMessage,
   };
 }
 

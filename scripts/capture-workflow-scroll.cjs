@@ -37,23 +37,27 @@ async function capture() {
 
   // Scroll to workflow visualizer
   const workflowElem = page.locator(".workflow-visualizer-container");
-  if (await workflowElem.count() > 0) {
+  if ((await workflowElem.count()) > 0) {
     await workflowElem.scrollIntoViewIfNeeded();
     await page.waitForTimeout(600);
   }
 
-  await page.screenshot({ path: path.join(screenshotsDir, "workflow-visualizer-stepwise-1440x900.png") });
+  await page.screenshot({
+    path: path.join(screenshotsDir, "workflow-visualizer-stepwise-1440x900.png"),
+  });
   console.log("✓ Captured workflow-visualizer-stepwise-1440x900.png");
 
   // Advance step
   const nextBtn = page.locator("button:has-text('Next Step')").first();
-  if (await nextBtn.count() > 0) {
+  if ((await nextBtn.count()) > 0) {
     await nextBtn.click();
     await page.waitForTimeout(400);
     await nextBtn.click();
     await page.waitForTimeout(400);
   }
-  await page.screenshot({ path: path.join(screenshotsDir, "workflow-visualizer-advanced-step-1440x900.png") });
+  await page.screenshot({
+    path: path.join(screenshotsDir, "workflow-visualizer-advanced-step-1440x900.png"),
+  });
   console.log("✓ Captured workflow-visualizer-advanced-step-1440x900.png");
 
   await browser.close();

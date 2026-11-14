@@ -1007,6 +1007,41 @@ body {
    DASHBOARD / OVERVIEW VIEW STYLES
    ========================================================================== */
 
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.section-heading .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin: 0 0 4px 0;
+}
+
+.section-heading h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.section-heading .subheading {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+}
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .overview-banner {
   background: #ffffff;
   border: 1px solid #d1d5db;

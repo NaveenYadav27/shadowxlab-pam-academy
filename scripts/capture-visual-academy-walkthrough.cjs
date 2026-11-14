@@ -42,21 +42,27 @@ async function capture() {
   console.log("Capturing Class 01 visual architecture...");
   await selectElem.selectOption("class-01");
   await page.waitForTimeout(1000);
-  await page.screenshot({ path: path.join(screenshotsDir, "class-01-visual-architecture-1440x900.png") });
+  await page.screenshot({
+    path: path.join(screenshotsDir, "class-01-visual-architecture-1440x900.png"),
+  });
   console.log("✓ Captured class-01-visual-architecture-1440x900.png");
 
   // 2. Class 02 Safe Authorization
   console.log("Capturing Class 02 Safe Authorization...");
   await selectElem.selectOption("class-02");
   await page.waitForTimeout(1000);
-  await page.screenshot({ path: path.join(screenshotsDir, "class-02-safe-authorization-1440x900.png") });
+  await page.screenshot({
+    path: path.join(screenshotsDir, "class-02-safe-authorization-1440x900.png"),
+  });
   console.log("✓ Captured class-02-safe-authorization-1440x900.png");
 
   // 3. Class 03 Account Onboarding
   console.log("Capturing Class 03 Account Onboarding...");
   await selectElem.selectOption("class-03");
   await page.waitForTimeout(1000);
-  await page.screenshot({ path: path.join(screenshotsDir, "class-03-account-onboarding-1440x900.png") });
+  await page.screenshot({
+    path: path.join(screenshotsDir, "class-03-account-onboarding-1440x900.png"),
+  });
   console.log("✓ Captured class-03-account-onboarding-1440x900.png");
 
   // 4. Class 05 CPM Rotation
@@ -76,11 +82,13 @@ async function capture() {
   // 6. Interactive Component Inspector (Clicking Vault & CPM filter)
   console.log("Interacting with Architecture Explorer (CPM filter)...");
   const cpmFilterBtn = page.locator("button:has-text('CPM Engine')").first();
-  if (await cpmFilterBtn.count() > 0) {
+  if ((await cpmFilterBtn.count()) > 0) {
     await cpmFilterBtn.click();
     await page.waitForTimeout(800);
   }
-  await page.screenshot({ path: path.join(screenshotsDir, "interactive-component-inspector-1440x900.png") });
+  await page.screenshot({
+    path: path.join(screenshotsDir, "interactive-component-inspector-1440x900.png"),
+  });
   console.log("✓ Captured interactive-component-inspector-1440x900.png");
 
   await browser.close();
