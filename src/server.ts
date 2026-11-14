@@ -51,7 +51,21 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      let response = await handler.fetch(request, env, ctx);
+
+      // If a route returns 404 (e.g. subpath navigation in an SPA structure),
+      // fall back to rendering the root route so deep links resolve properly.
+      if (response.status === 404) {
+        const url = new URL(request.url);
+        if (!url.pathname.startsWith("/api") && !url.pathname.includes(".") && !url.pathname.startsWith("/assets")) {
+          const rootRequest = new Request(new URL("/", request.url).href, request);
+          const rootResponse = await handler.fetch(rootRequest, env, ctx);
+          if (rootResponse.status === 200) {
+            response = rootResponse;
+          }
+        }
+      }
+
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
