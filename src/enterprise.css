@@ -49,23 +49,113 @@ body {
 .pvwa-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.pvwa-brand-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 6px rgba(0, 168, 232, 0.45));
+}
+
+.pvwa-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.pvwa-brand-main {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
 }
 
 .pvwa-brand-title {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   color: #ffffff;
+  letter-spacing: 0.05em;
+}
+
+.pvwa-brand-product {
+  font-size: 11px;
+  font-weight: 700;
+  color: #38bdf8;
   letter-spacing: 0.04em;
+}
+
+.pvwa-brand-descriptor {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
 }
 
 .pvwa-brand-sub {
   font-size: 11px;
   font-weight: 500;
   color: #94a3b8;
-  margin-left: 4px;
-  padding-left: 8px;
+  margin-left: 6px;
+  padding-left: 10px;
   border-left: 1px solid #2a3c4f;
+  white-space: nowrap;
+}
+
+.pvwa-disclaimer-pill {
+  font-size: 10px;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #2a3c4f;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+}
+
+/* App Footer */
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #0f1c29;
+  border-top: 1px solid #1e2e40;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+
+.app-footer-left strong {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
+.app-footer-sep {
+  color: #334155;
+}
+
+.app-footer-badge {
+  background: #1c2d3e;
+  border: 1px solid #2b3e52;
+  color: #38bdf8;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+}
+
+.app-footer-disclaimer {
+  color: #64748b;
+  font-style: italic;
+  font-size: 10.5px;
 }
 
 .pvwa-top-stats {
@@ -2373,4 +2463,47 @@ body {
 
 .pam-svg-icon.highlighted {
   filter: drop-shadow(0 0 8px rgba(0, 120, 212, 0.6));
+}
+
+/* Auth Screen Branding Enhancements */
+.auth-brand-logo {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(0, 168, 232, 0.5));
+}
+
+.auth-brand-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.auth-brand-accent {
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+}
+
+.auth-brand-descriptor {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.auth-brand-tag {
+  display: inline-block;
+  font-size: 9.5px;
+  color: #38bdf8;
+  background: rgba(0, 168, 232, 0.12);
+  border: 1px solid rgba(0, 168, 232, 0.3);
+  padding: 1px 6px;
+  border-radius: 2px;
+  margin-top: 4px;
+}
+
+.auth-disclaimer {
+  color: #64748b;
+  font-style: italic;
+  font-size: 10px;
 }

@@ -1007,9 +1007,9 @@ export function PamAcademy() {
     }
   }
 
-  async function handleSocialAuth(provider: "google" | "lovable") {
+  async function handleSocialAuth(provider: "google") {
     if (IS_PAM_DEMO_MODE) {
-      toast.info("Authentication bypass active: Google/Lovable OAuth is disabled in Demo Mode.");
+      toast.info("Authentication bypass active: Google OAuth is disabled in Demo Mode.");
       return;
     }
     setAuthIssue("");
@@ -1322,12 +1322,14 @@ export function PamAcademy() {
     return (
       <div className="auth-screen">
         <div className="auth-brand">
-          <span className="brand-mark">
-            <Shield size={22} />
-          </span>
+          <img src="/favicon.svg" alt="ShadowXLab Shield" width="32" height="32" className="auth-brand-logo" />
           <div>
-            <strong>SHADOWXLAB</strong>
-            <span>PAM ADMINISTRATOR ACADEMY</span>
+            <div className="auth-brand-title">
+              <strong>SHADOWXLAB</strong>
+              <span className="auth-brand-accent">PAM ACADEMY</span>
+            </div>
+            <span className="auth-brand-descriptor">Enterprise Privileged Access Training &amp; Simulation</span>
+            <span className="auth-brand-tag">PVWA Classic-Inspired Administration Simulator</span>
           </div>
         </div>
         <div className="auth-layout">
@@ -1458,15 +1460,6 @@ export function PamAcademy() {
                 </svg>
                 Continue with Google
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => void handleSocialAuth("lovable")}
-                className="social-button lovable-button"
-              >
-                <Command size={17} />
-                Continue with Lovable
-              </Button>
             </div>
             {authMessage && (
               <p className="auth-success">
@@ -1487,8 +1480,8 @@ export function PamAcademy() {
           </div>
         </div>
         <div className="auth-footer">
-          <span>SHADOWXLAB · PAM OPERATIONS ACADEMY</span>
-          <span>GLOBAL FINANCIAL SERVICES · CORP-PAM-LAB</span>
+          <span>SHADOWXLAB PAM ACADEMY · PVWA CLASSIC-INSPIRED ADMINISTRATION SIMULATOR</span>
+          <span>Independent training simulator inspired by enterprise PAM administration workflows. Not an official CyberArk product.</span>
         </div>
       </div>
     );
@@ -1641,10 +1634,11 @@ export function PamAcademy() {
   if (!authReady)
     return (
       <div className="auth-loading">
-        <span className="brand-mark">
-          <Shield size={22} />
-        </span>
-        <span>SECURING TRAINING WORKSPACE</span>
+        <img src="/favicon.svg" alt="ShadowXLab Shield" width="28" height="28" className="auth-brand-logo" />
+        <div>
+          <strong>SHADOWXLAB PAM ACADEMY</strong>
+          <span>SECURING TRAINING WORKSPACE</span>
+        </div>
       </div>
     );
   if (!sessionUser) return renderAuthGate();
@@ -1652,12 +1646,23 @@ export function PamAcademy() {
     <div className="pvwa-app">
       {/* CLASSIC PVWA TOP HEADER (44px) */}
       <header className="pvwa-top-header">
-        <div className="pvwa-brand">
-          <Shield size={16} color="#00A8E8" />
-          <span className="pvwa-brand-title">SHADOWXLAB PAM ACADEMY</span>
-          <span className="pvwa-brand-sub">PVWA CLASSIC v12.6</span>
+        <div className="pvwa-brand" title="CyberArk-inspired privileged access administration experience. Independent training simulator.">
+          <img src="/favicon.svg" alt="ShadowXLab Shield" width="22" height="22" className="pvwa-brand-icon" />
+          <div className="pvwa-brand-text">
+            <div className="pvwa-brand-main">
+              <span className="pvwa-brand-title">SHADOWXLAB</span>
+              <span className="pvwa-brand-product">PAM ACADEMY</span>
+            </div>
+            <span className="pvwa-brand-descriptor">Enterprise Privileged Access Training &amp; Simulation</span>
+          </div>
+          <span className="pvwa-brand-sub" title="CyberArk-inspired privileged access administration experience. Independent training simulator inspired by enterprise PAM administration workflows. Not an official CyberArk product.">
+            PVWA Classic-Inspired Administration Simulator
+          </span>
         </div>
         <div className="pvwa-top-stats">
+          <span className="pvwa-disclaimer-pill" title="Independent training simulator inspired by enterprise PAM administration workflows. Not an official CyberArk product.">
+            Independent Simulator
+          </span>
           <span className="pvwa-vault-pill">
             <span className="pvwa-vault-dot" />
             VAULT: CORP-PAM-VAULT01 (ONLINE)
@@ -1753,8 +1758,18 @@ export function PamAcademy() {
         )}
         <div style={{ padding: 16 }}>{renderWorkspace()}</div>
         <footer className="app-footer">
-          <span>SHADOWXLAB PAM ADMINISTRATOR ACADEMY</span>
-          <span>SIMULATED ENVIRONMENT · NO PRODUCTION ACCESS</span>
+          <div className="app-footer-left">
+            <strong>SHADOWXLAB PAM ACADEMY</strong>
+            <span className="app-footer-sep">·</span>
+            <span>Enterprise Privileged Access Training &amp; Simulation</span>
+            <span className="app-footer-sep">·</span>
+            <span className="app-footer-badge">PVWA Classic-Inspired Simulator</span>
+          </div>
+          <div className="app-footer-right">
+            <span className="app-footer-disclaimer">
+              Independent training simulator inspired by enterprise PAM administration workflows. Not an official CyberArk product.
+            </span>
+          </div>
         </footer>
       </main>
     </div>

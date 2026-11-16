@@ -11,12 +11,11 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.pathname.includes("~oauth")) {
-      // Intercept Lovable Cloud OAuth redirect loops on self-hosted instances
+      // Intercept OAuth redirect loops on self-hosted instances
       window.location.replace("/");
     }
   }, []);
@@ -43,20 +42,17 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
-  console.error(error);
+  console.error("ShadowXLab PAM Academy Runtime Error:", error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+          ShadowXLab PAM Academy | Application Error
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+          An unexpected error occurred in the simulation runtime. You can reload the workspace or return to overview.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -82,27 +78,47 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
-    // Replace these placeholders with the app's name and description when first building the app.
-    // Each content route, / included, must still set its own head(). Never add og:image or
-    // twitter:image here: every page without its own would inherit the root's preview image.
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "ShadowXLab PAM Academy | Enterprise Privileged Access Training" },
+      {
+        name: "description",
+        content:
+          "ShadowXLab PAM Academy is an enterprise privileged access management training and simulation platform featuring interactive account administration, Safe governance, CPM workflows, PSM session operations, audit trails, and structured administrator learning.",
+      },
+      { name: "author", content: "ShadowXLab" },
+      { name: "theme-color", content: "#001A33" },
+      { name: "application-name", content: "ShadowXLab PAM Academy" },
+      { name: "apple-mobile-web-app-title", content: "ShadowXLab PAM" },
+      { property: "og:title", content: "ShadowXLab PAM Academy | Enterprise Privileged Access Training" },
+      {
+        property: "og:description",
+        content:
+          "ShadowXLab PAM Academy is an enterprise privileged access management training and simulation platform featuring interactive account administration, Safe governance, CPM workflows, PSM session operations, audit trails, and structured administrator learning.",
+      },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://cyberark.shadowxlab.com/" },
+      { property: "og:image", content: "https://cyberark.shadowxlab.com/og-image.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "ShadowXLab PAM Academy | Enterprise Privileged Access Training" },
+      {
+        name: "twitter:description",
+        content:
+          "ShadowXLab PAM Academy is an enterprise privileged access management training and simulation platform featuring interactive account administration, Safe governance, CPM workflows, PSM session operations, audit trails, and structured administrator learning.",
+      },
+      { name: "twitter:image", content: "https://cyberark.shadowxlab.com/og-image.png" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "canonical", href: "https://cyberark.shadowxlab.com/" },
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+      { rel: "icon", type: "image/png", sizes: "48x48", href: "/favicon-48x48.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+      { rel: "manifest", href: "/site.webmanifest" },
     ],
   }),
   shellComponent: RootShell,
