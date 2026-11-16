@@ -12,7 +12,7 @@ interface LearningObjectivesPanelProps {
   savedAnswers: Record<string, number>;
   onRecordAnswer: (questionId: string, optionIndex: number, isCorrect: boolean) => void;
   onRecordExerciseComplete: (exerciseId: string) => void;
-  onJumpConsole?: (section: "accounts" | "safes" | "cpm" | "psm" | "audit") => void;
+  onJumpConsole?: (section: any) => void;
 }
 
 export const LearningObjectivesPanel: React.FC<LearningObjectivesPanelProps> = ({

@@ -5,19 +5,15 @@
  * knowledge checkpoints, and live simulator exercise validation.
  */
 
-import React, { useState, useEffect } from "react";
-import {
-  GraduationCap,
-  RotateCcw,
-  BookOpen,
-  Terminal,
-  Shield,
-  Layers,
-  KeyRound,
-  FileCheck,
-} from "lucide-react";
+import React, { useState } from "react";
+import { GraduationCap, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
-import { ACADEMY_CLASSES_V2, findClassById, findLessonById } from "@/lib/academy/content";
+import {
+  ADMIN_MODULES_20,
+  ACADEMY_CLASSES_V2,
+  findClassById,
+  getCurriculumMetrics,
+} from "@/lib/academy/content";
 import {
   loadLearnerProgress,
   saveLearnerProgress,
@@ -34,7 +30,7 @@ import type { PamState } from "@/lib/pam-engine";
 interface AcademyWorkspaceProps {
   state: PamState;
   onResetState: () => void;
-  onJumpConsole?: (section: "accounts" | "safes" | "cpm" | "psm" | "audit") => void;
+  onJumpConsole?: (section: any) => void;
 }
 
 export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
@@ -44,13 +40,38 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
 }) => {
   const [progress, setProgress] = useState(loadLearnerProgress());
 
-  // Active Class, Module, Lesson
-  const currentClass = findClassById(progress.currentClassId) || ACADEMY_CLASSES_V2[0];
+  const currentTrack = progress.currentTrackId || "admin-20";
+
+  // Active Class / Module / Lesson resolution
+  const activeDataset = currentTrack === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
+  const currentClass = findClassById(progress.currentClassId) || activeDataset[0];
   const currentModule =
     currentClass.modules.find((m) => m.id === progress.currentModuleId) || currentClass.modules[0];
   const currentLesson =
     currentModule.lessons.find((l) => l.id === progress.currentLessonId) ||
     currentModule.lessons[0];
+
+  function handleSelectTrack(newTrack: "admin-20" | "intro-6") {
+    const targetDataset = newTrack === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
+    const firstClass = targetDataset[0];
+    const firstModule = firstClass.modules[0];
+    const firstLesson = firstModule.lessons[0];
+
+    const nextProgress = {
+      ...progress,
+      currentTrackId: newTrack,
+      currentClassId: firstClass.id,
+      currentModuleId: firstModule.id,
+      currentLessonId: firstLesson.id,
+    };
+    setProgress(nextProgress);
+    saveLearnerProgress(nextProgress);
+    toast.info(
+      newTrack === "admin-20"
+        ? "Switched to Flagship 20-Module Administrator Track."
+        : "Switched to 6-Class Foundational Track.",
+    );
+  }
 
   function handleSelectClass(classId: string) {
     const cls = findClassById(classId);
@@ -106,10 +127,8 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
   }
 
   // Aggregate curriculum metrics
-  const totalLessonsCount = ACADEMY_CLASSES_V2.reduce(
-    (acc, c) => acc + c.modules.reduce((mAcc, m) => mAcc + m.lessons.length, 0),
-    0,
-  );
+  const metrics = getCurriculumMetrics(currentTrack);
+  const totalLessonsCount = metrics.totalLessons;
   const completedLessonsCount = progress.completedLessons.length;
   const overallPercentage =
     totalLessonsCount > 0 ? Math.round((completedLessonsCount / totalLessonsCount) * 100) : 0;
@@ -154,6 +173,8 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           currentClass={currentClass}
           currentLesson={currentLesson}
           completedLessons={progress.completedLessons}
+          currentTrack={currentTrack}
+          onSelectTrack={handleSelectTrack}
           onSelectClass={handleSelectClass}
           onSelectLesson={handleSelectLesson}
         />

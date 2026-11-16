@@ -1,6 +1,7 @@
 /**
  * SHADOWXLAB PAM ACADEMY — CURRICULUM REGISTRY & CONTENT REPOSITORY
- * Aggregates all six enterprise PAM classes, modules, and structured lessons.
+ * Aggregates both the Flagship 20-Module Administrator Curriculum
+ * and the foundational 6-Class Introductory Pathway.
  */
 
 import { CLASS_01 } from "./class-01";
@@ -9,7 +10,10 @@ import { CLASS_03 } from "./class-03";
 import { CLASS_04 } from "./class-04";
 import { CLASS_05 } from "./class-05";
 import { CLASS_06 } from "./class-06";
+import { ADMIN_MODULES_20, ADMIN_CATEGORIES } from "./modules";
 import type { ClassCurriculum, Lesson, Module } from "../types";
+
+export { ADMIN_MODULES_20, ADMIN_CATEGORIES };
 
 export const ACADEMY_CLASSES_V2: ClassCurriculum[] = [
   CLASS_01,
@@ -20,8 +24,13 @@ export const ACADEMY_CLASSES_V2: ClassCurriculum[] = [
   CLASS_06,
 ];
 
+export const ALL_CURRICULUM_ITEMS: ClassCurriculum[] = [
+  ...ADMIN_MODULES_20,
+  ...ACADEMY_CLASSES_V2,
+];
+
 export function findClassById(classId: string): ClassCurriculum | undefined {
-  return ACADEMY_CLASSES_V2.find((c) => c.id === classId);
+  return ALL_CURRICULUM_ITEMS.find((c) => c.id === classId);
 }
 
 export function findModuleById(classId: string, moduleId: string): Module | undefined {
@@ -45,7 +54,7 @@ export function findLessonAnywhere(lessonId: string):
       lesson: Lesson;
     }
   | undefined {
-  for (const c of ACADEMY_CLASSES_V2) {
+  for (const c of ALL_CURRICULUM_ITEMS) {
     for (const m of c.modules) {
       for (const l of m.lessons) {
         if (l.id === lessonId) {
@@ -57,14 +66,16 @@ export function findLessonAnywhere(lessonId: string):
   return undefined;
 }
 
-export function getCurriculumMetrics() {
+export function getCurriculumMetrics(track: "admin-20" | "intro-6" = "admin-20") {
+  const dataset = track === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
+
   let totalModules = 0;
   let totalLessons = 0;
   let totalEstimatedMinutes = 0;
   let totalQuestions = 0;
   let totalExercises = 0;
 
-  for (const c of ACADEMY_CLASSES_V2) {
+  for (const c of dataset) {
     totalModules += c.modules.length;
     for (const m of c.modules) {
       totalLessons += m.lessons.length;
@@ -77,7 +88,8 @@ export function getCurriculumMetrics() {
   }
 
   return {
-    totalClasses: ACADEMY_CLASSES_V2.length,
+    track,
+    totalClasses: dataset.length,
     totalModules,
     totalLessons,
     totalEstimatedMinutes,

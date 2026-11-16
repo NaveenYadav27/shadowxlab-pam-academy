@@ -6,12 +6,13 @@
 
 import type { LearnerProgress } from "./types";
 
-const PROGRESS_STORAGE_KEY = "shadowxlab_pam_academy_progress_v3";
+const PROGRESS_STORAGE_KEY = "shadowxlab_pam_academy_progress_v4";
 
 export const DEFAULT_LEARNER_PROGRESS: LearnerProgress = {
-  currentClassId: "class-01",
-  currentModuleId: "c01-m01",
-  currentLessonId: "c01-m01-l01",
+  currentTrackId: "admin-20",
+  currentClassId: "module-01",
+  currentModuleId: "m01-core",
+  currentLessonId: "m01-l01",
   completedLessons: [],
   checkpointAnswers: {},
   checkpointScores: {},
@@ -28,10 +29,12 @@ export function loadLearnerProgress(): LearnerProgress {
     const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
     if (!raw) return DEFAULT_LEARNER_PROGRESS;
     const parsed = JSON.parse(raw) as Partial<LearnerProgress>;
+    const track = parsed.currentTrackId || (parsed.currentClassId?.startsWith("class-") ? "intro-6" : "admin-20");
     return {
-      currentClassId: parsed.currentClassId || DEFAULT_LEARNER_PROGRESS.currentClassId,
-      currentModuleId: parsed.currentModuleId || DEFAULT_LEARNER_PROGRESS.currentModuleId,
-      currentLessonId: parsed.currentLessonId || DEFAULT_LEARNER_PROGRESS.currentLessonId,
+      currentTrackId: track,
+      currentClassId: parsed.currentClassId || (track === "admin-20" ? "module-01" : "class-01"),
+      currentModuleId: parsed.currentModuleId || (track === "admin-20" ? "m01-core" : "c01-m01"),
+      currentLessonId: parsed.currentLessonId || (track === "admin-20" ? "m01-l01" : "c01-m01-l01"),
       completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
       checkpointAnswers: parsed.checkpointAnswers || {},
       checkpointScores: parsed.checkpointScores || {},

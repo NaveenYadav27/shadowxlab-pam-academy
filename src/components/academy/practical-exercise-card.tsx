@@ -20,7 +20,7 @@ interface PracticalExerciseCardProps {
   state: PamState;
   isCompleted: boolean;
   onRecordExerciseComplete: (exerciseId: string) => void;
-  onJumpConsole?: (section: "accounts" | "safes" | "cpm" | "psm" | "audit") => void;
+  onJumpConsole?: (section: any) => void;
 }
 
 export const PracticalExerciseCard: React.FC<PracticalExerciseCardProps> = ({

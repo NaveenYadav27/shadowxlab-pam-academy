@@ -71,7 +71,19 @@ export interface PracticalExercise {
   title: string;
   scenario: string;
   instructions: string[];
-  targetConsole: "accounts" | "safes" | "cpm" | "psm" | "audit";
+  targetConsole:
+    | "accounts"
+    | "safes"
+    | "cpm"
+    | "psm"
+    | "audit"
+    | "policies"
+    | "discovery"
+    | "troubleshooting"
+    | "overview"
+    | "environment"
+    | "access"
+    | "assessments";
   associatedLabId: string;
   validationObjectiveId: string;
   validationCriteria: string;
@@ -126,7 +138,15 @@ export interface Lesson {
   // 9. Practical Operational Exercise (Simulator Integrated)
   practicalExercise?: PracticalExercise;
 
-  // 10. Completion Criteria & References
+  // 10. Enterprise Instructor Notes & Diagnostic Evidence
+  instructorNotes?: string[];
+  diagnosticEvidence?: {
+    logFile: string;
+    sampleOutput: string;
+    explanation: string;
+  }[];
+
+  // 11. Completion Criteria & References
   completionCriteria: string[];
   references: string[];
 }
@@ -142,16 +162,19 @@ export interface Module {
 export interface ClassCurriculum {
   id: string;
   number: string; // e.g. "01", "02"
-  label: string; // e.g. "CLASS 01"
+  label: string; // e.g. "CLASS 01" or "MODULE 01"
   title: string;
   subtitle: string;
   duration: string;
   level: DifficultyLevel;
   overview: string;
   modules: Module[];
+  track?: "admin-20" | "intro-6";
+  category?: string;
 }
 
 export interface LearnerProgress {
+  currentTrackId?: "admin-20" | "intro-6";
   currentClassId: string;
   currentModuleId: string;
   currentLessonId: string;

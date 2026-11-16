@@ -1,18 +1,21 @@
 /**
  * SHADOWXLAB PAM ACADEMY — HIERARCHICAL LESSON TREE
- * Left-panel navigation representing Class -> Module -> Lesson progression
- * with real-time completion tracking and duration indicators.
+ * Left-panel navigation representing Class/Module -> Unit -> Lesson progression
+ * with dual-pathway support (20-Module Flagship Track vs 6-Class Foundational Track),
+ * category grouping, real-time completion tracking, and duration indicators.
  */
 
 import React from "react";
-import { CheckCircle2, ChevronDown, ChevronRight, GraduationCap } from "lucide-react";
-import { ACADEMY_CLASSES_V2 } from "@/lib/academy/content";
+import { CheckCircle2, GraduationCap, Shield, BookOpen } from "lucide-react";
+import { ADMIN_MODULES_20, ADMIN_CATEGORIES, ACADEMY_CLASSES_V2 } from "@/lib/academy/content";
 import type { ClassCurriculum, Lesson, Module } from "@/lib/academy/types";
 
 interface LessonTreeProps {
   currentClass: ClassCurriculum;
   currentLesson: Lesson;
   completedLessons: string[];
+  currentTrack: "admin-20" | "intro-6";
+  onSelectTrack: (track: "admin-20" | "intro-6") => void;
   onSelectClass: (classId: string) => void;
   onSelectLesson: (classId: string, moduleId: string, lessonId: string) => void;
 }
@@ -21,10 +24,12 @@ export const LessonTree: React.FC<LessonTreeProps> = ({
   currentClass,
   currentLesson,
   completedLessons,
+  currentTrack,
+  onSelectTrack,
   onSelectClass,
   onSelectLesson,
 }) => {
-  // Calculate class completion
+  // Calculate class/module completion
   const totalClassLessons = currentClass.modules.reduce((acc, m) => acc + m.lessons.length, 0);
   const completedClassLessons = currentClass.modules.reduce(
     (acc, m) => acc + m.lessons.filter((l) => completedLessons.includes(l.id)).length,
@@ -33,31 +38,109 @@ export const LessonTree: React.FC<LessonTreeProps> = ({
   const percentComplete =
     totalClassLessons > 0 ? Math.round((completedClassLessons / totalClassLessons) * 100) : 0;
 
+  const is20Track = currentTrack === "admin-20";
+
   return (
     <div className="academy-left-tree">
+      {/* Track Selector Tabs */}
+      <div
+        style={{
+          display: "flex",
+          borderBottom: "1px solid #CBD5E1",
+          background: "#E2E8F0",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => onSelectTrack("admin-20")}
+          style={{
+            flex: 1,
+            padding: "8px 6px",
+            fontSize: 10,
+            fontWeight: 700,
+            border: "none",
+            borderBottom: is20Track ? "2px solid #0078D4" : "2px solid transparent",
+            background: is20Track ? "#FFFFFF" : "transparent",
+            color: is20Track ? "#0078D4" : "#64748B",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            textTransform: "uppercase",
+          }}
+        >
+          <Shield size={12} />
+          Admin Track (20 Modules)
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectTrack("intro-6")}
+          style={{
+            flex: 1,
+            padding: "8px 6px",
+            fontSize: 10,
+            fontWeight: 700,
+            border: "none",
+            borderBottom: !is20Track ? "2px solid #0078D4" : "2px solid transparent",
+            background: !is20Track ? "#FFFFFF" : "transparent",
+            color: !is20Track ? "#0078D4" : "#64748B",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+            textTransform: "uppercase",
+          }}
+        >
+          <BookOpen size={12} />
+          Intro Track (6 Classes)
+        </button>
+      </div>
+
       {/* Tree Header */}
       <div className="academy-tree-header">
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <GraduationCap size={16} className="text-[#0078D4]" />
           <h3>Curriculum Navigator</h3>
         </div>
-        <p>Six-Class Enterprise PAM Program</p>
+        <p>
+          {is20Track
+            ? "20-Module Enterprise Administrator Curriculum"
+            : "Six-Class Foundational Introduction"}
+        </p>
 
-        {/* Class Selector */}
+        {/* Module / Class Selector */}
         <select
           className="academy-class-selector"
           value={currentClass.id}
           onChange={(e) => onSelectClass(e.target.value)}
         >
-          {ACADEMY_CLASSES_V2.map((cls) => (
-            <option key={cls.id} value={cls.id}>
-              {cls.label}: {cls.title}
-            </option>
-          ))}
+          {is20Track ? (
+            ADMIN_CATEGORIES.map((cat) => (
+              <optgroup key={cat.category} label={cat.category}>
+                {cat.modules.map((mId) => {
+                  const modItem = ADMIN_MODULES_20.find((m) => m.id === mId);
+                  if (!modItem) return null;
+                  return (
+                    <option key={modItem.id} value={modItem.id}>
+                      {modItem.label}: {modItem.title}
+                    </option>
+                  );
+                })}
+              </optgroup>
+            ))
+          ) : (
+            ACADEMY_CLASSES_V2.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.label}: {cls.title}
+              </option>
+            ))
+          )}
         </select>
       </div>
 
-      {/* Class Progress Bar */}
+      {/* Progress Bar */}
       <div
         style={{ padding: "8px 12px", background: "#F1F5F9", borderBottom: "1px solid #E2E8F0" }}
       >

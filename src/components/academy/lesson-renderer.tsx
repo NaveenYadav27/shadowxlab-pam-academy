@@ -48,7 +48,7 @@ interface LessonRendererProps {
   lesson: Lesson;
   isCompleted: boolean;
   onMarkComplete: () => void;
-  onJumpConsole?: (section: "accounts" | "safes" | "cpm" | "psm" | "audit") => void;
+  onJumpConsole?: (section: any) => void;
 }
 
 export const LessonRenderer: React.FC<LessonRendererProps> = ({
@@ -416,6 +416,95 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
             ))}
           </tbody>
         </table>
+
+        {/* Diagnostic Evidence (Log Samples) */}
+        {lesson.diagnosticEvidence && lesson.diagnosticEvidence.length > 0 && (
+          <div style={{ marginTop: 14 }}>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "#64748B",
+                textTransform: "uppercase",
+                display: "block",
+                marginBottom: 6,
+              }}
+            >
+              Diagnostic Log Evidence & System Event Output:
+            </span>
+            {lesson.diagnosticEvidence.map((diag, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: "#0F172A",
+                  color: "#E2E8F0",
+                  padding: "10px 14px",
+                  borderRadius: 4,
+                  marginBottom: 8,
+                  fontFamily: "monospace",
+                  fontSize: 11,
+                }}
+              >
+                <div
+                  style={{
+                    color: "#38BDF8",
+                    fontWeight: 700,
+                    marginBottom: 4,
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span>Source: {diag.logFile}</span>
+                </div>
+                <pre style={{ margin: 0, whiteSpace: "pre-wrap", color: "#F87171" }}>
+                  {diag.sampleOutput}
+                </pre>
+                <div
+                  style={{
+                    marginTop: 6,
+                    fontSize: 11,
+                    color: "#94A3B8",
+                    fontStyle: "italic",
+                    borderTop: "1px solid #1E293B",
+                    paddingTop: 4,
+                  }}
+                >
+                  Analysis: {diag.explanation}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Instructor Field Notes */}
+        {lesson.instructorNotes && lesson.instructorNotes.length > 0 && (
+          <div
+            style={{
+              background: "#EFF6FF",
+              borderLeft: "3px solid #2563EB",
+              padding: "10px 14px",
+              marginTop: 12,
+              borderRadius: "0 4px 4px 0",
+            }}
+          >
+            <strong
+              style={{
+                fontSize: 11,
+                color: "#1D4ED8",
+                textTransform: "uppercase",
+                display: "block",
+                marginBottom: 4,
+              }}
+            >
+              Senior PAM Architect Field Notes:
+            </strong>
+            <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: "#1E3A8A", lineHeight: 1.5 }}>
+              {lesson.instructorNotes.map((note, idx) => (
+                <li key={idx}>{note}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       {/* 8. Security Implications & References */}
