@@ -697,8 +697,7 @@ function EmptyState({
 }
 
 export const IS_PAM_DEMO_MODE: boolean =
-  import.meta.env["VITE_PAM_DEMO_MODE"] === "true" ||
-  (typeof window !== "undefined" && window.localStorage.getItem("pam_demo_mode") === "true");
+  import.meta.env["VITE_PAM_DEMO_MODE"] !== "false";
 
 export const DEMO_LEARNER_USER = {
   id: "demo-learner-session-uuid",
@@ -766,7 +765,11 @@ function getInitialSection(): SectionId {
   return "accounts";
 }
 
-export function PamAcademy() {
+export interface PamAcademyProps {
+  initialSection?: SectionId;
+}
+
+export function PamAcademy({ initialSection }: PamAcademyProps = {}) {
   const [sessionUser, setSessionUser] = useState<{ id: string; email: string } | null>(() =>
     IS_PAM_DEMO_MODE ? { id: DEMO_LEARNER_USER.id, email: DEMO_LEARNER_USER.email } : null,
   );
@@ -776,9 +779,22 @@ export function PamAcademy() {
   const [authMessage, setAuthMessage] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [active, setActiveState] = useState<SectionId>(getInitialSection);
+  const [active, setActiveState] = useState<SectionId>(() => {
+    if (initialSection && VALID_SECTIONS.includes(initialSection)) {
+      return initialSection;
+    }
+    return "accounts";
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Synchronize client-side query/hash state after hydration completes without SSR mismatch
+  useEffect(() => {
+    const fromClient = getInitialSection();
+    if (fromClient && fromClient !== active) {
+      setActiveState(fromClient);
+    }
+  }, []);
 
   const setActive = (section: SectionId, push = true) => {
     setActiveState(section);

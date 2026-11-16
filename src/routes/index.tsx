@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PamAcademy } from "@/components/pam-academy";
+import { PamAcademy, type SectionId } from "@/components/pam-academy";
+
+interface IndexSearchParams {
+  section?: SectionId;
+}
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>): IndexSearchParams => {
+    return {
+      section: (search.section as SectionId) || undefined,
+    };
+  },
   head: () => ({
     meta: [
       { title: "ShadowXLab PAM Academy | Enterprise Privileged Access Training" },
@@ -24,5 +33,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <PamAcademy />;
+  const { section } = Route.useSearch();
+  return <PamAcademy initialSection={section} />;
 }

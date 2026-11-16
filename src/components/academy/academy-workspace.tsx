@@ -5,7 +5,7 @@
  * knowledge checkpoints, and live simulator exercise validation.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GraduationCap, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -15,6 +15,7 @@ import {
   getCurriculumMetrics,
 } from "@/lib/academy/content";
 import {
+  DEFAULT_LEARNER_PROGRESS,
   loadLearnerProgress,
   saveLearnerProgress,
   markLessonComplete,
@@ -38,7 +39,11 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
   onResetState,
   onJumpConsole,
 }) => {
-  const [progress, setProgress] = useState(loadLearnerProgress());
+  const [progress, setProgress] = useState(DEFAULT_LEARNER_PROGRESS);
+
+  useEffect(() => {
+    setProgress(loadLearnerProgress());
+  }, []);
 
   const currentTrack = progress.currentTrackId || "admin-20";
 

@@ -17,7 +17,7 @@ export const DEFAULT_LEARNER_PROGRESS: LearnerProgress = {
   checkpointAnswers: {},
   checkpointScores: {},
   completedExercises: [],
-  lastUpdated: new Date().toISOString(),
+  lastUpdated: "2026-11-16T00:00:00.000Z",
 };
 
 export function loadLearnerProgress(): LearnerProgress {
