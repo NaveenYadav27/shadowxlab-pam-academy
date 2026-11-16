@@ -1517,7 +1517,14 @@ export function PamAcademy({ initialSection }: PamAcademyProps = {}) {
         />
       );
     if (active === "academy")
-      return <AcademyWorkspace state={state} onResetState={resetLab} onJumpConsole={setActive} />;
+      return (
+        <AcademyWorkspace
+          state={state}
+          onResetState={resetLab}
+          onJumpConsole={setActive}
+          onUpdateState={(updater) => setState(updater)}
+        />
+      );
     if (active === "environment")
       return (
         <EnvironmentView

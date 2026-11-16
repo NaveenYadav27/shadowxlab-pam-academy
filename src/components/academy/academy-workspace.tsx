@@ -32,12 +32,14 @@ interface AcademyWorkspaceProps {
   state: PamState;
   onResetState: () => void;
   onJumpConsole?: (section: any) => void;
+  onUpdateState?: (updater: (prev: PamState) => PamState) => void;
 }
 
 export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
   state,
   onResetState,
   onJumpConsole,
+  onUpdateState,
 }) => {
   const [progress, setProgress] = useState(DEFAULT_LEARNER_PROGRESS);
 
@@ -190,6 +192,10 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           isCompleted={progress.completedLessons.includes(currentLesson.id)}
           onMarkComplete={handleMarkLessonComplete}
           onJumpConsole={onJumpConsole}
+          state={state}
+          completedExercises={progress.completedExercises}
+          onRecordExerciseComplete={handleRecordExerciseComplete}
+          onUpdateState={onUpdateState}
         />
 
         {/* RIGHT PANEL: Objectives, Terminology, Knowledge Checkpoint & Simulator Lab */}

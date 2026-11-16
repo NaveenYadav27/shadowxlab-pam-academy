@@ -18,11 +18,14 @@ import {
   FileText,
   KeyRound,
   Workflow,
+  Terminal,
 } from "lucide-react";
 import type { Lesson } from "@/lib/academy/types";
 import { VisualLearningCard } from "./visual/VisualLearningCard";
 import { ArchitectureExplorer } from "./visual/ArchitectureExplorer";
 import { WorkflowVisualizer, type WorkflowType } from "./visual/WorkflowVisualizer";
+import { InteractiveLabWorkbench } from "./interactive-lab-workbench";
+import { makeInitialPamState, type PamState } from "@/lib/pam-engine";
 
 function getWorkflowForLesson(num: string): WorkflowType {
   if (num.startsWith("2.")) return "safe-auth";
@@ -49,6 +52,10 @@ interface LessonRendererProps {
   isCompleted: boolean;
   onMarkComplete: () => void;
   onJumpConsole?: (section: any) => void;
+  state?: PamState;
+  completedExercises?: string[];
+  onRecordExerciseComplete?: (exerciseId: string) => void;
+  onUpdateState?: (updater: (prev: PamState) => PamState) => void;
 }
 
 export const LessonRenderer: React.FC<LessonRendererProps> = ({
@@ -56,6 +63,10 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
   isCompleted,
   onMarkComplete,
   onJumpConsole,
+  state,
+  completedExercises,
+  onRecordExerciseComplete,
+  onUpdateState,
 }) => {
   function handleScrollToArchitecture() {
     const el = document.getElementById("architecture-explorer-section");
@@ -63,8 +74,19 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
   }
 
   function handleScrollToLab() {
-    const el = document.getElementById("lesson-completion-section");
-    el?.scrollIntoView({ behavior: "smooth" });
+    const el = document.getElementById("practical-lab-workbench");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.style.transition = "box-shadow 0.3s ease, border-color 0.3s ease";
+      el.style.borderColor = "#0078D4";
+      el.style.boxShadow = "0 0 0 3px rgba(0, 120, 212, 0.4)";
+      setTimeout(() => {
+        el.style.borderColor = "#0078D4";
+        el.style.boxShadow = "0 2px 8px rgba(0, 120, 212, 0.08)";
+      }, 2500);
+    } else if (lesson.practicalExercise?.targetConsole) {
+      onJumpConsole?.(lesson.practicalExercise.targetConsole);
+    }
   }
 
   return (
@@ -75,6 +97,7 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
         isCompleted={isCompleted}
         onExploreArchitecture={handleScrollToArchitecture}
         onJumpLab={handleScrollToLab}
+        onJumpConsole={onJumpConsole}
       />
 
       {/* 2. Concept Introduction & Why It Exists */}
@@ -538,6 +561,24 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
           </ul>
         </div>
       </section>
+
+      {/* 8. Interactive Operational Practical Lab & Simulator Workbench */}
+      {lesson.practicalExercise && (
+        <section className="academy-section-block">
+          <h2 className="academy-section-title">
+            <Terminal size={16} className="text-[#0078D4]" />
+            8. Operational Simulator Lab & Practical Workbench
+          </h2>
+          <InteractiveLabWorkbench
+            exercise={lesson.practicalExercise}
+            state={state || makeInitialPamState()}
+            isCompleted={Boolean(completedExercises?.includes(lesson.practicalExercise.id))}
+            onRecordExerciseComplete={onRecordExerciseComplete || (() => {})}
+            onJumpConsole={onJumpConsole}
+            onUpdateState={onUpdateState}
+          />
+        </section>
+      )}
 
       {/* 9. Completion Action Bar */}
       <div

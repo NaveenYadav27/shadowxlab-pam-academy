@@ -18,6 +18,8 @@ import {
   ArrowDownCircle,
   Sparkles,
   ExternalLink,
+  ArrowRight,
+  Terminal,
 } from "lucide-react";
 import type { Lesson } from "@/lib/academy/types";
 
@@ -26,6 +28,7 @@ interface VisualLearningCardProps {
   isCompleted: boolean;
   onExploreArchitecture?: () => void;
   onJumpLab?: () => void;
+  onJumpConsole?: (section: any) => void;
 }
 
 export const VisualLearningCard: React.FC<VisualLearningCardProps> = ({
@@ -33,6 +36,7 @@ export const VisualLearningCard: React.FC<VisualLearningCardProps> = ({
   isCompleted,
   onExploreArchitecture,
   onJumpLab,
+  onJumpConsole,
 }) => {
   // Determine relevant visual icon based on lesson number and title
   function getVisualIcon() {
@@ -107,15 +111,35 @@ export const VisualLearningCard: React.FC<VisualLearningCardProps> = ({
               Interactive Topology Explorer
             </button>
             {lesson.practicalExercise && (
-              <button
-                type="button"
-                className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
-                onClick={onJumpLab}
-                title="Launch Simulator Lab"
-              >
-                <ExternalLink size={13} />
-                Practical Lab: {lesson.practicalExercise.title}
-              </button>
+              <div style={{ display: "inline-flex", flexWrap: "wrap", gap: 6 }}>
+                <button
+                  type="button"
+                  className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                  onClick={onJumpLab}
+                  title="Jump to Interactive Practical Lab Workbench"
+                >
+                  <ExternalLink size={13} />
+                  Practical Lab: {lesson.practicalExercise.title}
+                </button>
+                {onJumpConsole && (
+                  <button
+                    type="button"
+                    className="pvwa-btn pvwa-btn-sm"
+                    style={{
+                      background: "#0078D4",
+                      color: "#FFFFFF",
+                      border: "1px solid #005A9E",
+                      fontWeight: 600,
+                    }}
+                    onClick={() => onJumpConsole(lesson.practicalExercise?.targetConsole)}
+                    title={`Open live operational ${lesson.practicalExercise.targetConsole.toUpperCase()} console in simulator`}
+                  >
+                    <Terminal size={12} />
+                    Open {lesson.practicalExercise.targetConsole.toUpperCase()} Console
+                    <ArrowRight size={12} />
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
