@@ -29,7 +29,8 @@ export const MODULE_17: ClassCurriculum = {
           id: "m17-l01",
           number: "17.1",
           title: "Component Telemetry, SNMP v3 & Proactive Health Alerting",
-          subtitle: "Deploying enterprise monitoring probes, configuring SNMP traps, and tracking component heartbeats",
+          subtitle:
+            "Deploying enterprise monitoring probes, configuring SNMP traps, and tracking component heartbeats",
           estimatedMinutes: 25,
           learningObjectives: [
             "Configure component health telemetry using the PVWA Health Check REST API (`/PasswordVault/api/health`).",
@@ -79,53 +80,69 @@ export const MODULE_17: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Enterprise Monitoring Probe",
-                action: "Sends HTTP GET request to `https://vault.corp.local/PasswordVault/api/health` every 30 seconds.",
+                action:
+                  "Sends HTTP GET request to `https://vault.corp.local/PasswordVault/api/health` every 30 seconds.",
                 channelOrProtocol: "HTTPS Port 443",
-                verificationRule: "PVWA queries Vault over TCP 1858; compiles component status JSON payload.",
+                verificationRule:
+                  "PVWA queries Vault over TCP 1858; compiles component status JSON payload.",
               },
               {
                 stepNumber: 2,
                 actor: "PVWA Health Engine",
-                action: "Returns HTTP 200 OK with payload: `{\"Vault\": \"Connected\", \"CPM\": \"Connected\", \"PSM\": \"Connected\", \"Latency\": \"4ms\"}`.",
+                action:
+                  'Returns HTTP 200 OK with payload: `{"Vault": "Connected", "CPM": "Connected", "PSM": "Connected", "Latency": "4ms"}`.',
                 channelOrProtocol: "JSON Telemetry Stream",
-                verificationRule: "Probe records metrics; confirms all subsystems report healthy status.",
+                verificationRule:
+                  "Probe records metrics; confirms all subsystems report healthy status.",
               },
               {
                 stepNumber: 3,
                 actor: "CPM Service (Simulated Fault)",
-                action: "CPM service on Windows host stops due to unexpected OS reboot. Heartbeat misses 3 consecutive cycles.",
+                action:
+                  "CPM service on Windows host stops due to unexpected OS reboot. Heartbeat misses 3 consecutive cycles.",
                 channelOrProtocol: "Component Heartbeat Failure",
-                verificationRule: "Vault detects CPM heartbeat age > 5 minutes; flags component 'Disconnected'.",
+                verificationRule:
+                  "Vault detects CPM heartbeat age > 5 minutes; flags component 'Disconnected'.",
               },
               {
                 stepNumber: 4,
                 actor: "Vault SNMP Agent",
-                action: "Dispatches high-severity SNMP v3 trap: `ComponentStatusChange: CPM-01 -> Disconnected` to corporate NOC.",
+                action:
+                  "Dispatches high-severity SNMP v3 trap: `ComponentStatusChange: CPM-01 -> Disconnected` to corporate NOC.",
                 channelOrProtocol: "SNMP v3 UDP 162",
-                verificationRule: "NOC generates automated PagerDuty incident for on-call PAM engineer within 15 seconds.",
+                verificationRule:
+                  "NOC generates automated PagerDuty incident for on-call PAM engineer within 15 seconds.",
               },
             ],
           },
           terminology: [
             {
               term: "Component Heartbeat",
-              definition: "A periodic check-in signal transmitted by a component (CPM, PSM, PVWA) to the Vault over TCP 1858 recording active operational health.",
-              enterpriseContext: "If a component's heartbeat exceeds 5 minutes, the PVWA System Health dashboard displays a warning indicator.",
+              definition:
+                "A periodic check-in signal transmitted by a component (CPM, PSM, PVWA) to the Vault over TCP 1858 recording active operational health.",
+              enterpriseContext:
+                "If a component's heartbeat exceeds 5 minutes, the PVWA System Health dashboard displays a warning indicator.",
             },
             {
               term: "SNMP v3 Trap",
-              definition: "An encrypted, user-authenticated notification packet sent from the Vault to network management systems to signal critical events.",
-              enterpriseContext: "SNMP v3 uses USM (User-Based Security Model) with SHA authentication and AES encryption to prevent packet tampering.",
+              definition:
+                "An encrypted, user-authenticated notification packet sent from the Vault to network management systems to signal critical events.",
+              enterpriseContext:
+                "SNMP v3 uses USM (User-Based Security Model) with SHA authentication and AES encryption to prevent packet tampering.",
             },
             {
               term: "CPM Queue Depth",
-              definition: "The number of pending password verification, change, and reconcile tasks waiting in the Vault queue for CPM processing.",
-              enterpriseContext: "A queue depth exceeding 50 indicates CPM thread starvation, target host timeouts, or network firewall blocks.",
+              definition:
+                "The number of pending password verification, change, and reconcile tasks waiting in the Vault queue for CPM processing.",
+              enterpriseContext:
+                "A queue depth exceeding 50 indicates CPM thread starvation, target host timeouts, or network firewall blocks.",
             },
             {
               term: "Health Check REST API",
-              definition: "A standard programmatic endpoint (`/PasswordVault/api/health`) allowing external monitoring tools to query system vitality.",
-              enterpriseContext: "Used by cloud load balancers and infrastructure monitors (Dynatrace, Datadog) to route traffic away from failing nodes.",
+              definition:
+                "A standard programmatic endpoint (`/PasswordVault/api/health`) allowing external monitoring tools to query system vitality.",
+              enterpriseContext:
+                "Used by cloud load balancers and infrastructure monitors (Dynatrace, Datadog) to route traffic away from failing nodes.",
             },
           ],
           administratorResponsibilities: [
@@ -138,47 +155,60 @@ export const MODULE_17: ClassCurriculum = {
             {
               name: "SNMP v3 Parameters in dbparm.ini",
               settingOrObject: "C:\\Program Files (x86)\\PrivateArk\\Server\\dbparm.ini",
-              description: "Configures `SNMPAgentPeers`, `SNMPAgentCommunity`, `SNMPv3AuthUser`, and AES encryption passwords.",
-              productionBestPractice: "Always enforce SNMP v3 with `AuthPriv` (Authentication + Privacy/Encryption); never use plaintext SNMP v1/v2c.",
+              description:
+                "Configures `SNMPAgentPeers`, `SNMPAgentCommunity`, `SNMPv3AuthUser`, and AES encryption passwords.",
+              productionBestPractice:
+                "Always enforce SNMP v3 with `AuthPriv` (Authentication + Privacy/Encryption); never use plaintext SNMP v1/v2c.",
             },
             {
               name: "HealthCheckComponentWhiteList",
               settingOrObject: "PVWA Options > General > Health Check Settings",
-              description: "Specifies which components are evaluated by the `/api/health` endpoint.",
-              productionBestPractice: "Include all production CPM, PSM, and PVWA nodes to ensure holistic cluster health visibility.",
+              description:
+                "Specifies which components are evaluated by the `/api/health` endpoint.",
+              productionBestPractice:
+                "Include all production CPM, PSM, and PVWA nodes to ensure holistic cluster health visibility.",
             },
             {
               name: "Component Heartbeat Timeout Threshold",
               settingOrObject: "PVWA Options > Privileged Session Management > Timeout",
-              description: "Defines elapsed time before an inactive component is flagged as degraded or offline.",
-              productionBestPractice: "Set heartbeat warning threshold to 180 seconds (3 minutes) and critical offline to 300 seconds (5 minutes).",
+              description:
+                "Defines elapsed time before an inactive component is flagged as degraded or offline.",
+              productionBestPractice:
+                "Set heartbeat warning threshold to 180 seconds (3 minutes) and critical offline to 300 seconds (5 minutes).",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Review PVWA System Health Dashboard",
-              action: "In PVWA, navigate to Administration > System Health to inspect real-time component status indicators.",
-              expectedResult: "Displays status grid: Digital Vault (Online), CPM (Connected), PSM (Connected), PVWA (Connected).",
+              action:
+                "In PVWA, navigate to Administration > System Health to inspect real-time component status indicators.",
+              expectedResult:
+                "Displays status grid: Digital Vault (Online), CPM (Connected), PSM (Connected), PVWA (Connected).",
               operatorNotes: "Green pills indicate healthy heartbeats within the last 60 seconds.",
             },
             {
               stepNumber: 2,
               title: "Poll Health Check REST API",
-              action: "Execute curl command against health endpoint: `curl -k https://<PVWA_FQDN>/PasswordVault/api/health`.",
-              expectedResult: "Returns HTTP 200 JSON object detailing individual component statuses and database latency.",
+              action:
+                "Execute curl command against health endpoint: `curl -k https://<PVWA_FQDN>/PasswordVault/api/health`.",
+              expectedResult:
+                "Returns HTTP 200 JSON object detailing individual component statuses and database latency.",
             },
             {
               stepNumber: 3,
               title: "Inspect CPM Queue Saturation",
               action: "In CPM Operations console, inspect the count of active and pending tasks.",
-              expectedResult: "Pending tasks is under 5; active tasks processing cleanly without backlog.",
+              expectedResult:
+                "Pending tasks is under 5; active tasks processing cleanly without backlog.",
             },
             {
               stepNumber: 4,
               title: "Test SNMP Trap Alerting",
-              action: "On the Vault host, use the `SendSNMPTestTrap` utility to dispatch a test alert to the NOC collector.",
-              expectedResult: "Enterprise monitoring platform receives authenticated SNMP v3 packet and parses OID successfully.",
+              action:
+                "On the Vault host, use the `SendSNMPTestTrap` utility to dispatch a test alert to the NOC collector.",
+              expectedResult:
+                "Enterprise monitoring platform receives authenticated SNMP v3 packet and parses OID successfully.",
             },
           ],
           enterpriseScenario: {
@@ -193,36 +223,46 @@ export const MODULE_17: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "PVWA System Health dashboard displays yellow warning pill on CPM: 'Last heartbeat: 8 minutes ago'.",
-              rootCause: "The CyberArk Password Manager service crashed on the CPM host or outbound port 1858 was blocked by a firewall.",
-              securityImpact: "Password rotations, verifications, and reconciliations cease; risk of stale credentials accumulating.",
+              symptom:
+                "PVWA System Health dashboard displays yellow warning pill on CPM: 'Last heartbeat: 8 minutes ago'.",
+              rootCause:
+                "The CyberArk Password Manager service crashed on the CPM host or outbound port 1858 was blocked by a firewall.",
+              securityImpact:
+                "Password rotations, verifications, and reconciliations cease; risk of stale credentials accumulating.",
               cyberArkCodeOrEvent: "HEARTBEAT-MISSING",
             },
             {
-              symptom: "SNMP monitoring station reports zero traps received during simulated Vault failover.",
-              rootCause: "The SNMP v3 authentication password or engine ID in dbparm.ini does not match the monitoring station configuration.",
-              securityImpact: "NOC unaware of disaster events; silent failure of critical telemetry.",
+              symptom:
+                "SNMP monitoring station reports zero traps received during simulated Vault failover.",
+              rootCause:
+                "The SNMP v3 authentication password or engine ID in dbparm.ini does not match the monitoring station configuration.",
+              securityImpact:
+                "NOC unaware of disaster events; silent failure of critical telemetry.",
               cyberArkCodeOrEvent: "SNMP-AUTH-FAIL",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Verify CyberArk services on degraded component host via services.msc.",
+              diagnosticAction:
+                "Verify CyberArk services on degraded component host via services.msc.",
               logFileOrConsole: "services.msc / Task Manager",
-              remediation: "Restart the stopped service (e.g., CyberArk Password Manager or Privileged Session Manager).",
+              remediation:
+                "Restart the stopped service (e.g., CyberArk Password Manager or Privileged Session Manager).",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Review italog.log for component heartbeat registration messages.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\Server\\Logs\\italog.log",
-              remediation: "Look for 'Station is not defined' or connection drops on port 1858. Ensure firewall permits traffic.",
+              remediation:
+                "Look for 'Station is not defined' or connection drops on port 1858. Ensure firewall permits traffic.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Test Health Check API endpoint with verbosity enabled.",
               logFileOrConsole: "PVWA.App.log / Browser Developer Tools",
-              remediation: "Check whether PVWA application pool has sufficient permissions to query the internal monitoring safe.",
+              remediation:
+                "Check whether PVWA application pool has sufficient permissions to query the internal monitoring safe.",
             },
           ],
           diagnosticEvidence: [
@@ -254,7 +294,8 @@ export const MODULE_17: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m17-q01",
-              question: "What is the primary function of a Component Heartbeat in the PAM architecture?",
+              question:
+                "What is the primary function of a Component Heartbeat in the PAM architecture?",
               options: [
                 "To rotate domain passwords automatically.",
                 "To allow components (CPM, PSM, PVWA) to periodically report their operational health, service status, and active load to the Vault database.",
@@ -268,7 +309,8 @@ export const MODULE_17: ClassCurriculum = {
             },
             {
               id: "m17-q02",
-              question: "Which programmatic endpoint is provided by the PVWA for integration with enterprise monitoring platforms like Datadog, Prometheus, or load balancers?",
+              question:
+                "Which programmatic endpoint is provided by the PVWA for integration with enterprise monitoring platforms like Datadog, Prometheus, or load balancers?",
               options: [
                 "/PasswordVault/auth/logout",
                 "/PasswordVault/api/health",
@@ -282,7 +324,8 @@ export const MODULE_17: ClassCurriculum = {
             },
             {
               id: "m17-q03",
-              question: "Why is SNMP v3 strongly recommended over legacy SNMP v1/v2c for enterprise Vault monitoring?",
+              question:
+                "Why is SNMP v3 strongly recommended over legacy SNMP v1/v2c for enterprise Vault monitoring?",
               options: [
                 "Because SNMP v3 includes user-based authentication and AES payload encryption, preventing attackers from intercepting or spoofing operational alerts.",
                 "Because SNMP v3 only works on Linux.",
@@ -297,20 +340,72 @@ export const MODULE_17: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m17-ex01",
-            title: "Inspect Component Health Telemetry and Review Operational Latency",
+            title: "Inspect Component Health Telemetry & Active Incident Alerts",
+            objective:
+              "Review live Vault, PVWA, CPM, and PSM health telemetry in Dashboard and Troubleshooting, correlate open alerts, and validate Lab 01 component baseline.",
             scenario:
-              "Navigate to the Overview and Troubleshooting consoles to inspect live component heartbeats, review operational status indicators across all nodes, and verify telemetry health.",
+              "During your daily SRE morning check, inspect component latency and queue indicators in Dashboard and correlate active diagnostic alerts in the Troubleshooting workbench.",
+            prerequisites: [
+              "Review Component Telemetry, Health Check APIs, and Proactive Alerting in Section 1–4.",
+            ],
+            startingState:
+              "Dashboard shows Vault/PVWA/CPM/PSM telemetry; Troubleshooting lists open simulated operational incidents.",
             instructions: [
-              "Navigate to the Overview or Troubleshooting console.",
-              "Review the system health metrics strip and component status indicators.",
-              "Inspect latency and connection indicators for Vault, PVWA, CPM, and PSM.",
-              "Confirm that component heartbeats are within normal operational limits.",
+              "Open the Troubleshooting console and review open incidents, severity badges, and affected subsystems.",
+              "Open the Dashboard console and inspect Platform Health latencies and Attention Required alerts.",
+              "Correlate the CPM queue exception on `svc_backup` (WIN-SRV-02) between Dashboard and Troubleshooting.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 7 Lab 01 objectives.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open Troubleshooting and review the active incident queue and severity counts.",
+                explanation:
+                  "Centralized telemetry surfaces rotation lockouts and session errors before users report outages.",
+                expectedResult:
+                  "Troubleshooting workbench lists open incidents categorized by component and severity.",
+              },
+              {
+                action:
+                  "Open Dashboard and inspect Platform Health latencies and Attention Required items.",
+                explanation:
+                  "Confirms Vault, PVWA, CPM, and PSM heartbeat latency alongside outstanding account exceptions.",
+                expectedResult:
+                  "Platform Health displays all four services online and Attention Required flags `svc_backup`.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Validates all 7 Lab 01 telemetry and component baseline objectives.",
+                expectedResult: "All 7/7 Lab 01 objectives pass (100/100).",
+              },
             ],
             targetConsole: "troubleshooting",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-pvwa",
             validationCriteria:
-              "Component health indicators and telemetry metrics are reviewed in the troubleshooting console.",
+              "Component health telemetry and open incident alerts inspected (7/7 Lab 01 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "A Lab 01 baseline objective reports pending.",
+                hint: "Ensure baseline Safes, CPM operations, and audit events are present in live state.",
+                correctiveAction:
+                  "Click Reset Simulator in the top subnav if baseline records were cleared, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Correlate Monitoring Alerts with Audit History",
+              scenario:
+                "SRE leadership asks whether open warnings in Dashboard match entries in Reports & Audit.",
+              goal: "Without step-by-step instructions, open Reports & Audit and filter for Warning/Failed events to match the Dashboard exception.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Filtered Reports & Audit to locate the CPM Change warning for `svc_backup` on `WIN-SRV-02`.",
+                "Confirmed timestamp and failure detail align with the Dashboard Attention Required queue.",
+              ],
+            },
+            simulationLimitationNote:
+              "External SNMP v3 trap forwarding and REST Health Check API polling from enterprise SIEM/NMS tools are conceptual in this simulator. Live validation verifies the simulated component health baseline (Lab 01).",
           },
           completionCriteria: [
             "Deconstructed component heartbeat telemetry and Health Check REST APIs.",

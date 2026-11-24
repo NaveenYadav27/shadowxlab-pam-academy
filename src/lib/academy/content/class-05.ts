@@ -248,23 +248,84 @@ export const CLASS_05: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "ex-c05-01",
-            title: "Verify Credential Status & Reconcile Desynchronized Account",
+            title: "Verify & Rotate a Managed Credential (CPM Change Lifecycle)",
+            objective:
+              "Execute the full CPM Verify -> Change -> Audit -> Managed rotation cycle on Administrator (WIN-SRV-01) and validate all 4 Lab 05A objectives.",
             scenario:
-              "Navigate to the CPM Operations console. Identify account Administrator on WIN-SRV-01, trigger Verify to test connectivity, then select the failed account on WIN-SRV-02 and execute Reconcile to restore operational compliance.",
+              "An urgent security directive requires rotating the local Administrator password on WIN-SRV-01 via CPM. Verify the existing credential first, execute an immediate Change, confirm the audit trail, and verify the account remains Managed.",
+            prerequisites: [
+              "Review the Three-State Lifecycle (Verify, Change, Reconcile) in Section 1–3.",
+            ],
+            startingState:
+              "Administrator on WIN-SRV-01 is in WIN-SAFE (status: Managed); svc_backup on WIN-SRV-02 is in Rotation failed state (Account locked on target).",
             instructions: [
-              "Navigate to CPM Operations console in PVWA.",
-              "Select account Administrator on WIN-SRV-01 and click 'Verify'.",
-              "Select the out-of-sync account (svc_backup or WIN-SRV-02) and click 'Reconcile'.",
-              "Open Learning Academy Class 05 and validate completion of Lab 05A and Lab 05B.",
+              "Open the CPM Operations console and select Administrator on WIN-SRV-01.",
+              "Click 'Verify' to confirm the vaulted credential authenticates on WIN-SRV-01 before rotation.",
+              "Click 'Change' to execute an immediate CPM password rotation and confirm the operation completes with status 'Managed'.",
+              "Inspect the CPM Change record in Reports & Audit (or the CPM operation log), then return to Learning Academy and validate all 4 Lab 05A objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open CPM Operations and select Administrator (WIN-SRV-01).",
+                explanation: "CPM executes credential lifecycle actions per target account object.",
+                expectedResult:
+                  "Account panel shows Administrator on WIN-SRV-01 with platform Windows Server Local.",
+              },
+              {
+                action: "Click 'Verify' before attempting a password rotation.",
+                explanation:
+                  "Confirms the Vault secret matches the target hash before changing it, preventing lockout.",
+                expectedResult: "CPM operation log records a Completed Verify operation.",
+              },
+              {
+                action: "Click 'Change' to rotate the password on WIN-SRV-01.",
+                explanation:
+                  "Generates a policy-compliant secret, updates the target endpoint, and commits the new secret to the Vault.",
+                expectedResult:
+                  "CPM Change completes, Last Change updates, and account status confirms 'Managed'.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Checks live simulator state for Verify, Change, audit log evidence, and Managed status.",
+                expectedResult: "All 4/4 Lab 05A objectives pass (100/100).",
+              },
             ],
             targetConsole: "cpm",
-            associatedLabId: "Lab 05A · Verify credential status",
-            validationObjectiveId: "id-verify",
-            validationCriteria: "CPM Verify operation executed and recorded in audit log.",
+            associatedLabId: "Lab 05A · Rotate a managed credential",
+            validationObjectiveId: "run-change",
+            validationCriteria:
+              "WIN-SRV-01 Administrator verified, rotated via CPM Change, audited, and confirmed Managed.",
+            troubleshootingHints: [
+              {
+                symptom: "'Execute CPM password rotation' objective remains pending.",
+                hint: "Clicking only 'Verify' tests the existing password without rotating it.",
+                correctiveAction:
+                  "In CPM Operations with Administrator (WIN-SRV-01) selected, click 'Change' and wait for the Completed operation log entry, then re-validate.",
+              },
+              {
+                symptom: "A rotation fails with 'Account locked on target' (CACPM error).",
+                hint: "You may have selected svc_backup on WIN-SRV-02 instead of Administrator on WIN-SRV-01.",
+                correctiveAction:
+                  "Select Administrator on WIN-SRV-01 for Lab 05A, and save svc_backup lockout recovery (Unlock -> Reconcile -> Change -> Verify) for the Independent Practice challenge below.",
+              },
+            ],
+            independentPractice: {
+              title: "Recover Failed Rotation on svc_backup (WIN-SRV-02)",
+              scenario:
+                "Service account svc_backup on WIN-SRV-02 is locked out on the target endpoint and stuck in 'Rotation failed' status.",
+              goal: "Without step-by-step guidance, clear the lockout on svc_backup and restore it to Managed status using Unlock, Reconcile, Change, and Verify in CPM Operations.",
+              targetConsole: "cpm",
+              successCriteria: [
+                "Selected svc_backup (WIN-SRV-02) and executed the Unlock repair action.",
+                "Ran Reconcile, Change, and Verify so svc_backup transitioned from 'Rotation failed' to 'Managed'.",
+              ],
+            },
           },
           completionCriteria: [
             "Articulated the distinct mechanisms of Verify, Change, and Reconcile.",
-            "Successfully performed simulated Verify and Reconcile tasks in the CPM console.",
+            "Completed and validated the CPM Verify and Change rotation cycle on WIN-SRV-01 Administrator.",
           ],
           references: [
             "CyberArk Central Policy Manager User & Implementation Guide",

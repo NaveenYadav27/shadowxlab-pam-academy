@@ -29,7 +29,8 @@ export const MODULE_15: ClassCurriculum = {
           id: "m15-l01",
           number: "15.1",
           title: "PADR Replication Architecture & Controlled Failover",
-          subtitle: "Deploying multi-site DR Vaults, managing continuous sync, executing failovers, and preventing split-brain corruption",
+          subtitle:
+            "Deploying multi-site DR Vaults, managing continuous sync, executing failovers, and preventing split-brain corruption",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the CyberArk Disaster Recovery engine (PADR.exe) and continuous synchronization over TCP 1858.",
@@ -59,7 +60,8 @@ export const MODULE_15: ClassCurriculum = {
               {
                 component: "Disaster Recovery Vault (DR Node)",
                 role: "Standby Vault running PADR.exe. Standby database engine is stopped until activated during failover.",
-                networkProtocols: "TCP 1858 Outbound to Primary Vault; Inbound listener when promoted",
+                networkProtocols:
+                  "TCP 1858 Outbound to Primary Vault; Inbound listener when promoted",
                 securityBoundary: "Secondary Data Center / DR Facility",
               },
               {
@@ -79,58 +81,76 @@ export const MODULE_15: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "PADR Replication Daemon",
-                action: "Connects to Primary Vault every 60 seconds (or continuous streaming) over TCP 1858 using `DR` service user.",
+                action:
+                  "Connects to Primary Vault every 60 seconds (or continuous streaming) over TCP 1858 using `DR` service user.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
-                verificationRule: "Primary Vault authenticates DR user; sends incremental database transaction log deltas.",
+                verificationRule:
+                  "Primary Vault authenticates DR user; sends incremental database transaction log deltas.",
               },
               {
                 stepNumber: 2,
                 actor: "Disaster Event (Simulated)",
-                action: "Primary data center experiences total power loss. Primary Vault goes dark.",
+                action:
+                  "Primary data center experiences total power loss. Primary Vault goes dark.",
                 channelOrProtocol: "Facility Outage",
-                verificationRule: "PADR service detects consecutive heartbeat failures to Primary Vault on port 1858.",
+                verificationRule:
+                  "PADR service detects consecutive heartbeat failures to Primary Vault on port 1858.",
               },
               {
                 stepNumber: 3,
                 actor: "PAM Administrator / Auto-Failover",
-                action: "Triggers failover: PADR sets `FailoverMode = Yes`, mounts local database storage, and starts PrivateArk Server service.",
+                action:
+                  "Triggers failover: PADR sets `FailoverMode = Yes`, mounts local database storage, and starts PrivateArk Server service.",
                 channelOrProtocol: "PADR Promotion Routine",
-                verificationRule: "DR Vault becomes fully operational Primary Vault; begins accepting inbound TCP 1858 traffic.",
+                verificationRule:
+                  "DR Vault becomes fully operational Primary Vault; begins accepting inbound TCP 1858 traffic.",
               },
               {
                 stepNumber: 4,
                 actor: "Dynamic Routing Layer",
-                action: "Updates DNS CNAME or GTM VIP: `vault.corp.local` resolves to the secondary DR Vault IP address.",
+                action:
+                  "Updates DNS CNAME or GTM VIP: `vault.corp.local` resolves to the secondary DR Vault IP address.",
                 channelOrProtocol: "DNS / Global Load Balancer",
-                verificationRule: "PVWA, CPM, and PSM reconnect to promoted Vault; operations resume with zero data loss.",
+                verificationRule:
+                  "PVWA, CPM, and PSM reconnect to promoted Vault; operations resume with zero data loss.",
               },
             ],
           },
           terminology: [
             {
               term: "PADR (Privileged Access Disaster Recovery)",
-              definition: "The specialized Windows service responsible for continuous database replication from Primary to DR Vaults.",
-              enterpriseContext: "Operates on the DR Vault host, logging replication status in `padr.log`.",
+              definition:
+                "The specialized Windows service responsible for continuous database replication from Primary to DR Vaults.",
+              enterpriseContext:
+                "Operates on the DR Vault host, logging replication status in `padr.log`.",
             },
             {
               term: "Split-Brain Condition",
-              definition: "A catastrophic state where both Primary and DR Vaults operate simultaneously as active Primaries, accepting divergent changes.",
-              enterpriseContext: "Strictly avoided by enforcing manual or quorum-verified failover and ensuring primary services are halted.",
+              definition:
+                "A catastrophic state where both Primary and DR Vaults operate simultaneously as active Primaries, accepting divergent changes.",
+              enterpriseContext:
+                "Strictly avoided by enforcing manual or quorum-verified failover and ensuring primary services are halted.",
             },
             {
               term: "Recovery Point Objective (RPO)",
-              definition: "The maximum acceptable age of data that must be recovered from replication (e.g. less than 60 seconds of data loss).",
-              enterpriseContext: "Continuous PADR replication delivers an RPO of sub-second to a few seconds under normal network conditions.",
+              definition:
+                "The maximum acceptable age of data that must be recovered from replication (e.g. less than 60 seconds of data loss).",
+              enterpriseContext:
+                "Continuous PADR replication delivers an RPO of sub-second to a few seconds under normal network conditions.",
             },
             {
               term: "Recovery Time Objective (RTO)",
-              definition: "The duration of time required to promote the DR Vault and restore operational access after a disaster occurs.",
-              enterpriseContext: "Production PAM target RTO is typically under 15 minutes for controlled failovers.",
+              definition:
+                "The duration of time required to promote the DR Vault and restore operational access after a disaster occurs.",
+              enterpriseContext:
+                "Production PAM target RTO is typically under 15 minutes for controlled failovers.",
             },
             {
               term: "Failback",
-              definition: "The reverse synchronization procedure where changes made on the DR Vault during an outage are replicated back to the restored Primary.",
-              enterpriseContext: "Must be executed carefully to prevent overwriting new production credentials with old stale primary data.",
+              definition:
+                "The reverse synchronization procedure where changes made on the DR Vault during an outage are replicated back to the restored Primary.",
+              enterpriseContext:
+                "Must be executed carefully to prevent overwriting new production credentials with old stale primary data.",
             },
           ],
           administratorResponsibilities: [
@@ -143,47 +163,61 @@ export const MODULE_15: ClassCurriculum = {
             {
               name: "padr.ini Configuration File",
               settingOrObject: "C:\\Program Files (x86)\\PrivateArk\\PADR\\padr.ini on DR Vault",
-              description: "Configures Primary Vault IP, replication interval, failover thresholds, and credential file paths.",
-              productionBestPractice: "Set `CheckMilliSeconds = 1000` for near-real-time streaming; set `EnableFailover = No` for manual approval.",
+              description:
+                "Configures Primary Vault IP, replication interval, failover thresholds, and credential file paths.",
+              productionBestPractice:
+                "Set `CheckMilliSeconds = 1000` for near-real-time streaming; set `EnableFailover = No` for manual approval.",
             },
             {
               name: "DR User Credentials (user.ini)",
               settingOrObject: "CreateCredFile for DR service account",
               description: "Authentication ticket used by PADR to log into the Primary Vault.",
-              productionBestPractice: "Re-generate the DR credential file whenever Vault Master Keys or machine hostnames are updated.",
+              productionBestPractice:
+                "Re-generate the DR credential file whenever Vault Master Keys or machine hostnames are updated.",
             },
             {
               name: "FailoverMode Flag",
               settingOrObject: "padr.ini: FailoverMode = Yes / No",
-              description: "When set to Yes, PADR ceases replication, starts PrivateArk Server, and converts into an active Primary Vault.",
-              productionBestPractice: "In enterprise environments, prefer manual promotion (`FailoverMode = Yes` set by admin) to prevent false split-brain triggers.",
+              description:
+                "When set to Yes, PADR ceases replication, starts PrivateArk Server, and converts into an active Primary Vault.",
+              productionBestPractice:
+                "In enterprise environments, prefer manual promotion (`FailoverMode = Yes` set by admin) to prevent false split-brain triggers.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Inspect PADR Replication Status",
-              action: "On the DR Vault server, open `C:\\Program Files (x86)\\PrivateArk\\PADR\\padr.log` and review latest entries.",
-              expectedResult: "Log demonstrates continuous cycles: 'Synchronization ended successfully. Last synchronized transaction: N'.",
-              operatorNotes: "Transaction numbers must match the active transaction counter on the Primary Vault.",
+              action:
+                "On the DR Vault server, open `C:\\Program Files (x86)\\PrivateArk\\PADR\\padr.log` and review latest entries.",
+              expectedResult:
+                "Log demonstrates continuous cycles: 'Synchronization ended successfully. Last synchronized transaction: N'.",
+              operatorNotes:
+                "Transaction numbers must match the active transaction counter on the Primary Vault.",
             },
             {
               stepNumber: 2,
               title: "Simulate Disaster & Execute Failover",
-              action: "Isolate Primary Vault network. On DR Vault, edit `padr.ini`, set `FailoverMode = Yes`, and restart CyberArk Disaster Recovery service.",
-              expectedResult: "PADR service starts PrivateArk Server engine; DR Vault transitions to active Primary status in under 2 minutes.",
+              action:
+                "Isolate Primary Vault network. On DR Vault, edit `padr.ini`, set `FailoverMode = Yes`, and restart CyberArk Disaster Recovery service.",
+              expectedResult:
+                "PADR service starts PrivateArk Server engine; DR Vault transitions to active Primary status in under 2 minutes.",
             },
             {
               stepNumber: 3,
               title: "Redirect Component Traffic",
-              action: "Update DNS alias or PVWA `Vault.ini` files to point to the promoted DR Vault IP address.",
-              expectedResult: "PVWA, CPM, and PSM reconnect; administrative logins and session launches succeed on the DR Vault.",
+              action:
+                "Update DNS alias or PVWA `Vault.ini` files to point to the promoted DR Vault IP address.",
+              expectedResult:
+                "PVWA, CPM, and PSM reconnect; administrative logins and session launches succeed on the DR Vault.",
             },
             {
               stepNumber: 4,
               title: "Execute Reverse Failback",
-              action: "When Primary site is restored, configure PADR on Primary to replicate FROM the DR Vault, then perform controlled reverse switch.",
-              expectedResult: "All changes made on the DR Vault are synchronized back to Primary without data loss.",
+              action:
+                "When Primary site is restored, configure PADR on Primary to replicate FROM the DR Vault, then perform controlled reverse switch.",
+              expectedResult:
+                "All changes made on the DR Vault are synchronized back to Primary without data loss.",
             },
           ],
           enterpriseScenario: {
@@ -198,15 +232,20 @@ export const MODULE_15: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "Split-Brain condition occurs: users report password discrepancies across different data centers.",
-              rootCause: "A temporary network WAN outage caused the DR Vault to auto-promote while the Primary Vault was still running.",
-              securityImpact: "Catastrophic database divergence; conflicting password rotations on target servers.",
+              symptom:
+                "Split-Brain condition occurs: users report password discrepancies across different data centers.",
+              rootCause:
+                "A temporary network WAN outage caused the DR Vault to auto-promote while the Primary Vault was still running.",
+              securityImpact:
+                "Catastrophic database divergence; conflicting password rotations on target servers.",
               cyberArkCodeOrEvent: "SPLIT-BRAIN-CRIT",
             },
             {
               symptom: "PADR replication halts: 'ITATS004E Authentication failure for user DR'.",
-              rootCause: "The DR service account credential file (`user.ini`) became desynchronized after a Vault user update.",
-              securityImpact: "DR Vault falls behind real-time state; RPO expands to days, exposing organization to data loss.",
+              rootCause:
+                "The DR service account credential file (`user.ini`) became desynchronized after a Vault user update.",
+              securityImpact:
+                "DR Vault falls behind real-time state; RPO expands to days, exposing organization to data loss.",
               cyberArkCodeOrEvent: "ITATS004E",
             },
           ],
@@ -215,19 +254,24 @@ export const MODULE_15: ClassCurriculum = {
               stepNumber: 1,
               diagnosticAction: "Examine padr.log on DR Vault for synchronization error codes.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\PADR\\padr.log",
-              remediation: "Search for network timeout or authentication failures. Verify TCP 1858 connectivity to Primary Vault.",
+              remediation:
+                "Search for network timeout or authentication failures. Verify TCP 1858 connectivity to Primary Vault.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Re-create DR credential file using CreateCredFile utility.",
-              logFileOrConsole: "CreateCredFile.exe C:\\Keys\\user.ini /Password <Password> /AppType PADR",
-              remediation: "Replaces invalid credential file with a newly encrypted machine-bound ticket.",
+              logFileOrConsole:
+                "CreateCredFile.exe C:\\Keys\\user.ini /Password <Password> /AppType PADR",
+              remediation:
+                "Replaces invalid credential file with a newly encrypted machine-bound ticket.",
             },
             {
               stepNumber: 3,
-              diagnosticAction: "In split-brain event, immediately halt PrivateArk Server on the unauthorized node.",
+              diagnosticAction:
+                "In split-brain event, immediately halt PrivateArk Server on the unauthorized node.",
               logFileOrConsole: "PrivateArk Server Administration GUI / services.msc",
-              remediation: "Determine which node holds the most authoritative recent data, discard divergent data on the other, and re-initialize replication.",
+              remediation:
+                "Determine which node holds the most authoritative recent data, discard divergent data on the other, and re-initialize replication.",
             },
           ],
           diagnosticEvidence: [
@@ -259,7 +303,8 @@ export const MODULE_15: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m15-q01",
-              question: "What is the primary architectural role of the CyberArk Disaster Recovery service (PADR.exe) on the DR Vault host?",
+              question:
+                "What is the primary architectural role of the CyberArk Disaster Recovery service (PADR.exe) on the DR Vault host?",
               options: [
                 "It serves web pages to end users.",
                 "It continuously pulls database transaction log deltas from the Primary Vault over TCP 1858 and keeps the standby database synchronized.",
@@ -273,7 +318,8 @@ export const MODULE_15: ClassCurriculum = {
             },
             {
               id: "m15-q02",
-              question: "What catastrophic condition occurs if a network partition causes both the Primary Vault and DR Vault to act as active Primaries at the same time?",
+              question:
+                "What catastrophic condition occurs if a network partition causes both the Primary Vault and DR Vault to act as active Primaries at the same time?",
               options: [
                 "The Vault computers will overheat.",
                 "A Split-Brain condition, causing conflicting password rotations, divergent database versions, and corrupted credential state.",
@@ -287,7 +333,8 @@ export const MODULE_15: ClassCurriculum = {
             },
             {
               id: "m15-q03",
-              question: "During standby replication mode, is the PrivateArk Server database engine running on the DR Vault host?",
+              question:
+                "During standby replication mode, is the PrivateArk Server database engine running on the DR Vault host?",
               options: [
                 "Yes, it is running and accepting client connections.",
                 "No, the database engine is stopped/idle while PADR updates the underlying database files.",
@@ -302,20 +349,70 @@ export const MODULE_15: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m15-ex01",
-            title: "Simulate Disaster Recovery Failover and Validate Standby Promotion",
+            title: "Verify Disaster Recovery Readiness & Control-Plane Continuity",
+            objective:
+              "Inspect live component connectivity in Dashboard, review PADR failover gates and split-brain prevention steps, and validate the simulated control-plane baseline (Lab 01).",
             scenario:
-              "Review the disaster recovery operational status, simulate a primary communication interruption, verify failover gates, and confirm that the standby node can assume primary responsibilities.",
+              "Before a scheduled DR table-top exercise, audit component health across Vault, PVWA, CPM, and PSM in Dashboard and review the PADR failover runbook criteria.",
+            prerequisites: [
+              "Review PADR Replication over TCP 1858 and Split-Brain Defense in Section 1–4.",
+            ],
+            startingState:
+              "Simulated Vault, PVWA, CPM, and PSM control-plane nodes report active connectivity.",
             instructions: [
-              "Navigate to the Overview or PAM Environment console.",
-              "Inspect component connectivity and failover status indicators.",
-              "Review the disaster recovery runbook and operational criteria.",
-              "Confirm that component communication pathways support dynamic failover redirection.",
+              "Open the Dashboard console and confirm Digital Vault, PVWA, CPM, and PSM report healthy heartbeats.",
+              "Review the Standard Operating Procedure in Section 3 for controlled Primary-to-DR failover and failback verification.",
+              "Inspect Reports & Audit to verify continuity of CPM and PSM operational records.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 7 Lab 01 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Dashboard and verify Vault, PVWA, CPM, and PSM platform health.",
+                explanation:
+                  "Baseline component telemetry establishes pre-failover health before testing DR redirection.",
+                expectedResult: "All four core services display online health indicators.",
+              },
+              {
+                action:
+                  "Review the PADR failover/failback sequence in Section 3 and failure scenarios in Section 7.",
+                explanation:
+                  "Ensuring Primary Vault is fenced before DR promotion prevents catastrophic split-brain divergence.",
+                expectedResult:
+                  "Confirmed split-brain defense controls and Vault.ini client redirection sequence.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Validates all 7 Lab 01 control-plane baseline objectives.",
+                expectedResult: "All 7/7 Lab 01 objectives pass (100/100).",
+              },
             ],
             targetConsole: "overview",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-vault",
             validationCriteria:
-              "Disaster recovery topology and failover readiness are verified in the environment view.",
+              "Control-plane health baseline and DR readiness verified (7/7 Lab 01 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "A Lab 01 baseline objective reports pending.",
+                hint: "Confirm baseline Safes, CPM operations, and audit records are present.",
+                correctiveAction:
+                  "Click Reset Simulator in the top subnav if baseline state was cleared, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Verify Post-Recovery Break-Glass Account Inventory",
+              scenario:
+                "During a DR event, emergency break-glass credentials must be immediately identifiable.",
+              goal: "Without step-by-step instructions, locate EMERGENCY-SAFE in Accounts and identify the break-glass identities protected inside it.",
+              targetConsole: "accounts",
+              successCriteria: [
+                "Located EMERGENCY-SAFE accounts (`shared_ops` and `cisco_enable`).",
+                "Verified both break-glass accounts have accountable owners and Managed status.",
+              ],
+            },
+            simulationLimitationNote:
+              "Live Primary-to-DR PADR service failover promotion and split-brain fencing require multi-host infrastructure outside this browser simulator. Live validation verifies the simulated 4-pillar control-plane baseline (Lab 01).",
           },
           completionCriteria: [
             "Deconstructed PADR replication mechanisms over TCP 1858.",

@@ -29,7 +29,8 @@ export const MODULE_20: ClassCurriculum = {
           id: "m20-l01",
           number: "20.1",
           title: "Enterprise PAM Administrator Certification Exam",
-          subtitle: "Comprehensive 25-question scenario assessment and end-to-end operational capstone verification",
+          subtitle:
+            "Comprehensive 25-question scenario assessment and end-to-end operational capstone verification",
           estimatedMinutes: 45,
           learningObjectives: [
             "Demonstrate comprehensive theoretical and operational mastery across the 19 enterprise PAM administration domains.",
@@ -70,7 +71,8 @@ export const MODULE_20: ClassCurriculum = {
               {
                 component: "PSM Session Bastion",
                 role: "Air-gapped jump host proxy injecting vaulted credentials and recording keystroke/video sessions.",
-                networkProtocols: "RDP 3389 / HTTPS 443 Inbound; TCP 1858 to Vault; Target ports outbound",
+                networkProtocols:
+                  "RDP 3389 / HTTPS 443 Inbound; TCP 1858 to Vault; Target ports outbound",
                 securityBoundary: "Bastion Proxy Subnet",
               },
             ],
@@ -78,53 +80,69 @@ export const MODULE_20: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Certified Administrator Candidate",
-                action: "Initiates Module 20 capstone exam; reviews enterprise architecture scenarios.",
+                action:
+                  "Initiates Module 20 capstone exam; reviews enterprise architecture scenarios.",
                 channelOrProtocol: "PVWA Academy Interface",
-                verificationRule: "Candidate evaluates multi-domain architectural and operational trade-offs.",
+                verificationRule:
+                  "Candidate evaluates multi-domain architectural and operational trade-offs.",
               },
               {
                 stepNumber: 2,
                 actor: "Certified Administrator Candidate",
-                action: "Answers 25 scenario-based knowledge checkpoint questions covering Modules 01 through 19.",
+                action:
+                  "Answers 25 scenario-based knowledge checkpoint questions covering Modules 01 through 19.",
                 channelOrProtocol: "Interactive Checkpoint Engine",
-                verificationRule: "Scoring engine evaluates answers against verified enterprise best practices.",
+                verificationRule:
+                  "Scoring engine evaluates answers against verified enterprise best practices.",
               },
               {
                 stepNumber: 3,
                 actor: "Certified Administrator Candidate",
-                action: "Launches simulator capstone workflow: verifies Safe permissions, onboards credential, and verifies health.",
+                action:
+                  "Launches simulator capstone workflow: verifies Safe permissions, onboards credential, and verifies health.",
                 channelOrProtocol: "Simulator Operations Consoles",
-                verificationRule: "Deterministic state engine validates execution of required operational tasks.",
+                verificationRule:
+                  "Deterministic state engine validates execution of required operational tasks.",
               },
               {
                 stepNumber: 4,
                 actor: "Evaluation Engine",
-                action: "Computes cumulative score; generates certification outcome and updates learner transcript.",
+                action:
+                  "Computes cumulative score; generates certification outcome and updates learner transcript.",
                 channelOrProtocol: "Certification Evaluation Ledger",
-                verificationRule: "Passing score (>= 80%) unlocks Administrator Qualification status.",
+                verificationRule:
+                  "Passing score (>= 80%) unlocks Administrator Qualification status.",
               },
             ],
           },
           terminology: [
             {
               term: "Enterprise PAM Administrator",
-              definition: "A certified technical professional qualified to deploy, configure, govern, and troubleshoot enterprise privileged access infrastructure.",
-              enterpriseContext: "Responsible for defending enterprise Tier-0 assets, enforcing least privilege, and ensuring regulatory compliance.",
+              definition:
+                "A certified technical professional qualified to deploy, configure, govern, and troubleshoot enterprise privileged access infrastructure.",
+              enterpriseContext:
+                "Responsible for defending enterprise Tier-0 assets, enforcing least privilege, and ensuring regulatory compliance.",
             },
             {
               term: "Defense-in-Depth",
-              definition: "A security architecture layering multiple defensive mechanisms (network zoning, OS hardening, envelope encryption, dual control, session recording).",
-              enterpriseContext: "Guarantees that the compromise of any single component or credential does not yield access to the broader environment.",
+              definition:
+                "A security architecture layering multiple defensive mechanisms (network zoning, OS hardening, envelope encryption, dual control, session recording).",
+              enterpriseContext:
+                "Guarantees that the compromise of any single component or credential does not yield access to the broader environment.",
             },
             {
               term: "Non-Repudiation",
-              definition: "The assurance that an individual cannot deny the authenticity of their signature on a document or the sending of a message.",
-              enterpriseContext: "Enforced in PAM via individual Directory Mapping, Dual Control approvals, and immutable Vault audit trails.",
+              definition:
+                "The assurance that an individual cannot deny the authenticity of their signature on a document or the sending of a message.",
+              enterpriseContext:
+                "Enforced in PAM via individual Directory Mapping, Dual Control approvals, and immutable Vault audit trails.",
             },
             {
               term: "Zero Standing Privileges (ZSP)",
-              definition: "A modern security posture where human operators possess no static elevated credentials, receiving access only just-in-time via brokered sessions.",
-              enterpriseContext: "The ultimate objective of mature enterprise Privileged Access Management programs.",
+              definition:
+                "A modern security posture where human operators possess no static elevated credentials, receiving access only just-in-time via brokered sessions.",
+              enterpriseContext:
+                "The ultimate objective of mature enterprise Privileged Access Management programs.",
             },
           ],
           administratorResponsibilities: [
@@ -137,20 +155,26 @@ export const MODULE_20: ClassCurriculum = {
             {
               name: "Continuous Compliance Baselines",
               settingOrObject: "Master Policy & Target Platforms",
-              description: "Universal security rules mandating password rotation <= 90 days, session recording, and dual-control approval.",
-              productionBestPractice: "Review Master Policy exceptions quarterly with Chief Information Security Officer (CISO).",
+              description:
+                "Universal security rules mandating password rotation <= 90 days, session recording, and dual-control approval.",
+              productionBestPractice:
+                "Review Master Policy exceptions quarterly with Chief Information Security Officer (CISO).",
             },
             {
               name: "Disaster Recovery Readiness Audit",
               settingOrObject: "PADR Replication & Backup Repositories",
-              description: "Continuous verification of sub-60-second replication latency and daily encrypted backup archives.",
-              productionBestPractice: "Automate daily health check alerts verifying `padr.log` and `backup.log` completion statuses.",
+              description:
+                "Continuous verification of sub-60-second replication latency and daily encrypted backup archives.",
+              productionBestPractice:
+                "Automate daily health check alerts verifying `padr.log` and `backup.log` completion statuses.",
             },
             {
               name: "Bastion Hardening Verification",
               settingOrObject: "Vault OS & PSM AppLocker Policies",
-              description: "Strict isolation of component hosts with zero direct user access and drop-silent firewall rules.",
-              productionBestPractice: "Re-run OS hardening and AppLocker verification scripts after every operating system patch cycle.",
+              description:
+                "Strict isolation of component hosts with zero direct user access and drop-silent firewall rules.",
+              productionBestPractice:
+                "Re-run OS hardening and AppLocker verification scripts after every operating system patch cycle.",
             },
           ],
           operationalProcedures: [
@@ -158,26 +182,34 @@ export const MODULE_20: ClassCurriculum = {
               stepNumber: 1,
               title: "Review Assessment Instructions",
               action: "Carefully read all 25 scenario questions in the Knowledge Checkpoint panel.",
-              expectedResult: "Questions cover architecture, Safes, accounts, dependents, PSM, DR, troubleshooting, and security.",
-              operatorNotes: "Take your time: evaluate each scenario based on production best practices and root-cause evidence.",
+              expectedResult:
+                "Questions cover architecture, Safes, accounts, dependents, PSM, DR, troubleshooting, and security.",
+              operatorNotes:
+                "Take your time: evaluate each scenario based on production best practices and root-cause evidence.",
             },
             {
               stepNumber: 2,
               title: "Execute Capstone Simulator Workflow",
-              action: "Navigate across Accounts, Safes, CPM, and PSM consoles to verify system health and complete required lab tasks.",
-              expectedResult: "All simulator objectives validated with green checkmarks in the evaluation checklist.",
+              action:
+                "Navigate across Accounts, Safes, CPM, and PSM consoles to verify system health and complete required lab tasks.",
+              expectedResult:
+                "All simulator objectives validated with green checkmarks in the evaluation checklist.",
             },
             {
               stepNumber: 3,
               title: "Submit Checkpoint Answers",
-              action: "Select your answers for all 25 questions and review the detailed technical explanations.",
-              expectedResult: "Answers recorded in learner progress store with instant feedback and score tabulation.",
+              action:
+                "Select your answers for all 25 questions and review the detailed technical explanations.",
+              expectedResult:
+                "Answers recorded in learner progress store with instant feedback and score tabulation.",
             },
             {
               stepNumber: 4,
               title: "Final Certification Verification",
-              action: "Confirm that all 20 modules in the Administrator Curriculum reflect completed status.",
-              expectedResult: "Learner transcript registers 100% completion of the Flagship Administrator Curriculum.",
+              action:
+                "Confirm that all 20 modules in the Administrator Curriculum reflect completed status.",
+              expectedResult:
+                "Learner transcript registers 100% completion of the Flagship Administrator Curriculum.",
             },
           ],
           enterpriseScenario: {
@@ -193,14 +225,18 @@ export const MODULE_20: ClassCurriculum = {
           failureScenarios: [
             {
               symptom: "Assessment score falls below 80% passing threshold.",
-              rootCause: "Gaps in specific domain knowledge (e.g., Safe permission dependencies, error code classification, or DR failback).",
-              securityImpact: "Candidate must review module instructional materials and re-attempt the assessment.",
+              rootCause:
+                "Gaps in specific domain knowledge (e.g., Safe permission dependencies, error code classification, or DR failback).",
+              securityImpact:
+                "Candidate must review module instructional materials and re-attempt the assessment.",
               cyberArkCodeOrEvent: "QUAL-RETRY",
             },
             {
               symptom: "Simulator capstone exercise fails validation checklist.",
-              rootCause: "One or more operational tasks (e.g. pre-verification, Safe membership, or session termination) omitted.",
-              securityImpact: "Practical operational readiness unconfirmed; requires hands-on execution in simulator.",
+              rootCause:
+                "One or more operational tasks (e.g. pre-verification, Safe membership, or session termination) omitted.",
+              securityImpact:
+                "Practical operational readiness unconfirmed; requires hands-on execution in simulator.",
               cyberArkCodeOrEvent: "LAB-INCOMPLETE",
             },
           ],
@@ -209,19 +245,23 @@ export const MODULE_20: ClassCurriculum = {
               stepNumber: 1,
               diagnosticAction: "Review question explanations for any incorrect answers.",
               logFileOrConsole: "PVWA Checkpoint Interface",
-              remediation: "Re-read the corresponding module (e.g. Module 04 for Safe permissions, Module 15 for DR failover).",
+              remediation:
+                "Re-read the corresponding module (e.g. Module 04 for Safe permissions, Module 15 for DR failover).",
             },
             {
               stepNumber: 2,
-              diagnosticAction: "Verify pending simulator lab objectives in the Live Objective Status checklist.",
+              diagnosticAction:
+                "Verify pending simulator lab objectives in the Live Objective Status checklist.",
               logFileOrConsole: "Practical Exercise Card",
-              remediation: "Jump to the required operational console and execute the missing administrative action.",
+              remediation:
+                "Jump to the required operational console and execute the missing administrative action.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Re-run validation once all objectives report completed evidence.",
               logFileOrConsole: "Practical Exercise Card > Validate & Complete",
-              remediation: "Confirms 100/100 score and seals capstone completion in learner progress.",
+              remediation:
+                "Confirms 100/100 score and seals capstone completion in learner progress.",
             },
           ],
           diagnosticEvidence: [
@@ -246,7 +286,8 @@ export const MODULE_20: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m20-q01",
-              question: "Which communication protocol and port is used exclusively for all inbound traffic to the Digital Vault kernel?",
+              question:
+                "Which communication protocol and port is used exclusively for all inbound traffic to the Digital Vault kernel?",
               options: [
                 "HTTPS over TCP Port 443",
                 "Encrypted Vault Protocol over TCP Port 1858",
@@ -260,7 +301,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q02",
-              question: "What is the primary operational advantage of using Directory Mapping over creating local Vault users?",
+              question:
+                "What is the primary operational advantage of using Directory Mapping over creating local Vault users?",
               options: [
                 "It eliminates the need for Master Keys.",
                 "It ensures automated provisioning and immediate de-provisioning tied directly to Active Directory group membership.",
@@ -274,7 +316,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q03",
-              question: "Why should an administrator NEVER modify out-of-the-box default platforms directly?",
+              question:
+                "Why should an administrator NEVER modify out-of-the-box default platforms directly?",
               options: [
                 "Default platforms are read-only and cannot be saved.",
                 "Software upgrades can overwrite default platform files, destroying customizations; best practice is always to duplicate and edit the clone.",
@@ -288,13 +331,9 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q04",
-              question: "Which Safe permission allows an engineer to launch a recorded session through PSM without ever viewing or copying the plaintext password?",
-              options: [
-                "Retrieve accounts",
-                "Use accounts",
-                "Manage Safe",
-                "Unlock accounts",
-              ],
+              question:
+                "Which Safe permission allows an engineer to launch a recorded session through PSM without ever viewing or copying the plaintext password?",
+              options: ["Retrieve accounts", "Use accounts", "Manage Safe", "Unlock accounts"],
               correctIndex: 1,
               explanation:
                 "'Use accounts' allows transparent session initiation via PSM without exposing the plaintext secret. 'Retrieve accounts' allows viewing the actual password and must be strictly restricted.",
@@ -302,7 +341,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q05",
-              question: "Which five properties are fundamentally required to onboard an Account Object in the Digital Vault?",
+              question:
+                "Which five properties are fundamentally required to onboard an Account Object in the Digital Vault?",
               options: [
                 "Safe, Platform, Address, Username, and Secret (Password/Key)",
                 "IP Address, MAC Address, Domain, User Group, and Safe",
@@ -316,7 +356,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q06",
-              question: "Why does a standard CPM 'Change' operation fail when an account's password has become desynchronized out-of-band on the target system?",
+              question:
+                "Why does a standard CPM 'Change' operation fail when an account's password has become desynchronized out-of-band on the target system?",
               options: [
                 "Because the CPM service stops.",
                 "Because a standard Change operation requires authenticating with the old password first; if the Vault's recorded password does not match the target, authentication fails.",
@@ -330,7 +371,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q07",
-              question: "What catastrophic failure occurs if a domain service account password is changed in Active Directory without updating remote services that run under it?",
+              question:
+                "What catastrophic failure occurs if a domain service account password is changed in Active Directory without updating remote services that run under it?",
               options: [
                 "The target hard drive is erased.",
                 "The remote services fail to authenticate, trigger account lockouts in Active Directory, and crash with Win32 Error 1069.",
@@ -344,7 +386,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q08",
-              question: "Which Safe permission MUST a manager possess to be an authorized approver for dual-control access requests in that Safe?",
+              question:
+                "Which Safe permission MUST a manager possess to be an authorized approver for dual-control access requests in that Safe?",
               options: [
                 "Access without confirmation",
                 "Authorize account access",
@@ -358,7 +401,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q09",
-              question: "What is the primary function of an Auto-Onboarding Rule in enterprise discovery workflows?",
+              question:
+                "What is the primary function of an Auto-Onboarding Rule in enterprise discovery workflows?",
               options: [
                 "To reboot the Vault server nightly.",
                 "To automatically evaluate pending discovered accounts against criteria and onboard matching accounts into designated Safes and Platforms without manual triage.",
@@ -372,7 +416,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q10",
-              question: "How does the Privileged Session Manager (PSM) achieve zero-knowledge credential isolation for administrative users?",
+              question:
+                "How does the Privileged Session Manager (PSM) achieve zero-knowledge credential isolation for administrative users?",
               options: [
                 "By emailing the password to the user in a text file.",
                 "By air-gapping the connection: the user connects to PSM; the PSM retrieves the credential from the Vault and injects it directly into the target protocol stream without revealing plaintext.",
@@ -386,7 +431,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q11",
-              question: "What dual recording streams does the Privileged Session Manager (PSM) capture concurrently during an active session?",
+              question:
+                "What dual recording streams does the Privileged Session Manager (PSM) capture concurrently during an active session?",
               options: [
                 "Audio from the microphone and GPS coordinates.",
                 "Synchronized optical video frame deltas and text-indexed keystroke inputs.",
@@ -400,7 +446,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q12",
-              question: "Why is the Digital Vault audit trail described as 'cryptographically immutable'?",
+              question:
+                "Why is the Digital Vault audit trail described as 'cryptographically immutable'?",
               options: [
                 "Because it is written onto write-once optical CD-ROMs.",
                 "Because audit records are stored in append-only tables encrypted with Vault master keys, and cannot be edited or deleted by any user or administrator.",
@@ -414,7 +461,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q13",
-              question: "Why should a production Digital Vault server host NEVER be joined to an enterprise Active Directory domain?",
+              question:
+                "Why should a production Digital Vault server host NEVER be joined to an enterprise Active Directory domain?",
               options: [
                 "Because Windows Server does not support Active Directory.",
                 "To prevent a domain-level compromise (such as a compromised Domain Admin or Kerberos attack) from compromising the Vault operating system.",
@@ -428,7 +476,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q14",
-              question: "Why does the Digital Vault utilize a native backup utility (PARASW) rather than standard third-party backup agents installed on the host?",
+              question:
+                "Why does the Digital Vault utilize a native backup utility (PARASW) rather than standard third-party backup agents installed on the host?",
               options: [
                 "Because third-party agents are too expensive.",
                 "To preserve the Vault's OS hardening and isolation boundary, preventing third-party software vulnerabilities and unmonitored services from running on the bastion host.",
@@ -442,7 +491,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q15",
-              question: "What catastrophic operational condition occurs if a network partition causes both the Primary Vault and DR Vault to act as active Primaries simultaneously?",
+              question:
+                "What catastrophic operational condition occurs if a network partition causes both the Primary Vault and DR Vault to act as active Primaries simultaneously?",
               options: [
                 "The computer monitors will turn off.",
                 "A Split-Brain condition, causing conflicting password rotations, divergent database versions, and corrupted credential state.",
@@ -456,7 +506,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q16",
-              question: "What is the primary function of the 'Server.key' in the Digital Vault cryptographic hierarchy?",
+              question:
+                "What is the primary function of the 'Server.key' in the Digital Vault cryptographic hierarchy?",
               options: [
                 "It is used by end users to log into the PVWA portal.",
                 "It is the master symmetric key used by the running Vault server to encrypt and decrypt the individual Safe Keys.",
@@ -470,7 +521,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q17",
-              question: "What is the primary function of a Component Heartbeat in the PAM architecture?",
+              question:
+                "What is the primary function of a Component Heartbeat in the PAM architecture?",
               options: [
                 "To rotate domain passwords automatically.",
                 "To allow components (CPM, PSM, PVWA) to periodically report their operational health, service status, and active load to the Vault database.",
@@ -484,7 +536,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q18",
-              question: "What is the primary architectural difference between error code CACPM072E and error code CACPM250E?",
+              question:
+                "What is the primary architectural difference between error code CACPM072E and error code CACPM250E?",
               options: [
                 "CACPM072E is for Linux; CACPM250E is for Windows.",
                 "CACPM072E indicates an infrastructure failure connecting to the Vault or missing Safe permissions; CACPM250E indicates an authentication or execution failure on the target endpoint.",
@@ -498,7 +551,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q19",
-              question: "What is Step 1 of the 5-Step Systematic Diagnostic Protocol in enterprise PAM troubleshooting?",
+              question:
+                "What is Step 1 of the 5-Step Systematic Diagnostic Protocol in enterprise PAM troubleshooting?",
               options: [
                 "Reboot the Vault server immediately.",
                 "Symptom & Scope Analysis: Determine the blast radius and isolate whether the failure is global, regional, or specific to a single account/platform.",
@@ -512,13 +566,9 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q20",
-              question: "Which utility is used to regenerate encrypted, machine-bound credential files (user.ini) when a component encounters error ITATS004E?",
-              options: [
-                "CreateCredFile.exe",
-                "notepad.exe",
-                "diskpart.exe",
-                "FormatVault.exe",
-              ],
+              question:
+                "Which utility is used to regenerate encrypted, machine-bound credential files (user.ini) when a component encounters error ITATS004E?",
+              options: ["CreateCredFile.exe", "notepad.exe", "diskpart.exe", "FormatVault.exe"],
               correctIndex: 0,
               explanation:
                 "CreateCredFile.exe generates encrypted credential files bound to the local machine's cryptographic hardware token and executable path, restoring authenticated component communication with the Vault.",
@@ -526,7 +576,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q21",
-              question: "When a user launching a session through PSM receives error PSMSR126E, which subsystem on the PSM host is responsible for blocking the execution?",
+              question:
+                "When a user launching a session through PSM receives error PSMSR126E, which subsystem on the PSM host is responsible for blocking the execution?",
               options: [
                 "Windows Defender Antivirus",
                 "Windows AppLocker",
@@ -540,7 +591,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q22",
-              question: "Why is a Hardware Security Module (HSM) used in high-assurance PAM deployments?",
+              question:
+                "Why is a Hardware Security Module (HSM) used in high-assurance PAM deployments?",
               options: [
                 "To speed up internet browsing.",
                 "To store and execute operations with the Vault Server Key inside tamper-resistant hardware silicon, preventing the key from ever existing as a plaintext file on disk.",
@@ -568,7 +620,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q24",
-              question: "Where are newly discovered accounts stored prior to being matched by an auto-onboarding rule or approved by an administrator?",
+              question:
+                "Where are newly discovered accounts stored prior to being matched by an auto-onboarding rule or approved by an administrator?",
               options: [
                 "In the Windows Recycle Bin.",
                 "In the Pending Accounts queue in the PVWA.",
@@ -582,7 +635,8 @@ export const MODULE_20: ClassCurriculum = {
             },
             {
               id: "m20-q25",
-              question: "What action should an administrator take immediately if a Split-Brain condition is detected between Primary and DR Vaults?",
+              question:
+                "What action should an administrator take immediately if a Split-Brain condition is detected between Primary and DR Vaults?",
               options: [
                 "Allow both Vaults to continue running until the weekend.",
                 "Immediately halt the PrivateArk Server service on the secondary/unauthorized node to prevent further database divergence, isolate the primary, and execute a controlled resynchronization.",
@@ -598,20 +652,69 @@ export const MODULE_20: ClassCurriculum = {
           practicalExercise: {
             id: "m20-ex01",
             title: "Execute Enterprise PAM Administrator Capstone Workflow",
+            objective:
+              "Demonstrate end-to-end PAM administration readiness across Dashboard, Safes, Accounts/CPM, PSM, and Reports & Audit, pass the 25-question certification exam (>= 80%), and validate the capstone control-plane state.",
             scenario:
-              "Complete the comprehensive capstone qualification workflow: audit the PAM architecture, verify Safe permission boundaries, onboard and manage a target account, execute an approved session, and resolve an operational failure.",
+              "Complete the final capstone qualification check across the full PAM lifecycle: verify control-plane health, confirm least-privilege Safe boundaries, validate Managed account status, confirm audited PSM session lifecycle, and pass the 25-question certification assessment.",
+            prerequisites: [
+              "Completed Modules 01–19 or equivalent hands-on mastery across Safes, Accounts, CPM, PSM, and Troubleshooting.",
+            ],
+            startingState:
+              "Full enterprise PAM simulator active across all consoles; 25-question certification exam loaded in Knowledge Checkpoints.",
             instructions: [
-              "Review the PAM architecture components and verify that all core nodes are online in the Overview console.",
-              "Inspect Safe permissions in the Safes console and ensure least privilege is enforced.",
-              "Verify that target credentials in the Accounts console transition to Managed status.",
-              "Launch a brokered session through the PSM console and terminate cleanly.",
-              "Verify that operational evidence is recorded in the Reports & Audit console.",
+              "Open Dashboard and verify Vault, PVWA, CPM, and PSM report healthy online status.",
+              "Confirm least-privilege Safe boundaries in Safes (`DBA-SAFE` without Retrieve accounts for `dba_user`) and Managed credentials in Accounts.",
+              "Verify audited CPM rotation and terminated PSM session records exist in Reports & Audit.",
+              "Complete the 25-question Enterprise PAM Administrator Certification Exam in Knowledge Checkpoints (score >= 20/25, 80%), then validate and complete Module 20.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open Dashboard and verify all four PAS control-plane components are healthy.",
+                explanation:
+                  "Confirms baseline operational readiness across Vault, PVWA, CPM, and PSM.",
+                expectedResult: "All four services display active status in Platform Health.",
+              },
+              {
+                action: "Verify Safes, Accounts, CPM, and PSM audit evidence in Reports & Audit.",
+                explanation:
+                  "Demonstrates end-to-end operational traceability across every PAM lifecycle stage.",
+                expectedResult:
+                  "Audit ledger shows Verified/Changed credentials, Safe governance, and terminated PSM session records.",
+              },
+              {
+                action:
+                  "Complete all 25 certification exam questions (achieving >= 80% / 20 correct) and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Module 20 enforces realistic certification readiness: both live simulator validation and >= 80% exam mastery are required before marking the track complete.",
+                expectedResult:
+                  "Lab validation passes (100/100), exam passes (>= 80%), and Module 20 unlocks final track completion.",
+              },
             ],
             targetConsole: "overview",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-vault",
             validationCriteria:
-              "All capstone operational verification gates are completed across the simulator consoles.",
+              "All capstone control-plane validation checks passed (7/7 Lab 01 objectives) alongside >= 80% on the 25-question exam.",
+            troubleshootingHints: [
+              {
+                symptom: "'Complete Lesson' remains locked after validating the capstone lab.",
+                hint: "Module 20 requires scoring at least 20/25 (80%) on the Knowledge Checkpoint certification exam.",
+                correctiveAction:
+                  "Review missed questions in the Knowledge Checkpoints panel, retry until you reach >= 20/25, and then click Complete Lesson.",
+              },
+            ],
+            independentPractice: {
+              title: "Full-Lifecycle Unassisted Verification Drill",
+              scenario:
+                "Simulate an unassisted production handover review before receiving final certification sign-off.",
+              goal: "Without step-by-step guidance, confirm zero failed CPM accounts, at least one sealed PSM session, and least-privilege DBA-SAFE membership across the consoles.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Verified `DBA-SAFE` enforces least privilege without Retrieve accounts for `dba_user`.",
+                "Verified `svc_backup` recovery or documented exception status and reviewed full audit trail in Reports & Audit.",
+              ],
+            },
           },
           completionCriteria: [
             "Completed all 25 multi-domain scenario assessment questions with passing score.",

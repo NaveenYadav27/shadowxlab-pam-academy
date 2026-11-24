@@ -29,7 +29,8 @@ export const MODULE_01: ClassCurriculum = {
           id: "m01-l01",
           number: "1.1",
           title: "PAM Architecture Topology & Protocol Isolation",
-          subtitle: "Deconstructing Vault, PVWA, CPM, and PSM interactions across secure network boundaries",
+          subtitle:
+            "Deconstructing Vault, PVWA, CPM, and PSM interactions across secure network boundaries",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the four core components of an enterprise PAM deployment and their dedicated roles.",
@@ -52,7 +53,8 @@ export const MODULE_01: ClassCurriculum = {
               {
                 component: "Digital Vault",
                 role: "Encrypted relational database and security kernel. Stores credentials, cryptographic keys, access control lists, and audit trails. Executes on hardened Windows Server with all non-essential OS services and networking disabled.",
-                networkProtocols: "TCP 1858 (Inbound from PVWA, CPM, PSM; outbound traffic strictly blocked)",
+                networkProtocols:
+                  "TCP 1858 (Inbound from PVWA, CPM, PSM; outbound traffic strictly blocked)",
                 securityBoundary: "Tier-0 Air-Gapped / Isolated Management VLAN",
               },
               {
@@ -64,13 +66,15 @@ export const MODULE_01: ClassCurriculum = {
               {
                 component: "Central Policy Manager (CPM)",
                 role: "Background automation worker responsible for credential lifecycle. Periodically verifies, rotates, and reconciles passwords on remote target systems without user intervention.",
-                networkProtocols: "TCP 1858 (To Vault), RPC/SMB/SSH/SQL/HTTPS (From CPM to Target Systems)",
+                networkProtocols:
+                  "TCP 1858 (To Vault), RPC/SMB/SSH/SQL/HTTPS (From CPM to Target Systems)",
                 securityBoundary: "Management Subnet / Orchestration Tier",
               },
               {
                 component: "Privileged Session Manager (PSM)",
                 role: "High-security RDS-based proxy bastion. Injects vaulted credentials directly into destination protocols (RDP, SSH, Web), isolating end-user laptops from target production servers.",
-                networkProtocols: "HTTPS/RDP 3389 (User to PSM), RDP/SSH/HTTPS (PSM to Target), TCP 1858 (PSM to Vault)",
+                networkProtocols:
+                  "HTTPS/RDP 3389 (User to PSM), RDP/SSH/HTTPS (PSM to Target), TCP 1858 (PSM to Vault)",
                 securityBoundary: "Bastion Jump Subnet",
               },
             ],
@@ -78,60 +82,78 @@ export const MODULE_01: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Administrative User",
-                action: "Authenticates to PVWA via Corporate SSO / SAML with mandatory MFA token verification.",
+                action:
+                  "Authenticates to PVWA via Corporate SSO / SAML with mandatory MFA token verification.",
                 channelOrProtocol: "HTTPS (Port 443)",
-                verificationRule: "PVWA queries Vault over TCP 1858 to validate user license, group membership, and active sessions.",
+                verificationRule:
+                  "PVWA queries Vault over TCP 1858 to validate user license, group membership, and active sessions.",
               },
               {
                 stepNumber: 2,
                 actor: "PVWA Web Tier",
-                action: "Queries the Digital Vault to retrieve the list of Safes and accounts visible to the authenticated user.",
+                action:
+                  "Queries the Digital Vault to retrieve the list of Safes and accounts visible to the authenticated user.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
-                verificationRule: "Vault enforces Safe-level Access Control Lists (ACLs); user only sees authorized targets.",
+                verificationRule:
+                  "Vault enforces Safe-level Access Control Lists (ACLs); user only sees authorized targets.",
               },
               {
                 stepNumber: 3,
                 actor: "Administrative User",
-                action: "Clicks 'Connect' to initiate an administrative session to production database SRV-DB-01.",
+                action:
+                  "Clicks 'Connect' to initiate an administrative session to production database SRV-DB-01.",
                 channelOrProtocol: "PVWA REST API / RDP Session File (.rdp)",
-                verificationRule: "PVWA invokes PSM API to generate a one-time dynamic session token.",
+                verificationRule:
+                  "PVWA invokes PSM API to generate a one-time dynamic session token.",
               },
               {
                 stepNumber: 4,
                 actor: "Privileged Session Manager (PSM)",
-                action: "Retrieves target credential from Vault, connects to target host, and injects credential without showing plaintext to user.",
+                action:
+                  "Retrieves target credential from Vault, connects to target host, and injects credential without showing plaintext to user.",
                 channelOrProtocol: "RDP Port 3389 / Target SSH Port 22",
-                verificationRule: "Keystroke recorder and video capture worker start recording before session window opens.",
+                verificationRule:
+                  "Keystroke recorder and video capture worker start recording before session window opens.",
               },
               {
                 stepNumber: 5,
                 actor: "Central Policy Manager (CPM)",
-                action: "Detects session termination or scheduled interval and executes one-time password rotation on target host.",
+                action:
+                  "Detects session termination or scheduled interval and executes one-time password rotation on target host.",
                 channelOrProtocol: "Target Management Protocol (WMI/RPC/SSH)",
-                verificationRule: "CPM verifies new password hash matches Vault database state and marks account healthy.",
+                verificationRule:
+                  "CPM verifies new password hash matches Vault database state and marks account healthy.",
               },
             ],
           },
           terminology: [
             {
               term: "Digital Vault",
-              definition: "The core secure storage engine operating on an OS-hardened server where all secrets, keys, and audit records reside.",
-              enterpriseContext: "The Vault never initiates outbound connections; all components must poll or connect inbound on TCP 1858.",
+              definition:
+                "The core secure storage engine operating on an OS-hardened server where all secrets, keys, and audit records reside.",
+              enterpriseContext:
+                "The Vault never initiates outbound connections; all components must poll or connect inbound on TCP 1858.",
             },
             {
               term: "PVWA (Password Vault Web Access)",
-              definition: "The web-based graphical user interface and REST API gateway for end users and PAM administrators.",
-              enterpriseContext: "Enterprise deployments utilize load-balanced PVWA pools behind an application delivery controller (F5/Citrix).",
+              definition:
+                "The web-based graphical user interface and REST API gateway for end users and PAM administrators.",
+              enterpriseContext:
+                "Enterprise deployments utilize load-balanced PVWA pools behind an application delivery controller (F5/Citrix).",
             },
             {
               term: "CPM (Central Policy Manager)",
-              definition: "The automated daemon service responsible for testing, changing, and reconciling account credentials on remote endpoints.",
-              enterpriseContext: "Can be clustered or segmented across disparate geographical data centers to overcome firewall boundaries.",
+              definition:
+                "The automated daemon service responsible for testing, changing, and reconciling account credentials on remote endpoints.",
+              enterpriseContext:
+                "Can be clustered or segmented across disparate geographical data centers to overcome firewall boundaries.",
             },
             {
               term: "PSM (Privileged Session Manager)",
-              definition: "A secure jump server gateway that establishes isolated, recorded sessions to target assets without revealing secrets.",
-              enterpriseContext: "Prevents workstation-to-server malware injection; all access terminates on the PSM farm.",
+              definition:
+                "A secure jump server gateway that establishes isolated, recorded sessions to target assets without revealing secrets.",
+              enterpriseContext:
+                "Prevents workstation-to-server malware injection; all access terminates on the PSM farm.",
             },
           ],
           administratorResponsibilities: [
@@ -144,48 +166,63 @@ export const MODULE_01: ClassCurriculum = {
             {
               name: "Vault Firewall Rule: Port 1858",
               settingOrObject: "Inbound Windows Firewall on Vault Server",
-              description: "Restricts TCP 1858 inbound exclusively to the static IPs of PVWA, CPM, and PSM servers.",
-              productionBestPractice: "Never open TCP 1858 to wide corporate subnets. Reject all traffic from unauthorized hosts with drop-silent rules.",
+              description:
+                "Restricts TCP 1858 inbound exclusively to the static IPs of PVWA, CPM, and PSM servers.",
+              productionBestPractice:
+                "Never open TCP 1858 to wide corporate subnets. Reject all traffic from unauthorized hosts with drop-silent rules.",
             },
             {
               name: "PVWA Base URL & Session Timeout",
               settingOrObject: "PVWA Options > General > Application URL",
               description: "Configures canonical FQDN and inactive operator timeout period.",
-              productionBestPractice: "Enforce a maximum 15-minute inactivity timeout for PVWA web administrative sessions.",
+              productionBestPractice:
+                "Enforce a maximum 15-minute inactivity timeout for PVWA web administrative sessions.",
             },
             {
               name: "CPM Interval Scan Cycle",
               settingOrObject: "pm.ini / Platform Default Execution Interval",
-              description: "Defines the frequency at which CPM polls the Vault for pending password verification or rotation requests.",
-              productionBestPractice: "Set interval to 1–2 minutes (60–120s) in enterprise environments to minimize rotation backlog.",
+              description:
+                "Defines the frequency at which CPM polls the Vault for pending password verification or rotation requests.",
+              productionBestPractice:
+                "Set interval to 1–2 minutes (60–120s) in enterprise environments to minimize rotation backlog.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Component Heartbeat Verification",
-              action: "Log in to PVWA as PAM Administrator, navigate to Administration > System Health, and inspect component status pills.",
-              expectedResult: "Digital Vault, CPM, PSM, and PVWA nodes report 'Connected' with latency under 15ms.",
-              operatorNotes: "A warning or red pill indicates service stoppage or network routing partition on TCP 1858.",
+              action:
+                "Log in to PVWA as PAM Administrator, navigate to Administration > System Health, and inspect component status pills.",
+              expectedResult:
+                "Digital Vault, CPM, PSM, and PVWA nodes report 'Connected' with latency under 15ms.",
+              operatorNotes:
+                "A warning or red pill indicates service stoppage or network routing partition on TCP 1858.",
             },
             {
               stepNumber: 2,
               title: "Vault Bastion Inspection",
-              action: "Access the physical or hypervisor console of the Vault server and review PrivateArk Server console state.",
-              expectedResult: "PrivateArk Server engine reports 'The Server is UP and running'. Active threads and DB connections within limits.",
-              operatorNotes: "Do not attempt to RDP directly to the Vault server; remote desktop is permanently disabled by hardening scripts.",
+              action:
+                "Access the physical or hypervisor console of the Vault server and review PrivateArk Server console state.",
+              expectedResult:
+                "PrivateArk Server engine reports 'The Server is UP and running'. Active threads and DB connections within limits.",
+              operatorNotes:
+                "Do not attempt to RDP directly to the Vault server; remote desktop is permanently disabled by hardening scripts.",
             },
             {
               stepNumber: 3,
               title: "CPM Service Poll Verification",
-              action: "Inspect the CyberArk Password Manager service status on the CPM Windows Server host.",
-              expectedResult: "Service status is 'Running', and pm.log demonstrates continuous polling cycles without ITATS connection errors.",
+              action:
+                "Inspect the CyberArk Password Manager service status on the CPM Windows Server host.",
+              expectedResult:
+                "Service status is 'Running', and pm.log demonstrates continuous polling cycles without ITATS connection errors.",
             },
             {
               stepNumber: 4,
               title: "End-to-End Test Session",
-              action: "Select a test Windows local account, click 'Connect' via PSM, and verify that the session launches cleanly.",
-              expectedResult: "Target server desktop renders in secure session window; audit log records PSM Connect event.",
+              action:
+                "Select a test Windows local account, click 'Connect' via PSM, and verify that the session launches cleanly.",
+              expectedResult:
+                "Target server desktop renders in secure session window; audit log records PSM Connect event.",
             },
           ],
           enterpriseScenario: {
@@ -200,36 +237,49 @@ export const MODULE_01: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "PVWA displays 'Server Error in /PasswordVault Application' or 'ITATS006E Database is unavailable'.",
-              rootCause: "Network connectivity between PVWA and Vault over TCP 1858 is severed, or Vault service stopped.",
-              securityImpact: "All users locked out of credential checkouts and emergency access; critical business interruption.",
+              symptom:
+                "PVWA displays 'Server Error in /PasswordVault Application' or 'ITATS006E Database is unavailable'.",
+              rootCause:
+                "Network connectivity between PVWA and Vault over TCP 1858 is severed, or Vault service stopped.",
+              securityImpact:
+                "All users locked out of credential checkouts and emergency access; critical business interruption.",
               cyberArkCodeOrEvent: "ITATS006E",
             },
             {
-              symptom: "CPM fails to perform password rotation: 'CACPM072E Connection to Vault failed on port 1858'.",
-              rootCause: "Firewall rule dropped, CPM machine IP changed, or Vault credential file (user.ini) desynchronized.",
-              securityImpact: "Credentials expire on target systems without rotating; accounts fail compliance audit windows.",
+              symptom:
+                "CPM fails to perform password rotation: 'CACPM072E Connection to Vault failed on port 1858'.",
+              rootCause:
+                "Firewall rule dropped, CPM machine IP changed, or Vault credential file (user.ini) desynchronized.",
+              securityImpact:
+                "Credentials expire on target systems without rotating; accounts fail compliance audit windows.",
               cyberArkCodeOrEvent: "CACPM072E",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Execute network socket test from PVWA or CPM host to the Vault IP on port 1858.",
-              logFileOrConsole: "PowerShell: Test-NetConnection -ComputerName <Vault_IP> -Port 1858",
-              remediation: "If TcpTestSucceeded is False, inspect intermediate hardware firewalls, router ACLs, and Vault host firewall.",
+              diagnosticAction:
+                "Execute network socket test from PVWA or CPM host to the Vault IP on port 1858.",
+              logFileOrConsole:
+                "PowerShell: Test-NetConnection -ComputerName <Vault_IP> -Port 1858",
+              remediation:
+                "If TcpTestSucceeded is False, inspect intermediate hardware firewalls, router ACLs, and Vault host firewall.",
             },
             {
               stepNumber: 2,
-              diagnosticAction: "Inspect Vault server event and communication log for rejected connection attempts.",
+              diagnosticAction:
+                "Inspect Vault server event and communication log for rejected connection attempts.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\Server\\Logs\\italog.log",
-              remediation: "Search for 'Station is not defined' or IP mismatch errors. Add authorized IP to dbparm.ini AllowNodes list.",
+              remediation:
+                "Search for 'Station is not defined' or IP mismatch errors. Add authorized IP to dbparm.ini AllowNodes list.",
             },
             {
               stepNumber: 3,
-              diagnosticAction: "Verify that PrivateArk Server service is running and database engine has mounted encrypted drives.",
+              diagnosticAction:
+                "Verify that PrivateArk Server service is running and database engine has mounted encrypted drives.",
               logFileOrConsole: "PrivateArk Server Administration GUI / dbparm.ini",
-              remediation: "Restart the PrivateArk Server service or mount encrypted storage volume using recovery keys.",
+              remediation:
+                "Restart the PrivateArk Server service or mount encrypted storage volume using recovery keys.",
             },
           ],
           diagnosticEvidence: [
@@ -261,7 +311,8 @@ export const MODULE_01: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m01-q01",
-              question: "Which communication protocol and port does the Digital Vault use for all component interactions?",
+              question:
+                "Which communication protocol and port does the Digital Vault use for all component interactions?",
               options: [
                 "HTTPS over TCP Port 443",
                 "Proprietary encrypted Vault protocol over TCP Port 1858",
@@ -275,7 +326,8 @@ export const MODULE_01: ClassCurriculum = {
             },
             {
               id: "m01-q02",
-              question: "An administrative user reports that they cannot see any servers in the PVWA account inventory. What is the most probable architectural cause?",
+              question:
+                "An administrative user reports that they cannot see any servers in the PVWA account inventory. What is the most probable architectural cause?",
               options: [
                 "The target servers have shut down their SSH/RDP daemons.",
                 "The user has not been granted 'List accounts' permission on the Safes containing those server credentials.",
@@ -289,7 +341,8 @@ export const MODULE_01: ClassCurriculum = {
             },
             {
               id: "m01-q03",
-              question: "Why is remote desktop (RDP) typically disabled on a production Digital Vault server host?",
+              question:
+                "Why is remote desktop (RDP) typically disabled on a production Digital Vault server host?",
               options: [
                 "Windows Server does not support RDP on non-domain joined servers.",
                 "To comply with Vault OS hardening standards that eliminate remote attack vectors and ensure administration occurs only at the physical/hypervisor console.",
@@ -305,19 +358,77 @@ export const MODULE_01: ClassCurriculum = {
           practicalExercise: {
             id: "m01-ex01",
             title: "Inspect PAM Component Topology & Validate Network Heartbeats",
+            objective:
+              "Verify Digital Vault, PVWA, CPM, and PSM health indicators and confirm live onboarding, rotation, and session audit traces in the simulator.",
             scenario:
-              "You have been tasked as the lead PAM Administrator at GFS Corp to audit the four core components (Vault, PVWA, CPM, PSM), inspect their operational latency, and confirm that all components have established healthy communication with the Vault.",
+              "As the lead PAM Administrator at GFS Corp, audit the four core components (Vault, PVWA, CPM, PSM), inspect their operational latency, and confirm that all components have established healthy communication with the Vault.",
+            prerequisites: [
+              "Review Section 1–4 of Module 01 and inspect the Interactive Topology Explorer.",
+            ],
+            startingState:
+              "Baseline simulator active with Vault ONLINE, 7 Safes, 12 seeded accounts, CPM operation log, and 4 audit entries.",
             instructions: [
-              "Navigate to the Overview console to review system component health indicators.",
-              "Confirm that the Digital Vault state is Online and TCP 1858 communication is active.",
-              "Inspect the recorded component heartbeats for PVWA, CPM, and PSM.",
-              "Review the audit trail to verify that your administrative login was timestamped and cryptographically recorded.",
+              "Open the Dashboard (Overview) console and inspect the Platform Health panel for Digital Vault, PVWA, CPM, and PSM.",
+              "Verify the top header reports 'Vault: ONLINE' and check component latency/queue indicators.",
+              "Open Reports & Audit to inspect the baseline CPM Verify, Access Review, CPM Change, and PSM Terminate audit records.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 7 Lab 01 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Dashboard and inspect all four services in Platform Health.",
+                explanation:
+                  "Confirms each isolated PAS tier (Vault, PVWA, CPM, PSM) is reachable and reporting telemetry.",
+                expectedResult:
+                  "Vault, PVWA, CPM, and PSM all display active status with latency/job metrics.",
+              },
+              {
+                action:
+                  "Confirm the header indicator shows 'Vault: ONLINE' and review Safe/account counts.",
+                explanation:
+                  "Verifies PVWA has an authenticated TCP 1858 channel to the simulated Digital Vault.",
+                expectedResult:
+                  "Header badge reports ONLINE and subnav displays active Vault inventory counts.",
+              },
+              {
+                action:
+                  "Open Reports & Audit and review the chronological control-plane audit trail.",
+                explanation:
+                  "Demonstrates immutable Vault auditing across CPM rotation, Safe review, and PSM sessions.",
+                expectedResult:
+                  "Audit table lists CPM Verify, Access review, CPM Change warning, and Terminate PSM session events.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Evaluates all 7 Lab 01 architecture and control-flow objectives against live state.",
+                expectedResult: "All 7/7 Lab 01 objectives report passed (100/100).",
+              },
             ],
             targetConsole: "overview",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-vault",
             validationCriteria:
-              "The Digital Vault component boundary is confirmed active and all core components report healthy heartbeats in PamState.",
+              "All 7 Lab 01 component topology and control-flow audit objectives verified in live PamState.",
+            troubleshootingHints: [
+              {
+                symptom: "A Lab 01 trace objective (CPM, PSM, or onboarding) shows pending.",
+                hint: "Verify that baseline Safes, CPM operations, and audit events have not been cleared.",
+                correctiveAction:
+                  "Click Reset Simulator in the subnav or trigger a CPM Verify in CPM Operations, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Independent Control-Plane Exception Triage",
+              scenario:
+                "Without guided steps, use Dashboard and Accounts to identify which accounts currently require operator attention.",
+              goal: "Locate both the unmanaged database account and the failed backup rotation account.",
+              targetConsole: "accounts",
+              successCriteria: [
+                "Identified oracle on DB-ORA-01 as Unmanaged.",
+                "Identified svc_backup on WIN-SRV-02 as Rotation failed with failure detail 'Account locked on target'.",
+              ],
+            },
           },
           completionCriteria: [
             "Analyzed the four-component PAM architecture (Vault, PVWA, CPM, PSM).",

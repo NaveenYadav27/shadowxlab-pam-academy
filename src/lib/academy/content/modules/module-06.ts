@@ -29,7 +29,8 @@ export const MODULE_06: ClassCurriculum = {
           id: "m06-l01",
           number: "6.1",
           title: "Reconcile Accounts & Linked Credential Binding",
-          subtitle: "Recovering desynchronized passwords and configuring elevated administrative reset accounts",
+          subtitle:
+            "Recovering desynchronized passwords and configuring elevated administrative reset accounts",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the architectural difference between a standard CPM Password Change and an administrative Reconcile operation.",
@@ -59,7 +60,8 @@ export const MODULE_06: ClassCurriculum = {
               {
                 component: "Linked Reconcile Account",
                 role: "Elevated administrative credential with OS-level authority to reset other users' passwords on target systems without knowing the old password.",
-                networkProtocols: "RPC/SMB NetUserSetInfo, SSH sudo /usr/bin/passwd, SQL ALTER USER",
+                networkProtocols:
+                  "RPC/SMB NetUserSetInfo, SSH sudo /usr/bin/passwd, SQL ALTER USER",
                 securityBoundary: "Elevated Administrative Tier",
               },
               {
@@ -79,53 +81,68 @@ export const MODULE_06: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "CPM Polling Engine",
-                action: "Detects an account in 'Rotation Failed' status or receives an administrator-triggered Reconcile command.",
+                action:
+                  "Detects an account in 'Rotation Failed' status or receives an administrator-triggered Reconcile command.",
                 channelOrProtocol: "Vault Internal Queue (TCP 1858)",
-                verificationRule: "CPM verifies that a valid Reconcile Account is linked to the account or platform.",
+                verificationRule:
+                  "CPM verifies that a valid Reconcile Account is linked to the account or platform.",
               },
               {
                 stepNumber: 2,
                 actor: "Central Policy Manager (CPM)",
                 action: "Retrieves the Reconcile Account credentials from the Vault.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
-                verificationRule: "Vault confirms CPM has Retrieve and Use permissions on the Safe holding the Reconcile Account.",
+                verificationRule:
+                  "Vault confirms CPM has Retrieve and Use permissions on the Safe holding the Reconcile Account.",
               },
               {
                 stepNumber: 3,
                 actor: "Central Policy Manager (CPM)",
-                action: "Connects to target host using the Reconcile Account and executes administrative password reset for the target user.",
+                action:
+                  "Connects to target host using the Reconcile Account and executes administrative password reset for the target user.",
                 channelOrProtocol: "Win32 RPC / Linux SSH sudo",
-                verificationRule: "Target OS accepts password change command executed under elevated Reconcile principal context.",
+                verificationRule:
+                  "Target OS accepts password change command executed under elevated Reconcile principal context.",
               },
               {
                 stepNumber: 4,
                 actor: "Central Policy Manager (CPM)",
-                action: "Generates new password hash, stores it in the Vault database, and marks account status 'Managed'.",
+                action:
+                  "Generates new password hash, stores it in the Vault database, and marks account status 'Managed'.",
                 channelOrProtocol: "TCP 1858 to Vault",
-                verificationRule: "Vault commits new password version; failure flags cleared; audit event logged.",
+                verificationRule:
+                  "Vault commits new password version; failure flags cleared; audit event logged.",
               },
             ],
           },
           terminology: [
             {
               term: "Reconcile Account",
-              definition: "An elevated credential configured with administrative rights to forcibly reset passwords on target hosts without knowing current passwords.",
-              enterpriseContext: "Typically a Windows Domain Admin or a Unix account configured in /etc/sudoers with NOPASSWD for `/usr/bin/passwd`.",
+              definition:
+                "An elevated credential configured with administrative rights to forcibly reset passwords on target hosts without knowing current passwords.",
+              enterpriseContext:
+                "Typically a Windows Domain Admin or a Unix account configured in /etc/sudoers with NOPASSWD for `/usr/bin/passwd`.",
             },
             {
               term: "Logon Account",
-              definition: "A linked credential used to authenticate the initial connection to a target system when direct administrative login is disabled by policy.",
-              enterpriseContext: "Crucial for Linux environments where `PermitRootLogin no` is enforced in sshd_config.",
+              definition:
+                "A linked credential used to authenticate the initial connection to a target system when direct administrative login is disabled by policy.",
+              enterpriseContext:
+                "Crucial for Linux environments where `PermitRootLogin no` is enforced in sshd_config.",
             },
             {
               term: "Credential Desynchronization",
-              definition: "A condition where the password stored in the Vault does not match the active password on the target endpoint.",
-              enterpriseContext: "Occurs when local out-of-band changes happen or network drops occur mid-rotation.",
+              definition:
+                "A condition where the password stored in the Vault does not match the active password on the target endpoint.",
+              enterpriseContext:
+                "Occurs when local out-of-band changes happen or network drops occur mid-rotation.",
             },
             {
               term: "Platform-Level vs Account-Level Linkage",
-              definition: "Reconcile accounts can be linked globally on a Platform (inherited by all accounts) or explicitly on an individual Account object.",
-              enterpriseContext: "Best practice is platform-level linkage for domain accounts, and account-level linkage for special multi-domain hosts.",
+              definition:
+                "Reconcile accounts can be linked globally on a Platform (inherited by all accounts) or explicitly on an individual Account object.",
+              enterpriseContext:
+                "Best practice is platform-level linkage for domain accounts, and account-level linkage for special multi-domain hosts.",
             },
           ],
           administratorResponsibilities: [
@@ -137,48 +154,62 @@ export const MODULE_06: ClassCurriculum = {
           configurationAndAdministration: [
             {
               name: "ReconcileAccountSafe & ReconcileAccountName",
-              settingOrObject: "Platform > Automatic Password Management > Additional Policy Settings",
-              description: "Defines the default Reconcile Account inherited by all accounts on this platform.",
-              productionBestPractice: "Configure at the platform level whenever possible to avoid configuring individual accounts manually.",
+              settingOrObject:
+                "Platform > Automatic Password Management > Additional Policy Settings",
+              description:
+                "Defines the default Reconcile Account inherited by all accounts on this platform.",
+              productionBestPractice:
+                "Configure at the platform level whenever possible to avoid configuring individual accounts manually.",
             },
             {
               name: "AutoReconcileWhenUnsynched",
               settingOrObject: "Platform > Automatic Password Management > General",
-              description: "Directs CPM to automatically trigger a Reconcile operation as soon as a Verify operation fails.",
-              productionBestPractice: "Set AutoReconcileWhenUnsynched = Yes in production to ensure self-healing credential recovery.",
+              description:
+                "Directs CPM to automatically trigger a Reconcile operation as soon as a Verify operation fails.",
+              productionBestPractice:
+                "Set AutoReconcileWhenUnsynched = Yes in production to ensure self-healing credential recovery.",
             },
             {
               name: "Linux Sudoers Configuration for Reconcile",
               settingOrObject: "/etc/sudoers on Linux Target Hosts",
-              description: "Grants CPM reconcile user privilege to execute passwd commands for other accounts.",
-              productionBestPractice: "Enforce: `reconcile_user ALL=(ALL) NOPASSWD: /usr/bin/passwd [A-Za-z0-9]*` and deny changing root.",
+              description:
+                "Grants CPM reconcile user privilege to execute passwd commands for other accounts.",
+              productionBestPractice:
+                "Enforce: `reconcile_user ALL=(ALL) NOPASSWD: /usr/bin/passwd [A-Za-z0-9]*` and deny changing root.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Onboard Dedicated Reconcile Account",
-              action: "Onboard a Windows Domain Administrator account `rec_win_admin` into a dedicated Safe `SEC-RECONCILE-SAFE`.",
+              action:
+                "Onboard a Windows Domain Administrator account `rec_win_admin` into a dedicated Safe `SEC-RECONCILE-SAFE`.",
               expectedResult: "Reconcile account is verified and managed by CPM.",
-              operatorNotes: "Do not use standard interactive accounts as Reconcile accounts. Use dedicated non-human service accounts.",
+              operatorNotes:
+                "Do not use standard interactive accounts as Reconcile accounts. Use dedicated non-human service accounts.",
             },
             {
               stepNumber: 2,
               title: "Link Reconcile Account to Platform",
-              action: "Edit `Windows Server Local` platform, navigate to Additional Policy Settings, and link `rec_win_admin`.",
-              expectedResult: "All accounts on the platform inherit `rec_win_admin` as their default reconcile authority.",
+              action:
+                "Edit `Windows Server Local` platform, navigate to Additional Policy Settings, and link `rec_win_admin`.",
+              expectedResult:
+                "All accounts on the platform inherit `rec_win_admin` as their default reconcile authority.",
             },
             {
               stepNumber: 3,
               title: "Simulate & Identify Desynchronization",
-              action: "Locate an account flagged with status 'Rotation Failed' (e.g. `svc_backup`). Inspect error cause.",
-              expectedResult: "Failure cause indicates 'Authentication failure: Win32 Error 1326' (target password desynchronized).",
+              action:
+                "Locate an account flagged with status 'Rotation Failed' (e.g. `svc_backup`). Inspect error cause.",
+              expectedResult:
+                "Failure cause indicates 'Authentication failure: Win32 Error 1326' (target password desynchronized).",
             },
             {
               stepNumber: 4,
               title: "Trigger Automated Reconciliation",
               action: "In PVWA Accounts, click 'Reconcile' on the failed account.",
-              expectedResult: "CPM authenticates using `rec_win_admin`, resets `svc_backup` password, and marks account Managed.",
+              expectedResult:
+                "CPM authenticates using `rec_win_admin`, resets `svc_backup` password, and marks account Managed.",
             },
           ],
           enterpriseScenario: {
@@ -193,15 +224,21 @@ export const MODULE_06: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "Reconcile fails: 'CACPM250E Reconcile account does not have sufficient permissions to reset password'.",
-              rootCause: "The Reconcile Account is missing local Administrator or sudo rights on the target host.",
-              securityImpact: "Desynchronized credential remains broken; automated recovery blocked.",
+              symptom:
+                "Reconcile fails: 'CACPM250E Reconcile account does not have sufficient permissions to reset password'.",
+              rootCause:
+                "The Reconcile Account is missing local Administrator or sudo rights on the target host.",
+              securityImpact:
+                "Desynchronized credential remains broken; automated recovery blocked.",
               cyberArkCodeOrEvent: "CACPM250E",
             },
             {
-              symptom: "Reconcile fails: 'ITATS028E Access denied to Reconcile Safe for PasswordManager'.",
-              rootCause: "The CPM user is not a member of the Safe holding the linked Reconcile Account.",
-              securityImpact: "CPM cannot retrieve reconcile credentials; all reconciliation operations on that platform fail.",
+              symptom:
+                "Reconcile fails: 'ITATS028E Access denied to Reconcile Safe for PasswordManager'.",
+              rootCause:
+                "The CPM user is not a member of the Safe holding the linked Reconcile Account.",
+              securityImpact:
+                "CPM cannot retrieve reconcile credentials; all reconciliation operations on that platform fail.",
               cyberArkCodeOrEvent: "ITATS028E",
             },
           ],
@@ -210,19 +247,23 @@ export const MODULE_06: ClassCurriculum = {
               stepNumber: 1,
               diagnosticAction: "Verify Reconcile Account Safe permissions for the CPM user.",
               logFileOrConsole: "PVWA Safes > SEC-RECONCILE-SAFE > Members",
-              remediation: "Ensure `PasswordManager` is added as a member with 'Retrieve accounts' and 'Use accounts' permissions.",
+              remediation:
+                "Ensure `PasswordManager` is added as a member with 'Retrieve accounts' and 'Use accounts' permissions.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Test Reconcile Account rights manually on target host.",
-              logFileOrConsole: "PowerShell: net user <ManagedUser> <NewPassword> / sudo /usr/bin/passwd <ManagedUser>",
-              remediation: "Verify that the reconcile account belongs to the local Administrators group or has appropriate sudoers rules.",
+              logFileOrConsole:
+                "PowerShell: net user <ManagedUser> <NewPassword> / sudo /usr/bin/passwd <ManagedUser>",
+              remediation:
+                "Verify that the reconcile account belongs to the local Administrators group or has appropriate sudoers rules.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Inspect pm_error.log for specific Reconcile plugin failure codes.",
               logFileOrConsole: "C:\\CyberArk\\Password Manager\\Logs\\pm_error.log",
-              remediation: "Look for Win32 Error 5 (Access Denied) or Linux 'sudo: a password is required'. Adjust target permissions.",
+              remediation:
+                "Look for Win32 Error 5 (Access Denied) or Linux 'sudo: a password is required'. Adjust target permissions.",
             },
           ],
           diagnosticEvidence: [
@@ -254,7 +295,8 @@ export const MODULE_06: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m06-q01",
-              question: "Why does a standard CPM 'Change' operation fail when an account's password has become desynchronized out-of-band?",
+              question:
+                "Why does a standard CPM 'Change' operation fail when an account's password has become desynchronized out-of-band?",
               options: [
                 "Because the CPM service shuts down automatically.",
                 "Because a standard Change operation requires authenticating with the old password first; if the Vault's recorded password does not match the target, authentication fails.",
@@ -282,7 +324,8 @@ export const MODULE_06: ClassCurriculum = {
             },
             {
               id: "m06-q03",
-              question: "Which setting directs the CPM to automatically trigger a Reconcile operation as soon as a scheduled Verify test fails?",
+              question:
+                "Which setting directs the CPM to automatically trigger a Reconcile operation as soon as a scheduled Verify test fails?",
               options: [
                 "EnforceExclusiveMode = Yes",
                 "AutoReconcileWhenUnsynched = Yes",
@@ -297,20 +340,90 @@ export const MODULE_06: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m06-ex01",
-            title: "Diagnose and Reconcile a Desynchronized Service Credential",
+            title: "Unlock, Reconcile & Recover Desynchronized Service Credential (svc_backup)",
+            objective:
+              "Diagnose the lockout failure on svc_backup (WIN-SRV-02), clear the lockout, reconcile Vault-target synchronization, rotate via Change, and verify Managed recovery (Lab 05B).",
             scenario:
-              "The service account `svc_backup` has suffered credential desynchronization on target DB-ORA-01 and is flagged in 'Rotation failed' status. Diagnose the failure, inspect the linked reconcile authority, and trigger reconciliation to restore health.",
+              "The service account `svc_backup` on target `WIN-SRV-02` is locked out and flagged in 'Rotation failed' status. Clear the target lockout, execute Reconcile to restore synchronization, retry CPM Change, and verify Managed health.",
+            prerequisites: [
+              "Review Reconcile Account mechanics and CACPM250E diagnostics in Section 1–4.",
+            ],
+            startingState:
+              "svc_backup on WIN-SRV-02 (SERVICE-SAFE) is in 'Rotation failed' status with failure detail 'Account locked on target' and Reconcile 'Pending'.",
             instructions: [
-              "Navigate to the CPM Operations or Accounts console.",
-              "Locate the failed credential `svc_backup`.",
-              "Review the recorded failure cause and verify the linked reconcile account.",
-              "Execute a Reconcile operation and confirm that the account returns to 'Managed' status.",
+              "Open the CPM Operations console and select `svc_backup` on `WIN-SRV-02`.",
+              "Inspect the failure detail ('Account locked on target') and click the Unlock / Repair target lockout action.",
+              "Click 'Reconcile' to forcibly resynchronize the Vault and target credential.",
+              "Click 'Change' to rotate the recovered credential, then click 'Verify' to confirm status returns to 'Managed'.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 5 Lab 05B objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open CPM Operations and select `svc_backup` (WIN-SRV-02).",
+                explanation:
+                  "Standard Change fails on locked or out-of-sync accounts until the underlying lockout is remediated.",
+                expectedResult:
+                  "Account panel displays status 'Rotation failed' and failure detail 'Account locked on target'.",
+              },
+              {
+                action: "Click 'Unlock target account' (Repair lockout) for `svc_backup`.",
+                explanation:
+                  "Clears the target directory lockout condition so CPM reconcile/change operations can authenticate.",
+                expectedResult:
+                  "Audit trail records lockout repair and failure cause clears on `svc_backup`.",
+              },
+              {
+                action: "Click 'Reconcile' on `svc_backup`.",
+                explanation:
+                  "Uses the linked Reconcile authority to overwrite the diverged target password without needing the unknown password.",
+                expectedResult: "CPM operation log records a Completed Reconcile operation.",
+              },
+              {
+                action: "Run 'Change' and then 'Verify' on `svc_backup`.",
+                explanation:
+                  "Confirms automated periodic rotation and live authentication both succeed after recovery.",
+                expectedResult:
+                  "CPM logs Completed Change and Verify operations; `svc_backup` status transitions to 'Managed'.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Verifies all 5 Lab 05B recovery objectives (failure inspection, unlock, reconcile, change, verify).",
+                expectedResult: "All 5/5 Lab 05B objectives pass (100/100).",
+              },
             ],
             targetConsole: "cpm",
             associatedLabId: "Lab 05B · Recover a failed rotation",
             validationObjectiveId: "reconcile-account",
             validationCriteria:
-              "The desynchronized account is reconciled and restored to Managed status.",
+              "svc_backup (WIN-SRV-02) unlocked, reconciled, rotated via Change, verified, and restored to Managed status (5/5 Lab 05B objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "Reconcile or Change fails immediately on svc_backup.",
+                hint: "Check whether the target account lockout has been repaired first.",
+                correctiveAction:
+                  "Click 'Unlock target account' in CPM Operations for svc_backup (WIN-SRV-02) before clicking Reconcile.",
+              },
+              {
+                symptom:
+                  "'Retry CPM Change' or 'Verify restored credential health' stays pending after Reconcile.",
+                hint: "Lab 05B requires completing all four recovery operations: Unlock, Reconcile, Change, and Verify.",
+                correctiveAction:
+                  "Run Change and then Verify on svc_backup in CPM Operations until status is 'Managed', then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Verify Post-Recovery Audit Evidence in Reports & Audit",
+              scenario:
+                "Change Management requires audit proof that the svc_backup outage was recovered through controlled Unlock, Reconcile, Change, and Verify operations.",
+              goal: "Without step-by-step guidance, inspect Reports & Audit and confirm the sequential recovery audit trail for svc_backup.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Located the lockout repair and Reconcile/Change/Verify entries for svc_backup in Reports & Audit.",
+                "Confirmed svc_backup now displays Managed health with no active failure cause.",
+              ],
+            },
           },
           completionCriteria: [
             "Deconstructed the mechanics of Reconcile and Logon linked account bindings.",

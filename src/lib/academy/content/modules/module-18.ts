@@ -73,28 +73,33 @@ export const MODULE_18: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Central Policy Manager (CPM)",
-                action: "Attempts to verify password for `WIN-SRV-01\\Administrator` on target host.",
+                action:
+                  "Attempts to verify password for `WIN-SRV-01\\Administrator` on target host.",
                 channelOrProtocol: "SMB Port 445 / RPC",
                 verificationRule: "Target OS returns Win32 Error 5: Access is denied.",
               },
               {
                 stepNumber: 2,
                 actor: "CPM Error Engine",
-                action: "Translates Win32 Error 5 into structured PAM code: `CACPM250E Verification failed: Access is denied`.",
+                action:
+                  "Translates Win32 Error 5 into structured PAM code: `CACPM250E Verification failed: Access is denied`.",
                 channelOrProtocol: "Local Error Formatter",
-                verificationRule: "CPM writes diagnostic context to `pm.log` and reports failure code to the Vault.",
+                verificationRule:
+                  "CPM writes diagnostic context to `pm.log` and reports failure code to the Vault.",
               },
               {
                 stepNumber: 3,
                 actor: "Digital Vault",
-                action: "Commits failure event to account metadata and audit trail; updates account status pill to 'Verify Failed'.",
+                action:
+                  "Commits failure event to account metadata and audit trail; updates account status pill to 'Verify Failed'.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
                 verificationRule: "Audit record timestamped with error code and target address.",
               },
               {
                 stepNumber: 4,
                 actor: "PAM Administrator",
-                action: "Inspects account details in PVWA; sees CACPM250E; consults runbook to adjust target administrative rights.",
+                action:
+                  "Inspects account details in PVWA; sees CACPM250E; consults runbook to adjust target administrative rights.",
                 channelOrProtocol: "PVWA Operations Console",
                 verificationRule: "Root cause identified accurately without guessing.",
               },
@@ -103,28 +108,38 @@ export const MODULE_18: ClassCurriculum = {
           terminology: [
             {
               term: "CACPM072E",
-              definition: "CPM communication failure: Indicates CPM cannot communicate with the Digital Vault on port 1858 or lacks Safe permissions.",
-              enterpriseContext: "Commonly caused by a stopped Vault service, firewall drop, or missing CPM membership on a newly created Safe.",
+              definition:
+                "CPM communication failure: Indicates CPM cannot communicate with the Digital Vault on port 1858 or lacks Safe permissions.",
+              enterpriseContext:
+                "Commonly caused by a stopped Vault service, firewall drop, or missing CPM membership on a newly created Safe.",
             },
             {
               term: "CACPM250E",
-              definition: "CPM target execution failure: Indicates CPM connected to target, but the target operating system rejected the command or credential.",
-              enterpriseContext: "Accompanied by OS return codes: Win32 Error 1326 (Bad Password), Win32 Error 5 (Access Denied), Win32 Error 1909 (Locked).",
+              definition:
+                "CPM target execution failure: Indicates CPM connected to target, but the target operating system rejected the command or credential.",
+              enterpriseContext:
+                "Accompanied by OS return codes: Win32 Error 1326 (Bad Password), Win32 Error 5 (Access Denied), Win32 Error 1909 (Locked).",
             },
             {
               term: "PSMSR037E",
-              definition: "PSM server unavailable: Indicates the client or PVWA cannot reach the PSM service or the PSM service is stopped.",
-              enterpriseContext: "Commonly caused by RDS licensing exhaustion, stopped CyberArk PSM service, or firewall blocking port 3389.",
+              definition:
+                "PSM server unavailable: Indicates the client or PVWA cannot reach the PSM service or the PSM service is stopped.",
+              enterpriseContext:
+                "Commonly caused by RDS licensing exhaustion, stopped CyberArk PSM service, or firewall blocking port 3389.",
             },
             {
               term: "PSMSR126E",
-              definition: "PSM executable blocked: Indicates that the client binary launched by a connection component was blocked by AppLocker.",
-              enterpriseContext: "Resolved by updating `PSMConfigureAppLocker.xml` on the PSM host and re-applying AppLocker rules.",
+              definition:
+                "PSM executable blocked: Indicates that the client binary launched by a connection component was blocked by AppLocker.",
+              enterpriseContext:
+                "Resolved by updating `PSMConfigureAppLocker.xml` on the PSM host and re-applying AppLocker rules.",
             },
             {
               term: "ITATS108E",
-              definition: "Unauthorized client station: Indicates an inbound connection to the Vault was rejected because the client IP is not in the authorized node list.",
-              enterpriseContext: "Occurs when a component server's IP address changes or is misconfigured in `dbparm.ini`.",
+              definition:
+                "Unauthorized client station: Indicates an inbound connection to the Vault was rejected because the client IP is not in the authorized node list.",
+              enterpriseContext:
+                "Occurs when a component server's IP address changes or is misconfigured in `dbparm.ini`.",
             },
           ],
           administratorResponsibilities: [
@@ -137,46 +152,61 @@ export const MODULE_18: ClassCurriculum = {
             {
               name: "Error Notification Thresholds",
               settingOrObject: "Platform > Automatic Password Management > Notification",
-              description: "Configures email alerts dispatched to administrators upon specific CACPM error occurrences.",
-              productionBestPractice: "Send instant alerts for CACPM072E (infrastructure block) and aggregate CACPM250E into daily digest.",
+              description:
+                "Configures email alerts dispatched to administrators upon specific CACPM error occurrences.",
+              productionBestPractice:
+                "Send instant alerts for CACPM072E (infrastructure block) and aggregate CACPM250E into daily digest.",
             },
             {
               name: "AppLocker Whitelist Configuration",
-              settingOrObject: "C:\\Program Files (x86)\\CyberArk\\PSM\\Hardening\\PSMConfigureAppLocker.xml",
-              description: "XML file defining allowed executables, DLLs, and publisher rules on the PSM RDS host.",
-              productionBestPractice: "Always use Publisher/Digital Signature rules rather than plain path rules for commercial client tools.",
+              settingOrObject:
+                "C:\\Program Files (x86)\\CyberArk\\PSM\\Hardening\\PSMConfigureAppLocker.xml",
+              description:
+                "XML file defining allowed executables, DLLs, and publisher rules on the PSM RDS host.",
+              productionBestPractice:
+                "Always use Publisher/Digital Signature rules rather than plain path rules for commercial client tools.",
             },
             {
               name: "Vault Authorized Node List",
               settingOrObject: "dbparm.ini / AllowNodes parameter",
-              description: "List of static IP addresses permitted to connect to the Vault over TCP port 1858.",
-              productionBestPractice: "Update AllowNodes immediately before changing IP addresses on PVWA, CPM, or PSM servers.",
+              description:
+                "List of static IP addresses permitted to connect to the Vault over TCP port 1858.",
+              productionBestPractice:
+                "Update AllowNodes immediately before changing IP addresses on PVWA, CPM, or PSM servers.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Triage CPM Error Code CACPM072E",
-              action: "Check if error affects a single Safe or all Safes. If single Safe, check Safe members for `PasswordManager`.",
-              expectedResult: "Adding `PasswordManager` with Add/Update/Manage rights resolves error immediately.",
-              operatorNotes: "If CACPM072E affects all Safes, test TCP port 1858 reachability from CPM host to Vault.",
+              action:
+                "Check if error affects a single Safe or all Safes. If single Safe, check Safe members for `PasswordManager`.",
+              expectedResult:
+                "Adding `PasswordManager` with Add/Update/Manage rights resolves error immediately.",
+              operatorNotes:
+                "If CACPM072E affects all Safes, test TCP port 1858 reachability from CPM host to Vault.",
             },
             {
               stepNumber: 2,
               title: "Triage Target Error Code CACPM250E",
-              action: "Open account details in PVWA; read the trailing Win32 error code (e.g., Error 1326: bad password).",
-              expectedResult: "Root cause determined: credential is out of sync. Click 'Reconcile' to execute elevated reset.",
+              action:
+                "Open account details in PVWA; read the trailing Win32 error code (e.g., Error 1326: bad password).",
+              expectedResult:
+                "Root cause determined: credential is out of sync. Click 'Reconcile' to execute elevated reset.",
             },
             {
               stepNumber: 3,
               title: "Remediate PSM AppLocker Error PSMSR126E",
-              action: "On PSM host, edit `PSMConfigureAppLocker.xml`, add target executable path, and run `PSMConfigureAppLocker.ps1` in PowerShell.",
-              expectedResult: "AppLocker rules refreshed; subsequent connection launch succeeds cleanly.",
+              action:
+                "On PSM host, edit `PSMConfigureAppLocker.xml`, add target executable path, and run `PSMConfigureAppLocker.ps1` in PowerShell.",
+              expectedResult:
+                "AppLocker rules refreshed; subsequent connection launch succeeds cleanly.",
             },
             {
               stepNumber: 4,
               title: "Remediate Vault Station Denial ITATS108E",
-              action: "On Vault host, open `dbparm.ini`, locate `AllowNodes`, add the new component IP address, and restart PrivateArk Server.",
+              action:
+                "On Vault host, open `dbparm.ini`, locate `AllowNodes`, add the new component IP address, and restart PrivateArk Server.",
               expectedResult: "Vault accepts connection on TCP 1858; ITATS108E errors cease.",
             },
           ],
@@ -192,14 +222,19 @@ export const MODULE_18: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "All accounts in a specific Safe fail rotation: 'CACPM072E Safe access denied for user PasswordManager'.",
-              rootCause: "The administrator created a new Safe but omitted adding the `PasswordManager` service account as a member.",
-              securityImpact: "Credential rotation fails; passwords age out and violate corporate policy.",
+              symptom:
+                "All accounts in a specific Safe fail rotation: 'CACPM072E Safe access denied for user PasswordManager'.",
+              rootCause:
+                "The administrator created a new Safe but omitted adding the `PasswordManager` service account as a member.",
+              securityImpact:
+                "Credential rotation fails; passwords age out and violate corporate policy.",
               cyberArkCodeOrEvent: "CACPM072E",
             },
             {
-              symptom: "User cannot connect via PSM: 'PSMSR126E [Application] failed to start due to AppLocker rule'.",
-              rootCause: "An updated version of SQL Server Management Studio (SSMS) was installed on the PSM host without updating AppLocker rules.",
+              symptom:
+                "User cannot connect via PSM: 'PSMSR126E [Application] failed to start due to AppLocker rule'.",
+              rootCause:
+                "An updated version of SQL Server Management Studio (SSMS) was installed on the PSM host without updating AppLocker rules.",
               securityImpact: "DBAs blocked from performing scheduled database maintenance.",
               cyberArkCodeOrEvent: "PSMSR126E",
             },
@@ -209,19 +244,22 @@ export const MODULE_18: ClassCurriculum = {
               stepNumber: 1,
               diagnosticAction: "Correlate error code with subsystem log file.",
               logFileOrConsole: "CACPM -> pm.log; PSMSR -> PSMTrace.log; ITATS -> italog.log",
-              remediation: "Always inspect the raw log file on the generating component host for the full un-truncated error string.",
+              remediation:
+                "Always inspect the raw log file on the generating component host for the full un-truncated error string.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Extract target OS return codes from CACPM250E error messages.",
               logFileOrConsole: "C:\\CyberArk\\Password Manager\\Logs\\pm.log",
-              remediation: "Look for Win32 Error 5 (Permissions), Error 1326 (Bad Password), or Error 1909 (Account Locked). Apply targeted fix.",
+              remediation:
+                "Look for Win32 Error 5 (Permissions), Error 1326 (Bad Password), or Error 1909 (Account Locked). Apply targeted fix.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Verify Vault station authorization in dbparm.ini.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\Server\\dbparm.ini",
-              remediation: "Confirm component IP address matches AllowNodes. If mismatch, correct and restart PrivateArk Server.",
+              remediation:
+                "Confirm component IP address matches AllowNodes. If mismatch, correct and restart PrivateArk Server.",
             },
           ],
           diagnosticEvidence: [
@@ -253,7 +291,8 @@ export const MODULE_18: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m18-q01",
-              question: "What is the primary architectural difference between error code CACPM072E and error code CACPM250E?",
+              question:
+                "What is the primary architectural difference between error code CACPM072E and error code CACPM250E?",
               options: [
                 "CACPM072E is for Linux; CACPM250E is for Windows.",
                 "CACPM072E indicates an infrastructure failure connecting to the Vault or missing Safe permissions; CACPM250E indicates an authentication or execution failure on the target endpoint.",
@@ -267,7 +306,8 @@ export const MODULE_18: ClassCurriculum = {
             },
             {
               id: "m18-q02",
-              question: "When a user launching a session through PSM receives error PSMSR126E, which subsystem on the PSM host is responsible for blocking the execution?",
+              question:
+                "When a user launching a session through PSM receives error PSMSR126E, which subsystem on the PSM host is responsible for blocking the execution?",
               options: [
                 "Windows Defender Antivirus",
                 "Windows AppLocker",
@@ -281,7 +321,8 @@ export const MODULE_18: ClassCurriculum = {
             },
             {
               id: "m18-q03",
-              question: "What does Vault error code ITATS108E indicate when a component server attempts to connect on TCP 1858?",
+              question:
+                "What does Vault error code ITATS108E indicate when a component server attempts to connect on TCP 1858?",
               options: [
                 "The Vault hard drive is full.",
                 "The client station IP address is not authorized in dbparm.ini to connect to the Vault.",
@@ -296,20 +337,75 @@ export const MODULE_18: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m18-ex01",
-            title: "Diagnose and Classify Operational Error Codes",
+            title: "Diagnose Error Code Taxonomy & Remediate Locked Account (svc_backup)",
+            objective:
+              "Correlate the simulated CPM lockout failure in Troubleshooting/CPM Operations and execute full Lab 05B recovery (Unlock -> Reconcile -> Change -> Verify) on `svc_backup`.",
             scenario:
-              "Navigate to the Troubleshooting workbench or CPM Operations console, inspect simulated failure events, correlate error codes (CACPM072E, CACPM250E), and formulate root-cause hypotheses.",
+              "A recurring rotation alert triggered for `svc_backup` on `WIN-SRV-02`. Inspect the error symptoms in Troubleshooting, identify the account lockout root cause, and execute controlled recovery in CPM Operations so `svc_backup` returns to Managed status.",
+            prerequisites: [
+              "Review CACPM072E, CACPM250E, PSMSR126E, and ITATS108E error taxonomy in Section 1–4.",
+            ],
+            startingState:
+              "`svc_backup` on `WIN-SRV-02` is in 'Rotation failed' status ('Account locked on target') with Reconcile Pending.",
             instructions: [
-              "Navigate to the Troubleshooting console.",
-              "Review the diagnostic log streams (pm.log, italog.log, PSMTrace.log).",
-              "Identify recorded error codes (e.g. `CACPM072E` or `CACPM250E`).",
-              "Formulate root cause hypotheses and review remediation runbooks.",
+              "Open the Troubleshooting console and inspect the open CPM failure incident and diagnostic evidence.",
+              "Switch to CPM Operations, select `svc_backup` (WIN-SRV-02), and click 'Unlock target account' to clear the lockout condition.",
+              "Execute 'Reconcile' on `svc_backup` to resynchronize Vault and target credentials.",
+              "Execute 'Change' and then 'Verify' on `svc_backup` until status transitions to 'Managed', then return to Learning Academy to validate all 5 Lab 05B objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Troubleshooting and inspect the open CPM rotation failure incident.",
+                explanation:
+                  "Mapping symptoms to error taxonomy distinguishes credential lockout from network/ACL issues.",
+                expectedResult:
+                  "Incident panel identifies the failed CPM rotation and recommended remediation path.",
+              },
+              {
+                action:
+                  "Open CPM Operations, select `svc_backup` (WIN-SRV-02), and click 'Unlock target account'.",
+                explanation: "Clears the target lockout before attempting reconcile or rotation.",
+                expectedResult:
+                  "Lockout condition clears and an incident repair audit event is logged.",
+              },
+              {
+                action: "Click 'Reconcile', then 'Change', then 'Verify' on `svc_backup`.",
+                explanation:
+                  "Restores credential synchronization, rotates the password safely, and verifies live authentication.",
+                expectedResult:
+                  "All three CPM operations complete and `svc_backup` status becomes 'Managed'.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Validates all 5 Lab 05B failure-recovery objectives.",
+                expectedResult: "All 5/5 Lab 05B objectives pass (100/100).",
+              },
             ],
             targetConsole: "troubleshooting",
             associatedLabId: "Lab 05B · Recover a failed rotation",
             validationObjectiveId: "inspect-failure",
             validationCriteria:
-              "Subsystem error codes are diagnosed and root-cause evidence is reviewed in the troubleshooting console.",
+              "Failure root cause diagnosed and `svc_backup` fully recovered via Unlock, Reconcile, Change, and Verify (5/5 Lab 05B objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "Lab 05B stays at 20% after reviewing Troubleshooting.",
+                hint: "Inspecting logs alone only completes 1 of 5 Lab 05B objectives; you must also execute the recovery sequence on `svc_backup`.",
+                correctiveAction:
+                  "Open CPM Operations, select `svc_backup` (WIN-SRV-02), click Unlock target account -> Reconcile -> Change -> Verify, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Remediate an Additional Open Incident in Troubleshooting Workbench",
+              scenario:
+                "The Troubleshooting workbench still contains additional open operational incidents.",
+              goal: "Without step-by-step guidance, step through the 5-step diagnostic workflow on another open incident in Troubleshooting and execute its remediation.",
+              targetConsole: "troubleshooting",
+              successCriteria: [
+                "Selected an open incident in the Troubleshooting workbench and reviewed its diagnostic evidence.",
+                "Completed the guided remediation workflow and confirmed the incident status updated to Resolved.",
+              ],
+            },
           },
           completionCriteria: [
             "Deconstructed the CACPM, PSMSR, and ITATS error code families.",

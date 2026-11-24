@@ -29,7 +29,8 @@ export const MODULE_09: ClassCurriculum = {
           id: "m09-l01",
           number: "9.1",
           title: "Account Discovery Mechanics & Auto-Onboarding Rules",
-          subtitle: "Scanning subnets, unearthing shadow accounts, and configuring automated onboarding rules",
+          subtitle:
+            "Scanning subnets, unearthing shadow accounts, and configuring automated onboarding rules",
           estimatedMinutes: 25,
           learningObjectives: [
             "Configure discovery scans across Active Directory organizational units and network subnet ranges.",
@@ -73,53 +74,69 @@ export const MODULE_09: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Scheduled Discovery Task",
-                action: "Executes nightly subnet scan against enterprise server VLAN `10.0.10.0/24`.",
+                action:
+                  "Executes nightly subnet scan against enterprise server VLAN `10.0.10.0/24`.",
                 channelOrProtocol: "SMB TCP 445 / WMI",
-                verificationRule: "Scanner authenticates using dedicated Discovery Service Account with read-only SAM query rights.",
+                verificationRule:
+                  "Scanner authenticates using dedicated Discovery Service Account with read-only SAM query rights.",
               },
               {
                 stepNumber: 2,
                 actor: "Discovery Scanner Worker",
-                action: "Extracts local accounts from 45 target servers and detects 3 unmanaged local Administrator accounts.",
+                action:
+                  "Extracts local accounts from 45 target servers and detects 3 unmanaged local Administrator accounts.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
-                verificationRule: "Scanner writes discovered records into the Vault 'Pending Accounts' repository.",
+                verificationRule:
+                  "Scanner writes discovered records into the Vault 'Pending Accounts' repository.",
               },
               {
                 stepNumber: 3,
                 actor: "Auto-Onboarding Rule Engine",
-                action: "Matches discovered account `WIN-SRV-09\\Administrator` against rule `RULE-WIN-PROD-AUTO`.",
+                action:
+                  "Matches discovered account `WIN-SRV-09\\Administrator` against rule `RULE-WIN-PROD-AUTO`.",
                 channelOrProtocol: "Vault Internal Rule Evaluation",
-                verificationRule: "Criteria match: OS = Windows, User = Administrator, IP matches `10.0.10.*`.",
+                verificationRule:
+                  "Criteria match: OS = Windows, User = Administrator, IP matches `10.0.10.*`.",
               },
               {
                 stepNumber: 4,
                 actor: "Auto-Onboarding Rule Engine",
-                action: "Automatically moves account into Safe `WIN-SAFE`, assigns Platform `Windows Server Local`, and triggers Verify.",
+                action:
+                  "Automatically moves account into Safe `WIN-SAFE`, assigns Platform `Windows Server Local`, and triggers Verify.",
                 channelOrProtocol: "TCP 1858 Commit",
-                verificationRule: "Account transitions from Pending to Managed inventory; CPM schedules rotation.",
+                verificationRule:
+                  "Account transitions from Pending to Managed inventory; CPM schedules rotation.",
               },
             ],
           },
           terminology: [
             {
               term: "Discovery Scan",
-              definition: "An automated reconnaissance process that queries directory services or network subnets to inventory accounts and systems.",
-              enterpriseContext: "Run continuously or scheduled nightly to detect new servers deployed by DevOps or infrastructure teams.",
+              definition:
+                "An automated reconnaissance process that queries directory services or network subnets to inventory accounts and systems.",
+              enterpriseContext:
+                "Run continuously or scheduled nightly to detect new servers deployed by DevOps or infrastructure teams.",
             },
             {
               term: "Pending Accounts",
-              definition: "The staging repository in the PVWA displaying accounts discovered on target systems that are not yet vaulted.",
-              enterpriseContext: "Administrators inspect pending accounts to identify shadow IT or unauthorized local accounts.",
+              definition:
+                "The staging repository in the PVWA displaying accounts discovered on target systems that are not yet vaulted.",
+              enterpriseContext:
+                "Administrators inspect pending accounts to identify shadow IT or unauthorized local accounts.",
             },
             {
               term: "Auto-Onboarding Rule",
-              definition: "A set of pattern-matching filters that automatically onboards pending accounts meeting specific criteria into predefined Safes.",
-              enterpriseContext: "Eliminates manual onboarding delays and enforces consistent naming and platform assignments.",
+              definition:
+                "A set of pattern-matching filters that automatically onboards pending accounts meeting specific criteria into predefined Safes.",
+              enterpriseContext:
+                "Eliminates manual onboarding delays and enforces consistent naming and platform assignments.",
             },
             {
               term: "Shadow Administrator",
-              definition: "A local or domain account possessing administrative rights that exists outside official IT inventory records.",
-              enterpriseContext: "Prime target for threat actors seeking unmonitored persistence on enterprise servers.",
+              definition:
+                "A local or domain account possessing administrative rights that exists outside official IT inventory records.",
+              enterpriseContext:
+                "Prime target for threat actors seeking unmonitored persistence on enterprise servers.",
             },
           ],
           administratorResponsibilities: [
@@ -132,47 +149,60 @@ export const MODULE_09: ClassCurriculum = {
             {
               name: "Subnet CIDR Range Definition",
               settingOrObject: "PVWA Discovery > Discovery Management > Add Scan",
-              description: "Defines IP boundaries and excluded IP addresses (e.g., printers, VoIP devices).",
-              productionBestPractice: "Always exclude non-computer devices like network switches, SAN controllers, and printers to prevent scan lockups.",
+              description:
+                "Defines IP boundaries and excluded IP addresses (e.g., printers, VoIP devices).",
+              productionBestPractice:
+                "Always exclude non-computer devices like network switches, SAN controllers, and printers to prevent scan lockups.",
             },
             {
               name: "Auto-Onboarding Rule Priority",
               settingOrObject: "Administration > Auto-Onboarding Rules",
-              description: "The order in which rules are evaluated against a pending account object.",
-              productionBestPractice: "Place highly specific departmental rules first; place broad catch-all rules at the bottom of the list.",
+              description:
+                "The order in which rules are evaluated against a pending account object.",
+              productionBestPractice:
+                "Place highly specific departmental rules first; place broad catch-all rules at the bottom of the list.",
             },
             {
               name: "Discovery Account Security",
               settingOrObject: "Discovery Scan Properties > Scanner Account",
-              description: "The credential used by the scanner to authenticate to remote target hosts and inspect local accounts.",
-              productionBestPractice: "The discovery account only needs read-only rights to query local user lists; never grant it Domain Admin privileges.",
+              description:
+                "The credential used by the scanner to authenticate to remote target hosts and inspect local accounts.",
+              productionBestPractice:
+                "The discovery account only needs read-only rights to query local user lists; never grant it Domain Admin privileges.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Define Network Discovery Scan",
-              action: "In PVWA Discovery, click 'New Scan'. Name: `PROD-VLAN-10`, Type: Network Subnet, Range: `10.0.10.0/24`.",
+              action:
+                "In PVWA Discovery, click 'New Scan'. Name: `PROD-VLAN-10`, Type: Network Subnet, Range: `10.0.10.0/24`.",
               expectedResult: "Scan task created and scheduled for execution.",
-              operatorNotes: "Verify routing and firewall rules permit CPM scanner to reach target subnet on TCP 445.",
+              operatorNotes:
+                "Verify routing and firewall rules permit CPM scanner to reach target subnet on TCP 445.",
             },
             {
               stepNumber: 2,
               title: "Execute Discovery Scan",
-              action: "Click 'Run Now' to initiate immediate scan execution. Monitor progress indicator.",
-              expectedResult: "Scan completes; reports number of hosts probed and discovered accounts added to Pending queue.",
+              action:
+                "Click 'Run Now' to initiate immediate scan execution. Monitor progress indicator.",
+              expectedResult:
+                "Scan completes; reports number of hosts probed and discovered accounts added to Pending queue.",
             },
             {
               stepNumber: 3,
               title: "Create Auto-Onboarding Rule",
-              action: "Under Auto-Onboarding Rules, add rule: `WIN-AUTO-RULE`. Match OS: Windows, Account: Administrator, Target Safe: WIN-SAFE.",
+              action:
+                "Under Auto-Onboarding Rules, add rule: `WIN-AUTO-RULE`. Match OS: Windows, Account: Administrator, Target Safe: WIN-SAFE.",
               expectedResult: "Rule saved and activated.",
             },
             {
               stepNumber: 4,
               title: "Verify Automated Onboarding",
-              action: "Open Accounts inventory and verify that accounts discovered on the scanned subnet have been onboarded into WIN-SAFE.",
-              expectedResult: "Accounts appear in Managed inventory with Verify status recorded; Pending queue cleared.",
+              action:
+                "Open Accounts inventory and verify that accounts discovered on the scanned subnet have been onboarded into WIN-SAFE.",
+              expectedResult:
+                "Accounts appear in Managed inventory with Verify status recorded; Pending queue cleared.",
             },
           ],
           enterpriseScenario: {
@@ -187,15 +217,20 @@ export const MODULE_09: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "Discovery scan finishes with zero accounts found: 'CACPM250E Access Denied during network sweep'.",
-              rootCause: "The Discovery Service Account lacks administrative access to query the remote SAM database, or Windows UAC remote restrictions block it.",
+              symptom:
+                "Discovery scan finishes with zero accounts found: 'CACPM250E Access Denied during network sweep'.",
+              rootCause:
+                "The Discovery Service Account lacks administrative access to query the remote SAM database, or Windows UAC remote restrictions block it.",
               securityImpact: "Discovery blind spot; entire server subnet remains unmonitored.",
               cyberArkCodeOrEvent: "CACPM250E",
             },
             {
-              symptom: "Auto-Onboarding Rule routes hundreds of non-administrative accounts into production Safes.",
-              rootCause: "Rule regex was too broad (e.g. matching `.*` rather than specific privileged accounts like `Administrator` or `root`).",
-              securityImpact: "Safe clutter, license exhaustion, and unintended password changes on unprivileged service accounts.",
+              symptom:
+                "Auto-Onboarding Rule routes hundreds of non-administrative accounts into production Safes.",
+              rootCause:
+                "Rule regex was too broad (e.g. matching `.*` rather than specific privileged accounts like `Administrator` or `root`).",
+              securityImpact:
+                "Safe clutter, license exhaustion, and unintended password changes on unprivileged service accounts.",
               cyberArkCodeOrEvent: "RULE-MISCONFIG",
             },
           ],
@@ -203,20 +238,24 @@ export const MODULE_09: ClassCurriculum = {
             {
               stepNumber: 1,
               diagnosticAction: "Verify Discovery Service Account permissions on target hosts.",
-              logFileOrConsole: "PowerShell: Get-LocalGroupMember -Group 'Administrators' on target host",
-              remediation: "Ensure the scanner account is a member of the local Administrators group or has WMI access granted.",
+              logFileOrConsole:
+                "PowerShell: Get-LocalGroupMember -Group 'Administrators' on target host",
+              remediation:
+                "Ensure the scanner account is a member of the local Administrators group or has WMI access granted.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Test network reachability from CPM scanner to target ports.",
               logFileOrConsole: "PowerShell: Test-NetConnection -ComputerName <TargetIP> -Port 445",
-              remediation: "Inspect intermediate firewall rules and ensure SMB (TCP 445) and WMI (TCP 135) are allowed.",
+              remediation:
+                "Inspect intermediate firewall rules and ensure SMB (TCP 445) and WMI (TCP 135) are allowed.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Review Auto-Onboarding Rule syntax and test regex in PVWA.",
               logFileOrConsole: "PVWA Administration > Auto-Onboarding Rules > Test Rule",
-              remediation: "Narrow filter criteria: specify exact account names or require specific Active Directory OU paths.",
+              remediation:
+                "Narrow filter criteria: specify exact account names or require specific Active Directory OU paths.",
             },
           ],
           diagnosticEvidence: [
@@ -248,7 +287,8 @@ export const MODULE_09: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m09-q01",
-              question: "What is the primary function of an Auto-Onboarding Rule in enterprise PAM?",
+              question:
+                "What is the primary function of an Auto-Onboarding Rule in enterprise PAM?",
               options: [
                 "To reboot the Vault server nightly.",
                 "To automatically evaluate pending discovered accounts against criteria and onboard matching accounts into designated Safes and Platforms without manual intervention.",
@@ -262,7 +302,8 @@ export const MODULE_09: ClassCurriculum = {
             },
             {
               id: "m09-q02",
-              question: "Where are newly discovered accounts stored prior to being matched by an auto-onboarding rule or approved by an administrator?",
+              question:
+                "Where are newly discovered accounts stored prior to being matched by an auto-onboarding rule or approved by an administrator?",
               options: [
                 "In the Windows Recycle Bin.",
                 "In the Pending Accounts queue in the PVWA.",
@@ -276,7 +317,8 @@ export const MODULE_09: ClassCurriculum = {
             },
             {
               id: "m09-q03",
-              question: "Why should an administrator exclude network printers and VoIP phones from subnet discovery scans?",
+              question:
+                "Why should an administrator exclude network printers and VoIP phones from subnet discovery scans?",
               options: [
                 "Because printers and non-computer appliances do not run Windows/Linux SAM databases, and aggressive port probes can cause them to freeze or print garbage pages.",
                 "Because printers require 64-character passwords.",
@@ -291,20 +333,71 @@ export const MODULE_09: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m09-ex01",
-            title: "Execute Subnet Discovery Scan and Onboard Discovered Accounts",
+            title: "Execute Network Discovery Scan & Audit Unmanaged Inventory",
+            objective:
+              "Run an automated network discovery scan in the Discovery console, classify unmanaged accounts, and validate Lab 04 enterprise inventory governance.",
             scenario:
-              "Execute an automated network discovery scan across subnet 10.0.10.0/24, inspect the pending accounts queue, and onboard an unmanaged database candidate into target Safe management.",
+              "Run a discovery scan across enterprise subnets to surface unmanaged privileged accounts, inspect discovered candidates, and verify unmanaged/exception classification (`oracle` on DB-ORA-01 and `svc_backup` on WIN-SRV-02).",
+            prerequisites: [
+              "Review Account Discovery Mechanics and Auto-Onboarding Rules in Section 1–4.",
+            ],
+            startingState:
+              "Discovery console holds baseline scan jobs and pending candidates; Accounts inventory contains unmanaged `oracle` (DB-ORA-01) and failed `svc_backup` (WIN-SRV-02).",
             instructions: [
-              "Navigate to the Discovery console.",
-              "Run the automated discovery scan against subnet 10.0.10.0/24.",
-              "Review the discovered inventory and filter unmanaged identities (e.g. `oracle` on DB-ORA-01).",
-              "Execute onboarding to transfer the discovered account into the managed inventory.",
+              "Open the Discovery console and run a live discovery scan job.",
+              "Inspect the discovered accounts queue and review platform, risk level, and target host metadata.",
+              "Review the Accounts inventory to confirm unmanaged candidate `oracle` (DB-ORA-01), shared identity `shared_ops` (EMERGENCY-SAFE), and failed `svc_backup` (WIN-SRV-02) are classified.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 04 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open the Discovery console and click Run Discovery Scan.",
+                explanation:
+                  "Automated discovery eliminates shadow privileged accounts across Windows, Linux, and database subnets.",
+                expectedResult:
+                  "Discovery scan completes, updates job status, and populates discovered account candidates.",
+              },
+              {
+                action: "Review discovered account metadata (username, address, platform, risk).",
+                explanation:
+                  "Auto-onboarding rules evaluate platform, machine type, and naming patterns to assign target Safes.",
+                expectedResult:
+                  "Each discovered candidate shows platform and risk indicators ready for onboarding.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Evaluates all 6 Lab 04 inventory classification and exception objectives.",
+                expectedResult: "All 6/6 Lab 04 objectives pass (100/100).",
+              },
             ],
             targetConsole: "discovery",
             associatedLabId: "Lab 04 · Classify the enterprise inventory",
             validationObjectiveId: "flag-unmanaged",
             validationCriteria:
-              "Discovery scan is executed and unmanaged candidate is onboarded into PAM management.",
+              "Discovery scan reviewed and all 6 Lab 04 enterprise inventory classification objectives validated.",
+            troubleshootingHints: [
+              {
+                symptom: "'Identify unmanaged database identity (oracle on DB-ORA-01)' fails.",
+                hint: "Lab 04 expects the baseline `oracle` account on `DB-ORA-01` to still be flagged as Unmanaged in Accounts.",
+                correctiveAction:
+                  "If you already rotated `oracle` in Accounts, click Reset Simulator to restore baseline inventory before re-validating Lab 04, then onboard a candidate from Discovery in Independent Practice.",
+              },
+            ],
+            independentPractice: {
+              title: "Onboard a Pending Discovered Account into Safe Management",
+              scenario:
+                "After validating the baseline inventory audit, onboard one pending candidate from the Discovery queue.",
+              goal: "Without step-by-step instructions, select a pending candidate in Discovery and onboard it into an appropriate Safe.",
+              targetConsole: "discovery",
+              successCriteria: [
+                "Selected a pending account in the Discovery queue and clicked Onboard.",
+                "Confirmed the newly onboarded account appears in the Accounts inventory and audit log.",
+              ],
+            },
+            simulationLimitationNote:
+              "Rule-engine regex filters (Automatic Onboarding Rules) are conceptual in the simulator; manual onboarding from the Discovery queue is live and validated alongside Lab 04 inventory classification.",
           },
           completionCriteria: [
             "Deconstructed discovery scan engines across Active Directory and network subnets.",

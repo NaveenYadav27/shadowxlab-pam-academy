@@ -29,7 +29,8 @@ export const MODULE_07: ClassCurriculum = {
           id: "m07-l01",
           number: "7.1",
           title: "Service Account Dependencies & Usage Synchronization",
-          subtitle: "Configuring Windows Services, Scheduled Tasks, and IIS AppPool usages under vaulted credentials",
+          subtitle:
+            "Configuring Windows Services, Scheduled Tasks, and IIS AppPool usages under vaulted credentials",
           estimatedMinutes: 25,
           learningObjectives: [
             "Analyze the operational risks of rotating domain service accounts that power remote operating system services.",
@@ -73,53 +74,68 @@ export const MODULE_07: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "CPM Polling Engine",
-                action: "Detects scheduled rotation interval reached for parent account `CORP\\svc_app_cluster`.",
+                action:
+                  "Detects scheduled rotation interval reached for parent account `CORP\\svc_app_cluster`.",
                 channelOrProtocol: "Vault Queue (TCP 1858)",
-                verificationRule: "CPM queries Vault for all child usages attached to the parent account.",
+                verificationRule:
+                  "CPM queries Vault for all child usages attached to the parent account.",
               },
               {
                 stepNumber: 2,
                 actor: "Central Policy Manager (CPM)",
-                action: "Generates new 32-character password and updates the account in Active Directory Domain Services.",
+                action:
+                  "Generates new 32-character password and updates the account in Active Directory Domain Services.",
                 channelOrProtocol: "LDAPS Port 636 / Kerberos",
                 verificationRule: "Domain Controller confirms password updated successfully.",
               },
               {
                 stepNumber: 3,
                 actor: "Central Policy Manager (CPM)",
-                action: "Connects sequentially or in parallel to each remote host listed in child usages and updates the local service configuration.",
+                action:
+                  "Connects sequentially or in parallel to each remote host listed in child usages and updates the local service configuration.",
                 channelOrProtocol: "Win32 SCM API (ChangeServiceConfig)",
-                verificationRule: "Target Service Control Manager accepts new password; confirms configuration written to registry.",
+                verificationRule:
+                  "Target Service Control Manager accepts new password; confirms configuration written to registry.",
               },
               {
                 stepNumber: 4,
                 actor: "Central Policy Manager (CPM)",
-                action: "Restarts the target Windows service (if `RestartService = Yes`) and confirms service state transitions to Running.",
+                action:
+                  "Restarts the target Windows service (if `RestartService = Yes`) and confirms service state transitions to Running.",
                 channelOrProtocol: "SCM ControlService API",
-                verificationRule: "Service starts cleanly without Error 1069; Vault marks parent and all usages Managed.",
+                verificationRule:
+                  "Service starts cleanly without Error 1069; Vault marks parent and all usages Managed.",
               },
             ],
           },
           terminology: [
             {
               term: "Dependent (Usage)",
-              definition: "A child object attached to a vaulted credential representing an endpoint instance (Service, Task, AppPool) where the password is deployed.",
-              enterpriseContext: "Guarantees that password changes are synchronized to endpoints before services encounter authentication errors.",
+              definition:
+                "A child object attached to a vaulted credential representing an endpoint instance (Service, Task, AppPool) where the password is deployed.",
+              enterpriseContext:
+                "Guarantees that password changes are synchronized to endpoints before services encounter authentication errors.",
             },
             {
               term: "Service Control Manager (SCM)",
-              definition: "The Windows OS subsystem responsible for managing services, drivers, and background daemons.",
-              enterpriseContext: "The CPM interacts with the SCM via remote RPC APIs to update the 'Log On As' password.",
+              definition:
+                "The Windows OS subsystem responsible for managing services, drivers, and background daemons.",
+              enterpriseContext:
+                "The CPM interacts with the SCM via remote RPC APIs to update the 'Log On As' password.",
             },
             {
               term: "Win32 Error 1069",
-              definition: "'The service did not start due to a logon failure' - the quintessential Windows service authentication error.",
-              enterpriseContext: "Occurs when a domain password was changed but the local service was not updated with the new credential.",
+              definition:
+                "'The service did not start due to a logon failure' - the quintessential Windows service authentication error.",
+              enterpriseContext:
+                "Occurs when a domain password was changed but the local service was not updated with the new credential.",
             },
             {
               term: "RestartService Setting",
-              definition: "A usage parameter dictating whether the CPM should bounce the target service immediately following password synchronization.",
-              enterpriseContext: "Set to 'No' on mission-critical database engines where service restarts must wait for approved maintenance windows.",
+              definition:
+                "A usage parameter dictating whether the CPM should bounce the target service immediately following password synchronization.",
+              enterpriseContext:
+                "Set to 'No' on mission-critical database engines where service restarts must wait for approved maintenance windows.",
             },
           ],
           administratorResponsibilities: [
@@ -132,47 +148,60 @@ export const MODULE_07: ClassCurriculum = {
             {
               name: "Usage Type: Windows Service",
               settingOrObject: "Account Details > Usages > Add Usage > Windows Service",
-              description: "Requires Target Address and exact Service Name (e.g. `MSSQLSERVER` or `AppClusterSvc`).",
-              productionBestPractice: "Always use the true Service Name (registry key), not the human-readable Display Name.",
+              description:
+                "Requires Target Address and exact Service Name (e.g. `MSSQLSERVER` or `AppClusterSvc`).",
+              productionBestPractice:
+                "Always use the true Service Name (registry key), not the human-readable Display Name.",
             },
             {
               name: "RestartService Flag",
               settingOrObject: "Usage Properties > RestartService",
-              description: "Determines if CPM issues stop/start commands to the service after updating its password in the SCM.",
-              productionBestPractice: "Set to Yes for lightweight background tasks; set to No for core ERP and core database engines.",
+              description:
+                "Determines if CPM issues stop/start commands to the service after updating its password in the SCM.",
+              productionBestPractice:
+                "Set to Yes for lightweight background tasks; set to No for core ERP and core database engines.",
             },
             {
               name: "Usage Failure Policy",
               settingOrObject: "Platform > Automatic Password Management > Usage Settings",
-              description: "Governs whether failure of a single usage should roll back the master password change or mark the usage failed.",
-              productionBestPractice: "Configure alerts to notify the on-call engineer immediately if a usage update fails.",
+              description:
+                "Governs whether failure of a single usage should roll back the master password change or mark the usage failed.",
+              productionBestPractice:
+                "Configure alerts to notify the on-call engineer immediately if a usage update fails.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Discover Service Usages",
-              action: "Execute a remote WMI query across target servers: `Get-WmiObject Win32_Service | Where-Object { $_.StartName -like '*svc_app*' }`.",
-              expectedResult: "Returns list of hosts, service names, and startup modes running under the target service account.",
+              action:
+                "Execute a remote WMI query across target servers: `Get-WmiObject Win32_Service | Where-Object { $_.StartName -like '*svc_app*' }`.",
+              expectedResult:
+                "Returns list of hosts, service names, and startup modes running under the target service account.",
               operatorNotes: "Document every endpoint before configuring the Vault object.",
             },
             {
               stepNumber: 2,
               title: "Attach Windows Service Usage",
-              action: "In PVWA Accounts, open parent account `CORP\\svc_app`, click 'Add Usage', select Windows Service, enter Address and Service Name.",
+              action:
+                "In PVWA Accounts, open parent account `CORP\\svc_app`, click 'Add Usage', select Windows Service, enter Address and Service Name.",
               expectedResult: "Usage is registered under the parent account as a dependent object.",
             },
             {
               stepNumber: 3,
               title: "Test Synchronized Rotation",
-              action: "Click 'Change' on the parent account. Monitor CPM logs as it processes the master account and subsequent usages.",
-              expectedResult: "CPM updates Active Directory, connects to target host, updates SCM, and reports success.",
+              action:
+                "Click 'Change' on the parent account. Monitor CPM logs as it processes the master account and subsequent usages.",
+              expectedResult:
+                "CPM updates Active Directory, connects to target host, updates SCM, and reports success.",
             },
             {
               stepNumber: 4,
               title: "Validate Remote Service Health",
-              action: "Connect to target host and inspect Windows Event Viewer (System Log) for Service Control Manager events.",
-              expectedResult: "No Event ID 7000 or 7041 (Logon Failure) recorded; service running cleanly with new password.",
+              action:
+                "Connect to target host and inspect Windows Event Viewer (System Log) for Service Control Manager events.",
+              expectedResult:
+                "No Event ID 7000 or 7041 (Logon Failure) recorded; service running cleanly with new password.",
             },
           ],
           enterpriseScenario: {
@@ -187,36 +216,50 @@ export const MODULE_07: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "Windows Event Log shows Event ID 7000: 'The service failed to start due to logon failure (Error 1069)'.",
-              rootCause: "Master account password was rotated in Active Directory, but the usage update on the local host failed or was missing.",
-              securityImpact: "Critical business service fails to start; production application crash.",
+              symptom:
+                "Windows Event Log shows Event ID 7000: 'The service failed to start due to logon failure (Error 1069)'.",
+              rootCause:
+                "Master account password was rotated in Active Directory, but the usage update on the local host failed or was missing.",
+              securityImpact:
+                "Critical business service fails to start; production application crash.",
               cyberArkCodeOrEvent: "Win32 Error 1069",
             },
             {
-              symptom: "CPM Usage update fails: 'CACPM250E Cannot connect to remote Service Control Manager (RPC Unavailable)'.",
-              rootCause: "Target server firewall is blocking TCP port 445 (SMB) or TCP port 135 (RPC Endpoint Mapper) from CPM.",
-              securityImpact: "Usage update fails while master password changes, leaving endpoint desynchronized.",
+              symptom:
+                "CPM Usage update fails: 'CACPM250E Cannot connect to remote Service Control Manager (RPC Unavailable)'.",
+              rootCause:
+                "Target server firewall is blocking TCP port 445 (SMB) or TCP port 135 (RPC Endpoint Mapper) from CPM.",
+              securityImpact:
+                "Usage update fails while master password changes, leaving endpoint desynchronized.",
               cyberArkCodeOrEvent: "CACPM250E",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Inspect Windows System Event Log on target host for Service Control Manager errors.",
-              logFileOrConsole: "Event Viewer > Windows Logs > System > Filter Event ID 7000, 7009, 7041",
-              remediation: "Confirm whether logon failure is due to bad password or 'Logon as a Service' right missing.",
+              diagnosticAction:
+                "Inspect Windows System Event Log on target host for Service Control Manager errors.",
+              logFileOrConsole:
+                "Event Viewer > Windows Logs > System > Filter Event ID 7000, 7009, 7041",
+              remediation:
+                "Confirm whether logon failure is due to bad password or 'Logon as a Service' right missing.",
             },
             {
               stepNumber: 2,
-              diagnosticAction: "Test remote RPC connectivity from CPM server to target host using PowerShell.",
-              logFileOrConsole: "PowerShell: Get-Service -ComputerName <TargetAddress> -Name <ServiceName>",
-              remediation: "If RPC error occurs, check Windows Firewall rules on target for 'Remote Service Management'.",
+              diagnosticAction:
+                "Test remote RPC connectivity from CPM server to target host using PowerShell.",
+              logFileOrConsole:
+                "PowerShell: Get-Service -ComputerName <TargetAddress> -Name <ServiceName>",
+              remediation:
+                "If RPC error occurs, check Windows Firewall rules on target for 'Remote Service Management'.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Manually re-sync usage credential from PVWA.",
-              logFileOrConsole: "PVWA Accounts > Select Parent Account > Usages Tab > Click 'Change' on specific failed usage",
-              remediation: "Forces CPM to push current active Vault password into the specific remote service without rotating AD again.",
+              logFileOrConsole:
+                "PVWA Accounts > Select Parent Account > Usages Tab > Click 'Change' on specific failed usage",
+              remediation:
+                "Forces CPM to push current active Vault password into the specific remote service without rotating AD again.",
             },
           ],
           diagnosticEvidence: [
@@ -248,7 +291,8 @@ export const MODULE_07: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m07-q01",
-              question: "What catastrophic operational failure occurs if a domain service account password is changed in Active Directory without updating remote services that run under it?",
+              question:
+                "What catastrophic operational failure occurs if a domain service account password is changed in Active Directory without updating remote services that run under it?",
               options: [
                 "The target server hard drive is reformatted.",
                 "The remote services fail to authenticate, trigger account lockouts in Active Directory, and crash with Win32 Error 1069.",
@@ -262,7 +306,8 @@ export const MODULE_07: ClassCurriculum = {
             },
             {
               id: "m07-q02",
-              question: "Why should an administrator consider setting 'RestartService = No' on a database engine usage?",
+              question:
+                "Why should an administrator consider setting 'RestartService = No' on a database engine usage?",
               options: [
                 "Because database services do not use passwords.",
                 "To prevent an unannounced database shutdown and transaction interruption during core business hours.",
@@ -276,7 +321,8 @@ export const MODULE_07: ClassCurriculum = {
             },
             {
               id: "m07-q03",
-              question: "Which Windows subsystem is responsible for maintaining the 'Log On As' credentials of background services and is updated by CPM usage plugins?",
+              question:
+                "Which Windows subsystem is responsible for maintaining the 'Log On As' credentials of background services and is updated by CPM usage plugins?",
               options: [
                 "Windows Defender Firewall",
                 "Service Control Manager (SCM)",
@@ -291,20 +337,71 @@ export const MODULE_07: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m07-ex01",
-            title: "Review Service Account Dependents and Manage Usages",
+            title: "Audit Service Account Dependents & Classify Enterprise Inventory",
+            objective:
+              "Inspect non-human service accounts (`svc_backup`, `svc_sql`, `svc_payment`) and their dependent usages in Accounts, verify accountable ownership, and validate Lab 04 inventory classification.",
             scenario:
-              "Inspect the privileged service account inventory, identify dependent services and usages, and verify that usage synchronization is configured to prevent service outages.",
+              "Before scheduling automated rotation on SERVICE-SAFE, audit all service accounts and their linked usages (Backup Agent, SQL Agent, Payment API), confirm accountable owners, and review unmanaged/failed exceptions.",
+            prerequisites: [
+              "Review Service Account Usages and Win32 Error 1069 prevention in Section 1–4.",
+            ],
+            startingState:
+              "SERVICE-SAFE holds svc_backup (Backup Agent, Rotation failed), svc_sql (SQL Agent, Managed), and svc_payment (Payment API, Verify required); oracle (DB-ORA-01) is Unmanaged.",
             instructions: [
-              "Navigate to the Accounts console.",
-              "Filter for service accounts (e.g. `svc_backup` or application services).",
-              "Review the account properties and dependent configurations.",
-              "Verify that management and rotation policies account for service uptime requirements.",
+              "Open the Accounts console and filter or inspect SERVICE-SAFE accounts (`svc_backup`, `svc_sql`, `svc_payment`).",
+              "Review each service account's Dependency/Usage field (Backup Agent, SQL Agent, Payment API) and assigned Owner.",
+              "Confirm shared emergency identity (`shared_ops` in EMERGENCY-SAFE) and unmanaged database candidate (`oracle` on DB-ORA-01) are accurately classified.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 04 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Accounts and inspect `svc_backup`, `svc_sql`, and `svc_payment`.",
+                explanation:
+                  "Rotating a service account without updating its dependent Windows services or scheduled tasks triggers Win32 Error 1069 outages.",
+                expectedResult:
+                  "Each service account displays its dependent workload (Backup Agent, SQL Agent, Payment API) and owner.",
+              },
+              {
+                action:
+                  "Inspect `shared_ops` (EMERGENCY-SAFE) and `oracle` (DB-ORA-01, Unmanaged) to complete full archetype review.",
+                explanation:
+                  "Lab 04 verifies enterprise-wide classification across human, service, database, and shared accounts.",
+                expectedResult:
+                  "All inventory records show named owners and governance exceptions are visible.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Validates all 6 Lab 04 classification and exception objectives.",
+                expectedResult: "All 6/6 Lab 04 objectives pass (100/100).",
+              },
             ],
             targetConsole: "accounts",
             associatedLabId: "Lab 04 · Classify the enterprise inventory",
             validationObjectiveId: "classify-types",
             validationCriteria:
-              "Service accounts and their dependent usage profiles are reviewed in the Accounts console.",
+              "Service accounts, dependencies, owners, and governance exceptions verified (6/6 Lab 04 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "'Identify unmanaged database identity (oracle on DB-ORA-01)' fails.",
+                hint: "If oracle on DB-ORA-01 was previously rotated/verified, its status changed from Unmanaged.",
+                correctiveAction:
+                  "Click Reset Simulator in the top subnav to restore the baseline inventory (with oracle Unmanaged), then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Verify Pending Service Account Health (`svc_payment`)",
+              scenario:
+                "Application owners ask whether `svc_payment` on APP-PAYMENT-01 is still synchronized before its next rotation window.",
+              goal: "Without step-by-step instructions, locate `svc_payment` in CPM Operations and execute a non-disruptive Verify check.",
+              targetConsole: "cpm",
+              successCriteria: [
+                "Located `svc_payment` (APP-PAYMENT-01) with dependency 'Payment API'.",
+                "Executed CPM Verify without triggering an unapproved password Change.",
+              ],
+            },
+            simulationLimitationNote:
+              "Automated Windows Service Control Manager restarts (RestartService) on remote endpoints are modeled via account dependency metadata rather than live OS service calls; live validation evaluates Lab 04 inventory and service-account classification.",
           },
           completionCriteria: [
             "Deconstructed service account dependencies across Windows Services, Tasks, and AppPools.",

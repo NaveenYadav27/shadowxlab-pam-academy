@@ -29,7 +29,8 @@ export const MODULE_02: ClassCurriculum = {
           id: "m02-l01",
           number: "2.1",
           title: "Directory Mapping & Enterprise Authentication",
-          subtitle: "Configuring LDAP synchronization, SAML federation, and role-based provisioning",
+          subtitle:
+            "Configuring LDAP synchronization, SAML federation, and role-based provisioning",
           estimatedMinutes: 25,
           learningObjectives: [
             "Configure Directory Mapping rules to dynamically provision PAM users based on Active Directory security groups.",
@@ -72,53 +73,69 @@ export const MODULE_02: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Enterprise Engineer",
-                action: "Navigates to PVWA and is redirected to Corporate IdP (Okta/Azure AD/Ping) for MFA authentication.",
+                action:
+                  "Navigates to PVWA and is redirected to Corporate IdP (Okta/Azure AD/Ping) for MFA authentication.",
                 channelOrProtocol: "HTTPS Port 443 / SAML 2.0 Redirect",
-                verificationRule: "IdP validates credentials, triggers FIDO2/Push MFA, and issues signed SAML assertion.",
+                verificationRule:
+                  "IdP validates credentials, triggers FIDO2/Push MFA, and issues signed SAML assertion.",
               },
               {
                 stepNumber: 2,
                 actor: "PVWA Web Tier",
-                action: "Validates SAML signature against trusted IdP certificate and extracts user UPN and group attributes.",
+                action:
+                  "Validates SAML signature against trusted IdP certificate and extracts user UPN and group attributes.",
                 channelOrProtocol: "SAML Assertion Consumer Service (ACS)",
-                verificationRule: "PVWA confirms token signature validity and timestamp within clock-skew tolerance.",
+                verificationRule:
+                  "PVWA confirms token signature validity and timestamp within clock-skew tolerance.",
               },
               {
                 stepNumber: 3,
                 actor: "Digital Vault",
-                action: "Searches Directory Maps for matching AD security groups associated with the user.",
+                action:
+                  "Searches Directory Maps for matching AD security groups associated with the user.",
                 channelOrProtocol: "Encrypted Vault Kernel (TCP 1858)",
-                verificationRule: "Vault checks license count and binds user to corresponding Vault permissions and Safe memberships.",
+                verificationRule:
+                  "Vault checks license count and binds user to corresponding Vault permissions and Safe memberships.",
               },
               {
                 stepNumber: 4,
                 actor: "PAM Administrator",
-                action: "Delegates administrative roles by assigning group-level memberships rather than individual users.",
+                action:
+                  "Delegates administrative roles by assigning group-level memberships rather than individual users.",
                 channelOrProtocol: "Administration > Users & Groups Console",
-                verificationRule: "Role separation enforced: Operators cannot manage Safes, Auditors cannot view passwords.",
+                verificationRule:
+                  "Role separation enforced: Operators cannot manage Safes, Auditors cannot view passwords.",
               },
             ],
           },
           terminology: [
             {
               term: "Directory Map",
-              definition: "A set of rules within the Vault that associates an LDAP query or AD security group with Vault properties, user templates, and authorized interfaces.",
-              enterpriseContext: "Ensures users inherit appropriate Safe permissions automatically based on their AD department group.",
+              definition:
+                "A set of rules within the Vault that associates an LDAP query or AD security group with Vault properties, user templates, and authorized interfaces.",
+              enterpriseContext:
+                "Ensures users inherit appropriate Safe permissions automatically based on their AD department group.",
             },
             {
               term: "EPV User License",
-              definition: "A licensed user seat allowing full interactive access to vaulted credentials and privileged sessions via PVWA.",
-              enterpriseContext: "Organizations must monitor allocated EPV licenses against contract quotas to avoid license exhaustion.",
+              definition:
+                "A licensed user seat allowing full interactive access to vaulted credentials and privileged sessions via PVWA.",
+              enterpriseContext:
+                "Organizations must monitor allocated EPV licenses against contract quotas to avoid license exhaustion.",
             },
             {
               term: "Vault Internal User",
-              definition: "A user account created directly within the Vault database (e.g., Master, Administrator, PasswordManager, PSMServer).",
-              enterpriseContext: "Used strictly for emergency break-glass access or internal system services; never for everyday human users.",
+              definition:
+                "A user account created directly within the Vault database (e.g., Master, Administrator, PasswordManager, PSMServer).",
+              enterpriseContext:
+                "Used strictly for emergency break-glass access or internal system services; never for everyday human users.",
             },
             {
               term: "Role-Based Access Control (RBAC)",
-              definition: "Restricting system access to authorized users based on their organizational role (e.g., Administrator, Auditor, Operator).",
-              enterpriseContext: "Auditors receive read-only reporting access; Operations staff receive checkout permissions; PAM Admins configure system objects.",
+              definition:
+                "Restricting system access to authorized users based on their organizational role (e.g., Administrator, Auditor, Operator).",
+              enterpriseContext:
+                "Auditors receive read-only reporting access; Operations staff receive checkout permissions; PAM Admins configure system objects.",
             },
           ],
           administratorResponsibilities: [
@@ -131,47 +148,62 @@ export const MODULE_02: ClassCurriculum = {
             {
               name: "LDAP Server Connection: SSL/TLS",
               settingOrObject: "PVWA Administration > LDAP Integration > Directories",
-              description: "Configures Domain Controller hostnames, port 636, and SSL CA certificates for encrypted directory queries.",
-              productionBestPractice: "Always enforce LDAPS (TCP 636) with trusted internal PKI root certificates. Never allow unencrypted LDAP (Port 389).",
+              description:
+                "Configures Domain Controller hostnames, port 636, and SSL CA certificates for encrypted directory queries.",
+              productionBestPractice:
+                "Always enforce LDAPS (TCP 636) with trusted internal PKI root certificates. Never allow unencrypted LDAP (Port 389).",
             },
             {
               name: "Directory Map Precedence",
               settingOrObject: "Directory Mapping Rules List",
-              description: "Determines the evaluation order of mapping rules when a user belongs to multiple AD groups.",
-              productionBestPractice: "Place the most restrictive or specialized administrative rules at the top of the priority list.",
+              description:
+                "Determines the evaluation order of mapping rules when a user belongs to multiple AD groups.",
+              productionBestPractice:
+                "Place the most restrictive or specialized administrative rules at the top of the priority list.",
             },
             {
               name: "Inactive User De-allocation",
               settingOrObject: "dbparm.ini / AutoDeleteExternalUsers",
-              description: "Automatically deactivates or removes cached directory user objects if they have not logged in for 90 days.",
-              productionBestPractice: "Enable automatic de-allocation to reclaim EPV user licenses from departed or inactive staff.",
+              description:
+                "Automatically deactivates or removes cached directory user objects if they have not logged in for 90 days.",
+              productionBestPractice:
+                "Enable automatic de-allocation to reclaim EPV user licenses from departed or inactive staff.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "LDAP Integration Test",
-              action: "In PVWA Administration > LDAP Integration, select the target domain and click 'Test Directory Connection'.",
-              expectedResult: "Connection succeeds with green status indicator; bind user authenticates cleanly.",
-              operatorNotes: "If failed, verify domain controller firewall rules on port 636 and check whether bind user password expired.",
+              action:
+                "In PVWA Administration > LDAP Integration, select the target domain and click 'Test Directory Connection'.",
+              expectedResult:
+                "Connection succeeds with green status indicator; bind user authenticates cleanly.",
+              operatorNotes:
+                "If failed, verify domain controller firewall rules on port 636 and check whether bind user password expired.",
             },
             {
               stepNumber: 2,
               title: "Create Directory Mapping Rule",
-              action: "Add a new Directory Map: specify AD Group `CN=PAM_Cloud_Admins,OU=Groups,DC=corp,DC=local` and link to `Cloud-Admins-VaultGroup`.",
-              expectedResult: "Mapping rule saved; test user from group logs in and immediately inherits Cloud-Admins profile.",
+              action:
+                "Add a new Directory Map: specify AD Group `CN=PAM_Cloud_Admins,OU=Groups,DC=corp,DC=local` and link to `Cloud-Admins-VaultGroup`.",
+              expectedResult:
+                "Mapping rule saved; test user from group logs in and immediately inherits Cloud-Admins profile.",
             },
             {
               stepNumber: 3,
               title: "License Quota Audit",
-              action: "Navigate to Administration > License Information and review Allocated vs Consumed user seats.",
-              expectedResult: "Active user count is below the licensed threshold (e.g. 240/300 EPV licenses used).",
+              action:
+                "Navigate to Administration > License Information and review Allocated vs Consumed user seats.",
+              expectedResult:
+                "Active user count is below the licensed threshold (e.g. 240/300 EPV licenses used).",
             },
             {
               stepNumber: 4,
               title: "Role Separation Validation",
-              action: "Log in with a test Auditor account and attempt to access Administration > Safes management.",
-              expectedResult: "Administrative actions are hidden or return HTTP 403 Forbidden; Auditor can only view Reports and System Health.",
+              action:
+                "Log in with a test Auditor account and attempt to access Administration > Safes management.",
+              expectedResult:
+                "Administrative actions are hidden or return HTTP 403 Forbidden; Auditor can only view Reports and System Health.",
             },
           ],
           enterpriseScenario: {
@@ -186,36 +218,47 @@ export const MODULE_02: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "User receives 'ITATS020E User is not authorized to logon from this station' or 'Authentication failure'.",
-              rootCause: "Directory Mapping rule did not match the user's AD groups, or the bind user account is locked out.",
-              securityImpact: "Legitimate administrator locked out of emergency operational systems.",
+              symptom:
+                "User receives 'ITATS020E User is not authorized to logon from this station' or 'Authentication failure'.",
+              rootCause:
+                "Directory Mapping rule did not match the user's AD groups, or the bind user account is locked out.",
+              securityImpact:
+                "Legitimate administrator locked out of emergency operational systems.",
               cyberArkCodeOrEvent: "ITATS020E",
             },
             {
               symptom: "New administrators cannot log in: 'ITATS006E License capacity exceeded'.",
-              rootCause: "All allocated EPV user licenses have been consumed by inactive accounts or overly broad Directory Maps.",
-              securityImpact: "Operational freeze; onboarding halts until inactive licenses are audited and purged.",
+              rootCause:
+                "All allocated EPV user licenses have been consumed by inactive accounts or overly broad Directory Maps.",
+              securityImpact:
+                "Operational freeze; onboarding halts until inactive licenses are audited and purged.",
               cyberArkCodeOrEvent: "ITATS006E",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Verify Active Directory bind account status and account lockout flags.",
+              diagnosticAction:
+                "Verify Active Directory bind account status and account lockout flags.",
               logFileOrConsole: "Active Directory Users and Computers (ADUC) / italog.log",
-              remediation: "Unlock the bind account, reset its password, and update the credential stored in the Vault LDAP configuration.",
+              remediation:
+                "Unlock the bind account, reset its password, and update the credential stored in the Vault LDAP configuration.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Examine LDAP search filter and user DN in PVWA web logs.",
               logFileOrConsole: "C:\\Windows\\Temp\\PVWA\\PVWA.App.log",
-              remediation: "Ensure the base DN includes the target OU where user accounts are located, and test with ldapsearch.",
+              remediation:
+                "Ensure the base DN includes the target OU where user accounts are located, and test with ldapsearch.",
             },
             {
               stepNumber: 3,
-              diagnosticAction: "Audit user license consumption and delete orphaned external users.",
-              logFileOrConsole: "PrivateArk Client > Tools > Administrative Tools > Users and Groups",
-              remediation: "Select inactive external users who have not logged in for 90+ days and delete their cached Vault principal records.",
+              diagnosticAction:
+                "Audit user license consumption and delete orphaned external users.",
+              logFileOrConsole:
+                "PrivateArk Client > Tools > Administrative Tools > Users and Groups",
+              remediation:
+                "Select inactive external users who have not logged in for 90+ days and delete their cached Vault principal records.",
             },
           ],
           diagnosticEvidence: [
@@ -247,7 +290,8 @@ export const MODULE_02: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m02-q01",
-              question: "What is the primary operational advantage of using Directory Mapping over creating local Vault users?",
+              question:
+                "What is the primary operational advantage of using Directory Mapping over creating local Vault users?",
               options: [
                 "Directory Mapping allows users to bypass Multi-Factor Authentication.",
                 "Directory Mapping ensures centralized provisioning and immediate de-provisioning tied to Active Directory employment status.",
@@ -261,7 +305,8 @@ export const MODULE_02: ClassCurriculum = {
             },
             {
               id: "m02-q02",
-              question: "If an enterprise exhausts its licensed EPV User quota, what occurs when a valid AD user attempts their initial login via a Directory Map?",
+              question:
+                "If an enterprise exhausts its licensed EPV User quota, what occurs when a valid AD user attempts their initial login via a Directory Map?",
               options: [
                 "The Vault converts them to a Master administrator automatically.",
                 "The Vault grants them temporary access for 24 hours.",
@@ -275,7 +320,8 @@ export const MODULE_02: ClassCurriculum = {
             },
             {
               id: "m02-q03",
-              question: "Which role separation model represents production best practice in enterprise PAM?",
+              question:
+                "Which role separation model represents production best practice in enterprise PAM?",
               options: [
                 "All users are granted Master Administrator permissions for ease of access.",
                 "Auditors have read-only access to audit logs and reports; Operators have access to check out credentials; PAM Admins manage Safes and configuration.",
@@ -290,20 +336,74 @@ export const MODULE_02: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m02-ex01",
-            title: "Inspect Administrator Role Assignments and User Privileges",
+            title: "Audit User Roles & Validate Least-Privilege DBA Access",
+            objective:
+              "Inspect enterprise user role assignments in Administration and verify least-privilege Safe authorization for dba_user on DBA-SAFE.",
             scenario:
-              "As part of a quarterly governance review, audit the user accounts configured in the PAM simulator, verify their assigned roles (Administrator vs Operator vs Auditor), and confirm least privilege enforcement.",
+              "As part of a quarterly governance review, audit the user accounts configured in the PAM simulator, verify role separation (Administrator vs Operator vs Auditor), and validate dba_user's least-privilege boundary on DBA-SAFE.",
+            prerequisites: [
+              "Review Directory Mapping, SAML/RADIUS MFA, and RBAC separation in Section 1–4.",
+            ],
+            startingState:
+              "Seeded operator personas exist in Administration; DBA-SAFE contains pam_admin, dba_user, and auditor.",
             instructions: [
-              "Navigate to the Access Management console.",
-              "Review the active users and their operational permissions.",
-              "Inspect user role attributes and verify that administrative permissions are restricted to authorized personnel.",
-              "Verify that audit logging records your inspection activity.",
+              "Open the Administration console and audit the active users and their assigned roles (Vault Admin, Operator, Auditor).",
+              "Open the Safes console, select DBA-SAFE, and verify dba_user has 'List accounts' and 'Use accounts' / 'Initiate privileged sessions' WITHOUT 'Retrieve accounts'.",
+              "Save dba_user's permissions (or run an allowed permission test on DBA-SAFE) so the Vault logs an audited governance event.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 02 objectives.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open Administration and review each user's assigned role and authentication method.",
+                explanation:
+                  "Prevents privilege creep by confirming only designated Vault Administrators hold administrative roles.",
+                expectedResult:
+                  "User roster clearly separates pam_admin, operational users (dba_user, windows_admin), and read-only auditor.",
+              },
+              {
+                action:
+                  "Switch to Safes > DBA-SAFE and verify dba_user has 'List accounts' and 'Use accounts' without 'Retrieve accounts', then click Save.",
+                explanation:
+                  "Binds identity governance to Safe-level least-privilege enforcement and records an audited DBA-SAFE event.",
+                expectedResult:
+                  "DBA-SAFE permissions are saved and audited with Retrieve accounts withheld.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Validates DBA-SAFE existence, owner assignment, dba_user membership, least privilege, and audited checks.",
+                expectedResult: "All 6/6 Lab 02 objectives pass (100/100).",
+              },
             ],
             targetConsole: "access",
             associatedLabId: "Lab 02 · Provision DBA-SAFE access",
             validationObjectiveId: "assign-owner",
             validationCriteria:
-              "User role definitions and access permissions are reviewed in the Access Management console.",
+              "User roles audited in Administration and DBA-SAFE least-privilege membership validated (6/6 Lab 02 objectives).",
+            troubleshootingHints: [
+              {
+                symptom:
+                  "'Verify permitted operation for DBA team' remains pending after inspecting Administration.",
+                hint: "Live Lab 02 validation requires an audited Success action targeting DBA-SAFE in the Safes console.",
+                correctiveAction:
+                  "Open Safes, select DBA-SAFE, select dba_user (ensuring Retrieve accounts is unchecked), click Save Member Permissions, and re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Provision a New Read-Only Auditor Identity",
+              scenario:
+                "An external compliance reviewer needs a least-privilege auditor account in the PAM workspace.",
+              goal: "Without step-by-step instructions, add a new user with an Auditor/Read-Only role in the Administration console.",
+              targetConsole: "access",
+              successCriteria: [
+                "Created a new user identity in Administration with least-privilege Auditor role.",
+                "Confirmed the new user appears in the user directory and generated an audit entry.",
+              ],
+            },
+            simulationLimitationNote:
+              "External LDAPS/SAML IdP directory binding is conceptual in the browser simulator. To satisfy live Lab 02 validation after reviewing roles in Administration, open Safes > DBA-SAFE and save or test dba_user's least-privilege permissions (no Retrieve accounts).",
           },
           completionCriteria: [
             "Mastered Directory Mapping mechanics and LDAPS connectivity requirements.",

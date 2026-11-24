@@ -563,6 +563,7 @@ export const PVWA_NAV_ITEMS: { id: SectionId; label: string; icon: typeof Activi
   { id: "discovery", label: "Discovery", icon: SearchCheck },
   { id: "academy", label: "Learning Academy", icon: GraduationCap },
   { id: "troubleshooting", label: "Troubleshooting", icon: LifeBuoy },
+  { id: "knowledge", label: "Knowledge Hub", icon: BookText },
 ];
 
 function titleFor(section: SectionId): string {
@@ -1725,6 +1726,7 @@ export function PamAcademy({ initialSection }: PamAcademyProps = {}) {
               key={item.id}
               type="button"
               className={cx("pvwa-nav-tab", isActive && "active")}
+              aria-current={isActive ? "page" : undefined}
               onClick={() => setActive(item.id)}
             >
               <Icon size={14} />
@@ -6377,73 +6379,324 @@ function AssessmentView({
   );
 }
 
-function KnowledgeView({
+const KNOWLEDGE_PILLARS: {
+  id: string;
+  index: string;
+  label: string;
+  description: string;
+  icon: typeof LockKeyhole;
+  keywords: string[];
+}[] = [
+  {
+    id: "digital-vault",
+    index: "01",
+    label: "DIGITAL VAULT",
+    description:
+      "Hardened, encrypted central repository enforcing Safe boundary access control lists and immutable audit storage.",
+    icon: LockKeyhole,
+    keywords: ["vault", "digital vault", "safe", "acl", "audit", "encrypted", "repository"],
+  },
+  {
+    id: "pvwa-gateway",
+    index: "02",
+    label: "PVWA GATEWAY",
+    description:
+      "Unified web interface providing operator workflows, request authorizations, and inventory visibility.",
+    icon: Network,
+    keywords: ["pvwa", "web access", "gateway", "portal", "web interface"],
+  },
+  {
+    id: "cpm-engine",
+    index: "03",
+    label: "CPM ENGINE",
+    description:
+      "Central Policy Manager executing automated verify, change, and reconcile operations across enterprise targets.",
+    icon: RefreshCw,
+    keywords: [
+      "cpm",
+      "central policy manager",
+      "password rotation",
+      "password management",
+      "verify",
+      "change",
+      "reconcile",
+      "rotation",
+    ],
+  },
+  {
+    id: "psm-broker",
+    index: "04",
+    label: "PSM BROKER",
+    description:
+      "Privileged Session Manager injecting credentials dynamically into recorded, monitored, and isolable RDP/SSH sessions.",
+    icon: MonitorPlay,
+    keywords: [
+      "psm",
+      "privileged session manager",
+      "session management",
+      "session proxy",
+      "broker",
+      "rdp",
+      "ssh",
+      "recording",
+    ],
+  },
+  {
+    id: "target-endpoints",
+    index: "05",
+    label: "TARGET ENDPOINTS",
+    description:
+      "Enterprise Windows servers, Linux hosts, SQL Server instances, and Oracle databases under PAM governance.",
+    icon: Server,
+    keywords: [
+      "target endpoints",
+      "windows",
+      "linux",
+      "sql server",
+      "oracle",
+      "servers",
+      "hosts",
+      "databases",
+      "endpoints",
+    ],
+  },
+];
+
+export function KnowledgeView({
   setActive,
   setSelectedClass,
 }: {
   setActive: (s: SectionId) => void;
   setSelectedClass: (c: string) => void;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const trimmedQuery = searchQuery.trim();
+  const queryTokens = useMemo(
+    () =>
+      trimmedQuery
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((token) => token.length > 0),
+    [trimmedQuery],
+  );
+
+  const filteredPillars = useMemo(() => {
+    if (queryTokens.length === 0) return KNOWLEDGE_PILLARS;
+    return KNOWLEDGE_PILLARS.filter((pillar) => {
+      const searchable =
+        `${pillar.label} ${pillar.description} ${pillar.keywords.join(" ")}`.toLowerCase();
+      return queryTokens.every((token) => searchable.includes(token));
+    });
+  }, [queryTokens]);
+
+  const filteredClasses = useMemo(() => {
+    if (queryTokens.length === 0) return CLASSES;
+    return CLASSES.filter((cls) => {
+      const searchable =
+        `${cls.id} ${cls.label} ${cls.title} ${cls.subtitle} ${cls.labs.join(" ")}`.toLowerCase();
+      return queryTokens.every((token) => searchable.includes(token));
+    });
+  }, [queryTokens]);
+
+  const hasQuery = trimmedQuery.length > 0;
+  const totalMatches = filteredPillars.length + filteredClasses.length;
+
   return (
-    <>
+    <div className="knowledge-hub">
       <SectionHeading
         eyebrow="CONTROL PLANE ARCHITECTURE · REFERENCE"
         title="PAM knowledge base"
-        description="Core technical reference for Digital Vault, Web Access, CPM rotation engine, PSM session proxy, and least-privilege security boundaries."
+        description="Structured technical reference for PAM control-plane architecture, core component responsibilities, terminology, and direct navigation to existing Academy classes."
       />
-      <div className="knowledge-grid">
-        <Panel title="The 5 PAM Control Plane Pillars" note="ARCHITECTURAL FOUNDATION">
-          <div className="detail-facts">
-            <Detail
-              label="DIGITAL VAULT"
-              value="Hardened, encrypted central repository enforcing Safe boundary access control lists and immutable audit storage."
-            />
-            <Detail
-              label="PVWA GATEWAY"
-              value="Unified web interface providing operator workflows, request authorizations, and inventory visibility."
-            />
-            <Detail
-              label="CPM ENGINE"
-              value="Central Policy Manager executing automated verify, change, and reconcile operations across enterprise targets."
-            />
-            <Detail
-              label="PSM BROKER"
-              value="Privileged Session Manager injecting credentials dynamically into recorded, monitored, and isolable RDP/SSH sessions."
-            />
-            <Detail
-              label="TARGET ENDPOINTS"
-              value="Enterprise Windows servers, Linux hosts, SQL Server instances, and Oracle databases under PAM governance."
-            />
-          </div>
-        </Panel>
 
-        <Panel title="Academy Curriculum Quick Links" note="JUMP TO HANDS-ON CLASS">
-          <div className="attention-list">
-            {CLASSES.map((cls) => (
-              <div key={cls.id} className="attention-row">
-                <div>
-                  <strong>
-                    {cls.label} · {cls.title}
-                  </strong>
-                  <small>{cls.subtitle}</small>
-                </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedClass(cls.id);
-                    setActive("academy");
-                  }}
-                >
-                  Start <ArrowRight size={14} />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </Panel>
+      <div className="knowledge-toolbar" role="search" aria-label="Knowledge Hub Search">
+        <div className="knowledge-search-field">
+          <Search size={15} className="knowledge-search-icon" aria-hidden="true" />
+          <input
+            type="text"
+            role="searchbox"
+            className="knowledge-search-input"
+            aria-label="Search PAM reference and Academy classes"
+            placeholder="Search Vault, PVWA, CPM, PSM, endpoints, or Academy classes..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+          {hasQuery && (
+            <button
+              type="button"
+              className="knowledge-search-clear"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+              title="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        <div className="knowledge-toolbar-meta">
+          <span className="knowledge-result-summary" aria-live="polite">
+            {hasQuery
+              ? `Showing ${filteredPillars.length} of ${KNOWLEDGE_PILLARS.length} pillars · ${filteredClasses.length} of ${CLASSES.length} classes`
+              : `${KNOWLEDGE_PILLARS.length} architecture pillars · ${CLASSES.length} Academy classes`}
+          </span>
+          {hasQuery && (
+            <Button type="button" size="sm" variant="outline" onClick={() => setSearchQuery("")}>
+              Clear search
+            </Button>
+          )}
+        </div>
       </div>
-    </>
+
+      {hasQuery && totalMatches === 0 ? (
+        <div className="knowledge-empty-state" role="status">
+          <div className="knowledge-empty-icon" aria-hidden="true">
+            <Search size={20} />
+          </div>
+          <h2>No matching Knowledge Hub entries</h2>
+          <p>
+            No PAM control-plane references or Academy classes matched &ldquo;{trimmedQuery}&rdquo;.
+            Try terms such as Vault, PVWA, Web Access, CPM, Password Rotation, PSM, Session
+            Management, Windows, Linux, SQL Server, Oracle, or a class name.
+          </p>
+          <Button type="button" size="sm" variant="outline" onClick={() => setSearchQuery("")}>
+            Clear search
+          </Button>
+        </div>
+      ) : (
+        <div className="knowledge-grid">
+          <section
+            className="knowledge-area knowledge-area-reference"
+            aria-labelledby="knowledge-reference-heading"
+          >
+            <div className="knowledge-area-header">
+              <div className="knowledge-area-title-group">
+                <span className="knowledge-area-kicker">
+                  <Shield size={12} aria-hidden="true" />
+                  PAM REFERENCE
+                </span>
+                <h2 id="knowledge-reference-heading">The 5 PAM Control Plane Pillars</h2>
+                <p>Architectural foundation and core component boundaries</p>
+              </div>
+              <span className="knowledge-count-pill">
+                {filteredPillars.length} / {KNOWLEDGE_PILLARS.length}
+              </span>
+            </div>
+
+            <div className="knowledge-area-body">
+              {filteredPillars.length === 0 ? (
+                <div className="knowledge-section-empty" role="status">
+                  <p>No architecture pillars match &ldquo;{trimmedQuery}&rdquo;.</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                <div className="knowledge-pillar-list">
+                  {filteredPillars.map((pillar) => {
+                    const Icon = pillar.icon;
+                    return (
+                      <article key={pillar.id} className="knowledge-pillar-card">
+                        <div className="knowledge-pillar-icon" aria-hidden="true">
+                          <Icon size={16} />
+                        </div>
+                        <div className="knowledge-pillar-content">
+                          <div className="knowledge-pillar-head">
+                            <span className="knowledge-pillar-index">{pillar.index}</span>
+                            <h3>{pillar.label}</h3>
+                          </div>
+                          <p>{pillar.description}</p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section
+            className="knowledge-area knowledge-area-curriculum"
+            aria-labelledby="knowledge-curriculum-heading"
+          >
+            <div className="knowledge-area-header">
+              <div className="knowledge-area-title-group">
+                <span className="knowledge-area-kicker knowledge-area-kicker-curriculum">
+                  <GraduationCap size={12} aria-hidden="true" />
+                  ACADEMY LEARNING PATH
+                </span>
+                <h2 id="knowledge-curriculum-heading">Academy Curriculum Quick Links</h2>
+                <p>Jump directly to hands-on Academy classes</p>
+              </div>
+              <span className="knowledge-count-pill">
+                {filteredClasses.length} / {CLASSES.length}
+              </span>
+            </div>
+
+            <div className="knowledge-area-body">
+              {filteredClasses.length === 0 ? (
+                <div className="knowledge-section-empty" role="status">
+                  <p>No Academy classes match &ldquo;{trimmedQuery}&rdquo;.</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear search
+                  </Button>
+                </div>
+              ) : (
+                <div className="knowledge-class-list">
+                  {filteredClasses.map((cls) => (
+                    <div key={cls.id} className="knowledge-class-row">
+                      <div className="knowledge-class-main">
+                        <div className="knowledge-class-meta">
+                          <span className="knowledge-class-badge">{cls.label}</span>
+                          <span className="knowledge-class-labs-count">
+                            {cls.labs.length} {cls.labs.length === 1 ? "lab" : "labs"}
+                          </span>
+                        </div>
+                        <strong className="knowledge-class-title">{cls.title}</strong>
+                        <p className="knowledge-class-subtitle">{cls.subtitle}</p>
+                        {cls.labs.length > 0 && (
+                          <div className="knowledge-class-labs">
+                            {cls.labs.map((lab) => (
+                              <span key={lab} className="knowledge-class-lab-tag">
+                                {lab}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="knowledge-class-action">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedClass(cls.id);
+                            setActive("academy");
+                          }}
+                        >
+                          Start <ArrowRight size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+    </div>
   );
 }
 

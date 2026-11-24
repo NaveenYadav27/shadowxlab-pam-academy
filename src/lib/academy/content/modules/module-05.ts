@@ -29,7 +29,8 @@ export const MODULE_05: ClassCurriculum = {
           id: "m05-l01",
           number: "5.1",
           title: "Account Object Anatomy & Onboarding Lifecycle",
-          subtitle: "Validating properties, platform bindings, and pre-management verification gates",
+          subtitle:
+            "Validating properties, platform bindings, and pre-management verification gates",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the internal schema of a vaulted Account Object and its mandatory properties.",
@@ -37,10 +38,7 @@ export const MODULE_05: ClassCurriculum = {
             "Execute the 4-phase onboarding lifecycle: Intake, Placement, Initial Verification, and Management Enablement.",
             "Evaluate automated onboarding techniques using REST APIs and the Password Upload Utility (PUU).",
           ],
-          prerequisites: [
-            "Module 03: Policies and Platforms.",
-            "Module 04: Safes.",
-          ],
+          prerequisites: ["Module 03: Policies and Platforms.", "Module 04: Safes."],
           conceptIntroduction:
             "In the Digital Vault, an 'Account' is not merely a username and password string; it is a structured, cryptographic object with rich metadata, operational flags, and audit linkages.\n\nEvery Account Object requires five fundamental parameters to function within the enterprise architecture:\n1. **Safe**: The encrypted container that houses the object and determines user access.\n2. **Platform**: The policy template dictating password generation, rotation interval, and CPM plugin.\n3. **Address**: The network location (FQDN, NetBIOS name, or IP address) where the credential authenticates.\n4. **Username**: The exact account identifier recognized by the target operating system, database, or network device.\n5. **Secret (Password / SSH Key)**: The cryptographic authentication payload.\n\nBefore enabling automated management, the PAM administrator must verify that the recorded password actually matches the target system. Enabling automated rotation on an account with an incorrect initial password triggers immediate account lockouts and business disruption. This verification gate is the first rule of account stewardship.",
           whyItExists:
@@ -72,53 +70,69 @@ export const MODULE_05: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "PAM Administrator",
-                action: "Initiates account onboarding via PVWA web console or REST API, specifying Safe, Platform, Address, and Username.",
+                action:
+                  "Initiates account onboarding via PVWA web console or REST API, specifying Safe, Platform, Address, and Username.",
                 channelOrProtocol: "HTTPS Port 443 / REST API",
-                verificationRule: "PVWA validates that target Safe exists, Platform is active, and Address resolves.",
+                verificationRule:
+                  "PVWA validates that target Safe exists, Platform is active, and Address resolves.",
               },
               {
                 stepNumber: 2,
                 actor: "Digital Vault",
-                action: "Generates new Account Object, writes encrypted payload to target Safe, and marks status 'Unmanaged'.",
+                action:
+                  "Generates new Account Object, writes encrypted payload to target Safe, and marks status 'Unmanaged'.",
                 channelOrProtocol: "Vault Kernel Protocol (TCP 1858)",
-                verificationRule: "Unique object constraint checked; duplicate accounts on same address/safe rejected.",
+                verificationRule:
+                  "Unique object constraint checked; duplicate accounts on same address/safe rejected.",
               },
               {
                 stepNumber: 3,
                 actor: "PAM Administrator",
-                action: "Triggers CPM 'Verify' operation to test credentials against the remote host.",
+                action:
+                  "Triggers CPM 'Verify' operation to test credentials against the remote host.",
                 channelOrProtocol: "PVWA Accounts Console > Verify",
-                verificationRule: "CPM connects to target host; verifies password authenticates cleanly without error.",
+                verificationRule:
+                  "CPM connects to target host; verifies password authenticates cleanly without error.",
               },
               {
                 stepNumber: 4,
                 actor: "Central Policy Manager (CPM)",
-                action: "Updates account status to 'Managed' and schedules recurring rotation according to platform policy.",
+                action:
+                  "Updates account status to 'Managed' and schedules recurring rotation according to platform policy.",
                 channelOrProtocol: "TCP 1858 to Vault",
-                verificationRule: "LastVerify timestamp updated; next scheduled rotation date calculated.",
+                verificationRule:
+                  "LastVerify timestamp updated; next scheduled rotation date calculated.",
               },
             ],
           },
           terminology: [
             {
               term: "Account Object",
-              definition: "A composite digital asset in the Vault consisting of metadata properties, historical versions, and encrypted authentication secrets.",
-              enterpriseContext: "Represents an administrative identity on a specific host or domain.",
+              definition:
+                "A composite digital asset in the Vault consisting of metadata properties, historical versions, and encrypted authentication secrets.",
+              enterpriseContext:
+                "Represents an administrative identity on a specific host or domain.",
             },
             {
               term: "Address Property",
-              definition: "The network destination where the account resides. Can be an IP address, NetBIOS name, or fully qualified domain name (FQDN).",
-              enterpriseContext: "Best practice is to use FQDN (e.g. `srv-sql-01.corp.local`) to ensure reliable DNS resolution across subnets.",
+              definition:
+                "The network destination where the account resides. Can be an IP address, NetBIOS name, or fully qualified domain name (FQDN).",
+              enterpriseContext:
+                "Best practice is to use FQDN (e.g. `srv-sql-01.corp.local`) to ensure reliable DNS resolution across subnets.",
             },
             {
               term: "Pre-Management Verification",
-              definition: "The mandatory operational step of testing an onboarded password against the target system before enabling automated rotation.",
-              enterpriseContext: "Prevents CPM from attempting a password change with an invalid old password, which triggers account lockouts.",
+              definition:
+                "The mandatory operational step of testing an onboarded password against the target system before enabling automated rotation.",
+              enterpriseContext:
+                "Prevents CPM from attempting a password change with an invalid old password, which triggers account lockouts.",
             },
             {
               term: "Password Upload Utility (PUU)",
-              definition: "A legacy command-line batch utility for bulk onboarding hundreds or thousands of accounts via structured CSV files.",
-              enterpriseContext: "Largely superseded in modern enterprise by Ansible, Terraform, and the PVWA REST API.",
+              definition:
+                "A legacy command-line batch utility for bulk onboarding hundreds or thousands of accounts via structured CSV files.",
+              enterpriseContext:
+                "Largely superseded in modern enterprise by Ansible, Terraform, and the PVWA REST API.",
             },
           ],
           administratorResponsibilities: [
@@ -131,47 +145,62 @@ export const MODULE_05: ClassCurriculum = {
             {
               name: "Address Property Resolution",
               settingOrObject: "Account Details > Address",
-              description: "Target hostname or IP address used by CPM and PSM to establish connectivity.",
-              productionBestPractice: "Always use FQDN. Avoid using static IPs that change during DHCP or cloud migration events.",
+              description:
+                "Target hostname or IP address used by CPM and PSM to establish connectivity.",
+              productionBestPractice:
+                "Always use FQDN. Avoid using static IPs that change during DHCP or cloud migration events.",
             },
             {
               name: "Account Object Name Schema",
               settingOrObject: "Vault Object Name Generation",
-              description: "Internal filename format: `<PlatformID>-<SafeName>-<Address>-<Username>`.",
-              productionBestPractice: "Never customize object names manually; allow PVWA/Vault to auto-generate standard object keys.",
+              description:
+                "Internal filename format: `<PlatformID>-<SafeName>-<Address>-<Username>`.",
+              productionBestPractice:
+                "Never customize object names manually; allow PVWA/Vault to auto-generate standard object keys.",
             },
             {
               name: "VerifyOnAdd Parameter",
-              settingOrObject: "Platform > Automatic Password Management > Privileged Account Management",
-              description: "Instructs CPM to automatically execute a Verify operation as soon as a new account is onboarded.",
-              productionBestPractice: "Enable VerifyOnAdd = Yes on all platforms to automate the pre-management verification gate.",
+              settingOrObject:
+                "Platform > Automatic Password Management > Privileged Account Management",
+              description:
+                "Instructs CPM to automatically execute a Verify operation as soon as a new account is onboarded.",
+              productionBestPractice:
+                "Enable VerifyOnAdd = Yes on all platforms to automate the pre-management verification gate.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Account Intake & Property Validation",
-              action: "In PVWA Accounts, click 'Add Account'. Select System Type: Windows, Safe: WIN-SAFE, Platform: Windows Server Local.",
-              expectedResult: "Form displays required properties: Address, Username, Password, Retype Password.",
-              operatorNotes: "Ensure username does not include prefix like `.\\` or `CORP\\` unless onboarding a domain account.",
+              action:
+                "In PVWA Accounts, click 'Add Account'. Select System Type: Windows, Safe: WIN-SAFE, Platform: Windows Server Local.",
+              expectedResult:
+                "Form displays required properties: Address, Username, Password, Retype Password.",
+              operatorNotes:
+                "Ensure username does not include prefix like `.\\` or `CORP\\` unless onboarding a domain account.",
             },
             {
               stepNumber: 2,
               title: "Enter Account Metadata",
-              action: "Input Address: `WIN-SRV-01.corp.local`, Username: `Administrator`, Owner: `windows_admin`, and current password.",
-              expectedResult: "Account object created in WIN-SAFE with initial status 'Unmanaged' or 'Pending Verification'.",
+              action:
+                "Input Address: `WIN-SRV-01.corp.local`, Username: `Administrator`, Owner: `windows_admin`, and current password.",
+              expectedResult:
+                "Account object created in WIN-SAFE with initial status 'Unmanaged' or 'Pending Verification'.",
             },
             {
               stepNumber: 3,
               title: "Trigger Pre-Management Verification",
-              action: "Select the newly onboarded account and click 'Verify' in the operational toolbar.",
-              expectedResult: "CPM polls the Vault, executes target authentication test, and reports 'Verify Completed'.",
+              action:
+                "Select the newly onboarded account and click 'Verify' in the operational toolbar.",
+              expectedResult:
+                "CPM polls the Vault, executes target authentication test, and reports 'Verify Completed'.",
             },
             {
               stepNumber: 4,
               title: "Confirm Managed State",
               action: "Inspect account status pill in the inventory.",
-              expectedResult: "Status pill turns green: 'Managed'. Next scheduled change date displayed.",
+              expectedResult:
+                "Status pill turns green: 'Managed'. Next scheduled change date displayed.",
             },
           ],
           enterpriseScenario: {
@@ -187,35 +216,46 @@ export const MODULE_05: ClassCurriculum = {
           failureScenarios: [
             {
               symptom: "Account onboarding rejected: 'ITATS053E Object already exists in Safe'.",
-              rootCause: "An account with the exact same Address and Username already exists in the destination Safe.",
-              securityImpact: "Duplicate account creation blocked; prevents administrative confusion and desynchronization.",
+              rootCause:
+                "An account with the exact same Address and Username already exists in the destination Safe.",
+              securityImpact:
+                "Duplicate account creation blocked; prevents administrative confusion and desynchronization.",
               cyberArkCodeOrEvent: "ITATS053E",
             },
             {
-              symptom: "CPM Verify fails immediately: 'CACPM072E Authentication failure on target'.",
-              rootCause: "The administrator entered an incorrect current password during onboarding, or the account is locked on target.",
-              securityImpact: "Target rejects credentials; automated rotation blocked to prevent account lockout.",
+              symptom:
+                "CPM Verify fails immediately: 'CACPM072E Authentication failure on target'.",
+              rootCause:
+                "The administrator entered an incorrect current password during onboarding, or the account is locked on target.",
+              securityImpact:
+                "Target rejects credentials; automated rotation blocked to prevent account lockout.",
               cyberArkCodeOrEvent: "CACPM250E",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Search inventory across all Safes for existing account objects with matching Address/Username.",
+              diagnosticAction:
+                "Search inventory across all Safes for existing account objects with matching Address/Username.",
               logFileOrConsole: "PVWA Accounts Console > Search Bar > Filter All Safes",
-              remediation: "If duplicate exists, delete orphaned object or update existing record rather than creating a duplicate.",
+              remediation:
+                "If duplicate exists, delete orphaned object or update existing record rather than creating a duplicate.",
             },
             {
               stepNumber: 2,
-              diagnosticAction: "Test target connectivity and authentication manually from CPM host using PowerShell or SSH.",
-              logFileOrConsole: "PowerShell: Test-WSMan -ComputerName <Address> / ssh <Username>@<Address>",
-              remediation: "Verify that target OS firewall permits RPC/SMB/SSH traffic from the CPM static IP.",
+              diagnosticAction:
+                "Test target connectivity and authentication manually from CPM host using PowerShell or SSH.",
+              logFileOrConsole:
+                "PowerShell: Test-WSMan -ComputerName <Address> / ssh <Username>@<Address>",
+              remediation:
+                "Verify that target OS firewall permits RPC/SMB/SSH traffic from the CPM static IP.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Review CPM verify error log for specific OS return codes.",
               logFileOrConsole: "C:\\CyberArk\\Password Manager\\Logs\\pm.log",
-              remediation: "Look for Win32 error codes: `5 (Access Denied)`, `1326 (Logon Failure)`, or `1909 (Account Locked)`. Correct root issue.",
+              remediation:
+                "Look for Win32 error codes: `5 (Access Denied)`, `1326 (Logon Failure)`, or `1909 (Account Locked)`. Correct root issue.",
             },
           ],
           diagnosticEvidence: [
@@ -247,7 +287,8 @@ export const MODULE_05: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m05-q01",
-              question: "Which five core properties are fundamentally required to onboard an Account Object in the Digital Vault?",
+              question:
+                "Which five core properties are fundamentally required to onboard an Account Object in the Digital Vault?",
               options: [
                 "Safe, Platform, Address, Username, and Secret (Password/Key)",
                 "Safe, User Group, Domain, IP, and MAC Address",
@@ -261,7 +302,8 @@ export const MODULE_05: ClassCurriculum = {
             },
             {
               id: "m05-q02",
-              question: "Why must a PAM Administrator execute a 'Verify' operation before enabling automated recurring password rotation on a newly onboarded account?",
+              question:
+                "Why must a PAM Administrator execute a 'Verify' operation before enabling automated recurring password rotation on a newly onboarded account?",
               options: [
                 "Because the Digital Vault will not save the account without it.",
                 "To confirm the stored password matches the real target system password, preventing automated change operations from locking out the account.",
@@ -275,7 +317,8 @@ export const MODULE_05: ClassCurriculum = {
             },
             {
               id: "m05-q03",
-              question: "What error is returned if an administrator attempts to onboard an account with the exact same Address and Username in the same Safe?",
+              question:
+                "What error is returned if an administrator attempts to onboard an account with the exact same Address and Username in the same Safe?",
               options: [
                 "ITATS006E Database Full",
                 "ITATS053E Object already exists in Safe",
@@ -290,20 +333,75 @@ export const MODULE_05: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m05-ex01",
-            title: "Onboard and Verify a Privileged Server Account",
+            title: "Validate & Onboard a Privileged Server Account (WIN-SRV-01)",
+            objective:
+              "Confirm account object anatomy (Safe, Platform, Address, Owner), execute CPM Verify on WIN-SRV-01 Administrator, and confirm Managed status.",
             scenario:
-              "Onboard an administrative credential into WIN-SAFE, bind it to the Windows Server Local platform, validate required properties, and execute pre-management verification.",
+              "Verify that the local Administrator account for WIN-SRV-01 is properly bound to WIN-SAFE and platform 'Windows Server Local' with owner 'windows_admin', run pre-management CPM Verify, and confirm Managed health.",
+            prerequisites: [
+              "Review Account Object Anatomy and Onboarding Lifecycle in Section 1–4.",
+            ],
+            startingState:
+              "WIN-SAFE exists and Administrator (WIN-SRV-01) is present in Accounts inventory under Windows Server Local.",
             instructions: [
-              "Navigate to the Accounts console.",
-              "Review the accounts inventory to ensure no duplicate object exists for WIN-SRV-01.",
-              "Inspect the target account's Safe, Platform, and Address properties.",
-              "Verify that the account status transitions from Unmanaged to Managed.",
+              "Open the Accounts console and select Administrator on address WIN-SRV-01.",
+              "Verify Safe is 'WIN-SAFE', Platform is 'Windows Server Local', and Owner is 'windows_admin'.",
+              "Run CPM 'Verify' on WIN-SRV-01 Administrator (from Accounts detail actions or CPM Operations) and confirm status is 'Managed'.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 03 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Accounts and locate Administrator on WIN-SRV-01.",
+                explanation:
+                  "Confirms unique object identity without duplicate address/username collisions.",
+                expectedResult:
+                  "Account details display Username Administrator, Address WIN-SRV-01, Safe WIN-SAFE.",
+              },
+              {
+                action: "Confirm Platform is 'Windows Server Local' and Owner is 'windows_admin'.",
+                explanation:
+                  "Platform binding selects the CPM plugin and rotation schedule; Owner enforces accountability.",
+                expectedResult: "Platform and Owner fields match enterprise onboarding policy.",
+              },
+              {
+                action:
+                  "Trigger CPM Verify on WIN-SRV-01 Administrator and verify status is 'Managed'.",
+                explanation:
+                  "Pre-management verification confirms the Vault credential authenticates on the target before enabling rotation.",
+                expectedResult:
+                  "CPM Verify completes and status confirms 'Managed' with updated verification timestamp.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Validates all 6 Lab 03 onboarding and verification objectives.",
+                expectedResult: "All 6/6 Lab 03 objectives pass (100/100).",
+              },
             ],
             targetConsole: "accounts",
             associatedLabId: "Lab 03 · Onboard WIN-SRV-01 Administrator",
             validationObjectiveId: "onboard-account",
             validationCriteria:
-              "Target administrative account is onboarded and verified in the Accounts console.",
+              "WIN-SRV-01 Administrator properties, CPM Verify, and Managed state validated (6/6 Lab 03 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "'Run CPM Verify against target' shows pending.",
+                hint: "Inspecting the account row alone does not record a CPM Verify event.",
+                correctiveAction:
+                  "Select Administrator (WIN-SRV-01) in Accounts or CPM Operations, click Verify, confirm Managed status, and re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Onboard a New Linux Server Account into UNIX-SAFE",
+              scenario:
+                "A newly deployed Linux host (LNX-APP-02) requires its root account onboarded into UNIX-SAFE.",
+              goal: "Without step-by-step guidance, use Add Account in the Accounts console to onboard root on LNX-APP-02 into UNIX-SAFE under platform 'Unix SSH' and run CPM Verify.",
+              targetConsole: "accounts",
+              successCriteria: [
+                "Created a new account for LNX-APP-02 in UNIX-SAFE under platform 'Unix SSH' with an accountable owner.",
+                "Verified the newly onboarded account appears in Accounts and passed CPM Verify.",
+              ],
+            },
           },
           completionCriteria: [
             "Deconstructed the five mandatory properties of the Vault Account Object model.",

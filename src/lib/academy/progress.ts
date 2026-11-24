@@ -4,7 +4,7 @@
  * progression, checkpoint answers, and simulator exercise completion.
  */
 
-import type { LearnerProgress } from "./types";
+import type { KnowledgeCheckpointQuestion, LearnerProgress } from "./types";
 
 const PROGRESS_STORAGE_KEY = "shadowxlab_pam_academy_progress_v4";
 
@@ -17,6 +17,7 @@ export const DEFAULT_LEARNER_PROGRESS: LearnerProgress = {
   checkpointAnswers: {},
   checkpointScores: {},
   completedExercises: [],
+  completedIndependentPractices: [],
   lastUpdated: "2026-11-16T00:00:00.000Z",
 };
 
@@ -29,7 +30,9 @@ export function loadLearnerProgress(): LearnerProgress {
     const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
     if (!raw) return DEFAULT_LEARNER_PROGRESS;
     const parsed = JSON.parse(raw) as Partial<LearnerProgress>;
-    const track = parsed.currentTrackId || (parsed.currentClassId?.startsWith("class-") ? "intro-6" : "admin-20");
+    const track =
+      parsed.currentTrackId ||
+      (parsed.currentClassId?.startsWith("class-") ? "intro-6" : "admin-20");
     return {
       currentTrackId: track,
       currentClassId: parsed.currentClassId || (track === "admin-20" ? "module-01" : "class-01"),
@@ -39,6 +42,9 @@ export function loadLearnerProgress(): LearnerProgress {
       checkpointAnswers: parsed.checkpointAnswers || {},
       checkpointScores: parsed.checkpointScores || {},
       completedExercises: Array.isArray(parsed.completedExercises) ? parsed.completedExercises : [],
+      completedIndependentPractices: Array.isArray(parsed.completedIndependentPractices)
+        ? parsed.completedIndependentPractices
+        : [],
       lastUpdated: parsed.lastUpdated || new Date().toISOString(),
     };
   } catch (err) {
@@ -81,6 +87,16 @@ export function recordCheckpointAnswer(
   return current;
 }
 
+export function resetCheckpointAnswersForQuestions(questionIds: string[]): LearnerProgress {
+  const current = loadLearnerProgress();
+  for (const id of questionIds) {
+    delete current.checkpointAnswers[id];
+    delete current.checkpointScores[id];
+  }
+  saveLearnerProgress(current);
+  return current;
+}
+
 export function recordExerciseComplete(exerciseId: string): LearnerProgress {
   const current = loadLearnerProgress();
   if (!current.completedExercises.includes(exerciseId)) {
@@ -88,6 +104,39 @@ export function recordExerciseComplete(exerciseId: string): LearnerProgress {
   }
   saveLearnerProgress(current);
   return current;
+}
+
+export function recordIndependentPracticeComplete(exerciseId: string): LearnerProgress {
+  const current = loadLearnerProgress();
+  const existing = current.completedIndependentPractices || [];
+  if (!existing.includes(exerciseId)) {
+    current.completedIndependentPractices = [...existing, exerciseId];
+  }
+  saveLearnerProgress(current);
+  return current;
+}
+
+export function evaluateLessonCheckpoint(
+  questions: KnowledgeCheckpointQuestion[],
+  savedAnswers: Record<string, number>,
+): {
+  total: number;
+  answered: number;
+  correct: number;
+  requiredCorrect: number;
+  percent: number;
+  passed: boolean;
+} {
+  const total = questions.length;
+  if (total === 0) {
+    return { total: 0, answered: 0, correct: 0, requiredCorrect: 0, percent: 100, passed: true };
+  }
+  const answered = questions.filter((q) => savedAnswers[q.id] !== undefined).length;
+  const correct = questions.filter((q) => savedAnswers[q.id] === q.correctIndex).length;
+  const requiredCorrect = total >= 10 ? Math.ceil(total * 0.8) : total;
+  const percent = Math.round((correct / total) * 100);
+  const passed = answered === total && correct >= requiredCorrect;
+  return { total, answered, correct, requiredCorrect, percent, passed };
 }
 
 export function resetLearnerProgress(): LearnerProgress {

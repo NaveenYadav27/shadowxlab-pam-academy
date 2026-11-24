@@ -29,7 +29,8 @@ export const MODULE_03: ClassCurriculum = {
           id: "m03-l01",
           number: "3.1",
           title: "Master Policy Hierarchy & Target Platform Customization",
-          subtitle: "Configuring platform inheritance, rotation intervals, and exclusive checkout enforcement",
+          subtitle:
+            "Configuring platform inheritance, rotation intervals, and exclusive checkout enforcement",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the hierarchy between the enterprise Master Policy and specific Target Platforms.",
@@ -64,7 +65,8 @@ export const MODULE_03: ClassCurriculum = {
               {
                 component: "Central Policy Manager (CPM)",
                 role: "Reads platform configuration parameters to determine when and how to rotate, verify, or reconcile passwords on target endpoints.",
-                networkProtocols: "Management protocols (RPC, SSH, SQL, REST APIs) directly to target hosts",
+                networkProtocols:
+                  "Management protocols (RPC, SSH, SQL, REST APIs) directly to target hosts",
                 securityBoundary: "Orchestration & Enforcement Engine",
               },
             ],
@@ -72,58 +74,76 @@ export const MODULE_03: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Security Governance Board",
-                action: "Defines Master Policy rule: 'Require password change every 30 days for Tier-0 Domain Accounts'.",
+                action:
+                  "Defines Master Policy rule: 'Require password change every 30 days for Tier-0 Domain Accounts'.",
                 channelOrProtocol: "PVWA Administration > Master Policy",
-                verificationRule: "Master Policy rule is committed to Vault database and marked active.",
+                verificationRule:
+                  "Master Policy rule is committed to Vault database and marked active.",
               },
               {
                 stepNumber: 2,
                 actor: "PAM Administrator",
-                action: "Clones default `Windows Server Local` platform to create specialized platform `WIN-FINANCE-HIGHSEC`.",
+                action:
+                  "Clones default `Windows Server Local` platform to create specialized platform `WIN-FINANCE-HIGHSEC`.",
                 channelOrProtocol: "Administration > Platform Management",
-                verificationRule: "Platform ID is unique; duplicates CPM plugin bindings and default parameters safely.",
+                verificationRule:
+                  "Platform ID is unique; duplicates CPM plugin bindings and default parameters safely.",
               },
               {
                 stepNumber: 3,
                 actor: "PAM Administrator",
-                action: "Configures `MinValidityPeriod = 60` and enables `EnforceExclusiveMode = Yes` on the new platform.",
+                action:
+                  "Configures `MinValidityPeriod = 60` and enables `EnforceExclusiveMode = Yes` on the new platform.",
                 channelOrProtocol: "Platform Settings > UI & Workflows",
-                verificationRule: "When an engineer checks out the credential, all other users are locked out until released.",
+                verificationRule:
+                  "When an engineer checks out the credential, all other users are locked out until released.",
               },
               {
                 stepNumber: 4,
                 actor: "Operational User",
-                action: "Checks out the password for server FIN-APP-01, completes emergency maintenance, and releases checkout.",
+                action:
+                  "Checks out the password for server FIN-APP-01, completes emergency maintenance, and releases checkout.",
                 channelOrProtocol: "PVWA Accounts Console",
-                verificationRule: "Immediate check-in triggers CPM to execute one-time password rotation on target server.",
+                verificationRule:
+                  "Immediate check-in triggers CPM to execute one-time password rotation on target server.",
               },
             ],
           },
           terminology: [
             {
               term: "Target Platform",
-              definition: "A policy and configuration template that governs account behavior, password generation rules, and CPM/PSM integration for a specific technology.",
-              enterpriseContext: "Accounts inherit their operational behavior directly from their assigned platform.",
+              definition:
+                "A policy and configuration template that governs account behavior, password generation rules, and CPM/PSM integration for a specific technology.",
+              enterpriseContext:
+                "Accounts inherit their operational behavior directly from their assigned platform.",
             },
             {
               term: "Master Policy",
-              definition: "The global security ruleset enforced across the entire Vault, setting standards for password changes, approvals, and session recording.",
-              enterpriseContext: "Audited by compliance officers to verify enterprise alignment with regulatory standards.",
+              definition:
+                "The global security ruleset enforced across the entire Vault, setting standards for password changes, approvals, and session recording.",
+              enterpriseContext:
+                "Audited by compliance officers to verify enterprise alignment with regulatory standards.",
             },
             {
               term: "Exclusive Mode",
-              definition: "A platform checkout setting that guarantees only one user can access or view an account credential at any given time.",
-              enterpriseContext: "Essential for financial and defense environments to guarantee strict single-user accountability for root access.",
+              definition:
+                "A platform checkout setting that guarantees only one user can access or view an account credential at any given time.",
+              enterpriseContext:
+                "Essential for financial and defense environments to guarantee strict single-user accountability for root access.",
             },
             {
               term: "One-Time Password (OTP)",
-              definition: "A workflow where a credential is automatically rotated by the CPM immediately upon release or after `MinValidityPeriod` expires.",
-              enterpriseContext: "Guarantees that a checked-out password cannot be reused by the engineer after their task concludes.",
+              definition:
+                "A workflow where a credential is automatically rotated by the CPM immediately upon release or after `MinValidityPeriod` expires.",
+              enterpriseContext:
+                "Guarantees that a checked-out password cannot be reused by the engineer after their task concludes.",
             },
             {
               term: "MinValidityPeriod",
-              definition: "The minimum time (in minutes) an account remains checked out before the CPM executes an automated post-use rotation.",
-              enterpriseContext: "Prevents CPM from rotating a credential in the middle of an engineer's active terminal session.",
+              definition:
+                "The minimum time (in minutes) an account remains checked out before the CPM executes an automated post-use rotation.",
+              enterpriseContext:
+                "Prevents CPM from rotating a credential in the middle of an engineer's active terminal session.",
             },
           ],
           administratorResponsibilities: [
@@ -136,47 +156,62 @@ export const MODULE_03: ClassCurriculum = {
             {
               name: "PerformPeriodicChange",
               settingOrObject: "Platform > Automatic Password Management > General",
-              description: "Enables automated recurring password rotation by CPM without requiring human intervention.",
-              productionBestPractice: "Set to Yes for all standard server local and domain administrative credentials.",
+              description:
+                "Enables automated recurring password rotation by CPM without requiring human intervention.",
+              productionBestPractice:
+                "Set to Yes for all standard server local and domain administrative credentials.",
             },
             {
               name: "MinValidityPeriod",
               settingOrObject: "Platform > Privileged Account Management > General",
-              description: "Minimum duration (in minutes) that a credential remains locked to a user before CPM initiates post-use change.",
-              productionBestPractice: "Set to 60 minutes for interactive administrative access; 15 minutes for automated batch tasks.",
+              description:
+                "Minimum duration (in minutes) that a credential remains locked to a user before CPM initiates post-use change.",
+              productionBestPractice:
+                "Set to 60 minutes for interactive administrative access; 15 minutes for automated batch tasks.",
             },
             {
               name: "PasswordLength & PasswordComplexity",
               settingOrObject: "Platform > Automatic Password Management > Generate",
-              description: "Specifies minimum length, character sets (Alpha, Numeric, Special), and forbidden characters.",
-              productionBestPractice: "Enforce 24+ characters with mixed case, numbers, and symbols; exclude characters known to break shell scripts.",
+              description:
+                "Specifies minimum length, character sets (Alpha, Numeric, Special), and forbidden characters.",
+              productionBestPractice:
+                "Enforce 24+ characters with mixed case, numbers, and symbols; exclude characters known to break shell scripts.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Platform Duplication",
-              action: "Navigate to Administration > Platform Management, select `Windows Server Local`, and click 'Duplicate'.",
-              expectedResult: "A copy is created; specify new Platform ID `WIN-FINANCE-HIGHSEC` and save.",
-              operatorNotes: "Duplication prevents accidental corruption of the baseline platform package.",
+              action:
+                "Navigate to Administration > Platform Management, select `Windows Server Local`, and click 'Duplicate'.",
+              expectedResult:
+                "A copy is created; specify new Platform ID `WIN-FINANCE-HIGHSEC` and save.",
+              operatorNotes:
+                "Duplication prevents accidental corruption of the baseline platform package.",
             },
             {
               stepNumber: 2,
               title: "Configure Exclusive Checkout & OTP",
-              action: "Edit `WIN-FINANCE-HIGHSEC`, expand UI & Workflows > Privileged Account Management, set `EnforceExclusiveMode = Yes`.",
-              expectedResult: "Platform configuration updated. Any account bound to this platform will now require exclusive checkout.",
+              action:
+                "Edit `WIN-FINANCE-HIGHSEC`, expand UI & Workflows > Privileged Account Management, set `EnforceExclusiveMode = Yes`.",
+              expectedResult:
+                "Platform configuration updated. Any account bound to this platform will now require exclusive checkout.",
             },
             {
               stepNumber: 3,
               title: "Set Password Complexity Parameters",
-              action: "Under Automatic Password Management > Generate, set `PasswordLength = 32` and `MinSpecialCharacters = 2`.",
-              expectedResult: "CPM will generate 32-character high-entropy passwords during future rotation cycles.",
+              action:
+                "Under Automatic Password Management > Generate, set `PasswordLength = 32` and `MinSpecialCharacters = 2`.",
+              expectedResult:
+                "CPM will generate 32-character high-entropy passwords during future rotation cycles.",
             },
             {
               stepNumber: 4,
               title: "Verify Platform Binding on Target Account",
-              action: "Open Accounts inventory, edit a test account, update its platform to `WIN-FINANCE-HIGHSEC`, and click Save.",
-              expectedResult: "Account properties reflect the new platform; subsequent checkout enforces exclusive single-user lock.",
+              action:
+                "Open Accounts inventory, edit a test account, update its platform to `WIN-FINANCE-HIGHSEC`, and click Save.",
+              expectedResult:
+                "Account properties reflect the new platform; subsequent checkout enforces exclusive single-user lock.",
             },
           ],
           enterpriseScenario: {
@@ -191,36 +226,47 @@ export const MODULE_03: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "Account cannot be checked out: 'Account is locked by another user: jsmith'.",
-              rootCause: "Exclusive checkout is active on the platform and previous user forgot to release the account after finishing work.",
-              securityImpact: "Other authorized operators blocked from performing emergency recovery tasks.",
+              symptom:
+                "Account cannot be checked out: 'Account is locked by another user: jsmith'.",
+              rootCause:
+                "Exclusive checkout is active on the platform and previous user forgot to release the account after finishing work.",
+              securityImpact:
+                "Other authorized operators blocked from performing emergency recovery tasks.",
               cyberArkCodeOrEvent: "ITATS024E",
             },
             {
-              symptom: "CPM rotation fails with error: 'Target system password rejected character set'.",
-              rootCause: "Platform password generation policy included special characters (e.g. `^`, `&`, `|`, `\"`) forbidden by the target OS or database shell.",
-              securityImpact: "Credential desynchronization; target rejects new password while Vault retains old hash.",
+              symptom:
+                "CPM rotation fails with error: 'Target system password rejected character set'.",
+              rootCause:
+                'Platform password generation policy included special characters (e.g. `^`, `&`, `|`, `"`) forbidden by the target OS or database shell.',
+              securityImpact:
+                "Credential desynchronization; target rejects new password while Vault retains old hash.",
               cyberArkCodeOrEvent: "CACPM154E",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Administrator inspects active locks on the account in the Accounts Console.",
+              diagnosticAction:
+                "Administrator inspects active locks on the account in the Accounts Console.",
               logFileOrConsole: "PVWA Accounts Console > Account Details > Locked By",
-              remediation: "If legitimate, contact the lock holder. If abandoned, a Safe Administrator can click 'Unlock Account' to force release.",
+              remediation:
+                "If legitimate, contact the lock holder. If abandoned, a Safe Administrator can click 'Unlock Account' to force release.",
             },
             {
               stepNumber: 2,
-              diagnosticAction: "Review CPM plugin execution log for password generation syntax errors.",
+              diagnosticAction:
+                "Review CPM plugin execution log for password generation syntax errors.",
               logFileOrConsole: "C:\\CyberArk\\Password Manager\\Logs\\pm.log / <PlatformID>.log",
-              remediation: "Adjust `PasswordForbiddenChars` in Platform settings to strip problematic characters from the generation pool.",
+              remediation:
+                "Adjust `PasswordForbiddenChars` in Platform settings to strip problematic characters from the generation pool.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Confirm Master Policy exception status in PVWA Administration.",
               logFileOrConsole: "Administration > Master Policy > Exceptions",
-              remediation: "Verify that the platform exception was not inadvertently deleted, overriding local platform settings.",
+              remediation:
+                "Verify that the platform exception was not inadvertently deleted, overriding local platform settings.",
             },
           ],
           diagnosticEvidence: [
@@ -252,7 +298,8 @@ export const MODULE_03: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m03-q01",
-              question: "What happens when an account is assigned to a platform with 'EnforceExclusiveMode = Yes' and User A checks it out?",
+              question:
+                "What happens when an account is assigned to a platform with 'EnforceExclusiveMode = Yes' and User A checks it out?",
               options: [
                 "User B can still view the password if they belong to the Auditor group.",
                 "User B is blocked from checking out or viewing the password until User A releases the lock or it expires.",
@@ -266,7 +313,8 @@ export const MODULE_03: ClassCurriculum = {
             },
             {
               id: "m03-q02",
-              question: "Why should an administrator NEVER modify out-of-the-box default platforms directly?",
+              question:
+                "Why should an administrator NEVER modify out-of-the-box default platforms directly?",
               options: [
                 "Default platforms are encrypted and cannot be opened.",
                 "Upgrades to the PAM software can overwrite default platform files, destroying customizations; best practice is always to duplicate and edit the clone.",
@@ -280,7 +328,8 @@ export const MODULE_03: ClassCurriculum = {
             },
             {
               id: "m03-q03",
-              question: "What is the primary function of the 'MinValidityPeriod' setting on a target platform?",
+              question:
+                "What is the primary function of the 'MinValidityPeriod' setting on a target platform?",
               options: [
                 "It defines how many days a user has worked at the company before receiving access.",
                 "It specifies the minimum time (in minutes) a credential must remain valid after checkout before the CPM executes a post-use rotation.",
@@ -295,20 +344,73 @@ export const MODULE_03: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m03-ex01",
-            title: "Inspect Password Policies and Platform Rotation Governance",
+            title: "Audit Password Policies & Validate Platform Binding on WIN-SRV-01",
+            objective:
+              "Review Master Policy and target platform rotation settings in Policies, then confirm Windows Server Local platform binding and CPM Verify on WIN-SRV-01 Administrator.",
             scenario:
-              "Navigate to the Password Policies console to review active platform rules, rotation schedules, and complexity requirements enforced across the enterprise fleet.",
+              "Verify that active Windows, Linux, and Database platform policies enforce required complexity and rotation intervals, and confirm WIN-SRV-01 Administrator is bound to 'Windows Server Local' in WIN-SAFE and verified by CPM.",
+            prerequisites: [
+              "Review Master Policy precedence, Exclusive Mode, and MinValidityPeriod in Section 1–4.",
+            ],
+            startingState:
+              "Seeded rotation policies exist in Policies; Administrator (WIN-SRV-01) resides in WIN-SAFE under Windows Server Local.",
             instructions: [
-              "Navigate to the Password Policies console.",
-              "Inspect the active platform definitions (Windows Server, Linux SSH, Database).",
-              "Review the configured rotation intervals, complexity parameters, and exclusive checkout flags.",
-              "Verify that policy rules are reflected in the operational state.",
+              "Open the Policies console and inspect the rotation intervals, password length, and complexity parameters for Windows, Unix, and Database platforms.",
+              "Switch to Accounts and select Administrator on WIN-SRV-01 to verify Platform is 'Windows Server Local', Safe is 'WIN-SAFE', and Owner is 'windows_admin'.",
+              "Run CPM 'Verify' on WIN-SRV-01 Administrator (from Accounts or CPM Operations) and confirm status is 'Managed'.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 03 objectives.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open Policies and inspect the Windows-90d, Unix-30d, and Service-60d policies.",
+                explanation:
+                  "Platform policies control rotation frequency, password length, and allowed character sets for every bound account.",
+                expectedResult:
+                  "Policy table displays active rotation intervals, complexity rules, and management settings.",
+              },
+              {
+                action:
+                  "Open Accounts, select Administrator (WIN-SRV-01), and verify Platform 'Windows Server Local', Safe 'WIN-SAFE', and Owner 'windows_admin'.",
+                explanation:
+                  "Confirms the target account inherits the intended platform policy and Safe boundary.",
+                expectedResult:
+                  "WIN-SRV-01 Administrator displays Windows Server Local, WIN-SAFE, and owner windows_admin.",
+              },
+              {
+                action: "Run CPM Verify on WIN-SRV-01 Administrator and return to validate Lab 03.",
+                explanation:
+                  "Proves the selected platform plugin can authenticate against the target endpoint.",
+                expectedResult: "All 6/6 Lab 03 objectives pass (100/100).",
+              },
             ],
             targetConsole: "policies",
             associatedLabId: "Lab 03 · Onboard WIN-SRV-01 Administrator",
             validationObjectiveId: "platform-selection",
             validationCriteria:
-              "The Password Policies console is reviewed and platform parameters are verified.",
+              "Policies reviewed and WIN-SRV-01 Administrator platform binding and CPM Verify validated (6/6 Lab 03 objectives).",
+            troubleshootingHints: [
+              {
+                symptom:
+                  "'Run CPM Verify against target' or 'Platform selection' objective is pending.",
+                hint: "Lab 03 evaluates Administrator on WIN-SRV-01 inside WIN-SAFE with platform Windows Server Local.",
+                correctiveAction:
+                  "Open Accounts or CPM Operations, select Administrator (WIN-SRV-01), run Verify, confirm Managed status, and re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Create a High-Security 14-Day Rotation Policy",
+              scenario:
+                "PCI-DSS auditors requested a stricter rotation policy for cardholder environment servers.",
+              goal: "Without step-by-step instructions, create a new password policy in the Policies console with a 14-day rotation interval and minimum 20-character length.",
+              targetConsole: "policies",
+              successCriteria: [
+                "Created a new policy in Policies with <= 14-day rotation interval and >= 20-character password complexity.",
+                "Confirmed the new policy appears in the active Policies list.",
+              ],
+            },
+            simulationLimitationNote:
+              "After inspecting platform rules in Policies, live Lab 03 validation verifies platform binding and CPM Verify on Administrator (WIN-SRV-01, platform Windows Server Local) in the Accounts / CPM Operations consoles.",
           },
           completionCriteria: [
             "Mastered the relationship between Master Policy rules and Target Platforms.",

@@ -4,36 +4,60 @@
  * conceptual explanations, score tracking, and persistent state.
  */
 
-import React, { useState } from "react";
-import { CheckCircle2, XCircle, HelpCircle, RotateCcw } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CheckCircle2, XCircle, HelpCircle, RotateCcw, Lightbulb } from "lucide-react";
 import type { KnowledgeCheckpointQuestion } from "@/lib/academy/types";
+import { evaluateLessonCheckpoint } from "@/lib/academy/progress";
 
 interface KnowledgeCheckpointProps {
   questions: KnowledgeCheckpointQuestion[];
   savedAnswers: Record<string, number>;
   onRecordAnswer: (questionId: string, optionIndex: number, isCorrect: boolean) => void;
+  onResetAnswers?: (questionIds: string[]) => void;
 }
 
 export const KnowledgeCheckpoint: React.FC<KnowledgeCheckpointProps> = ({
   questions,
   savedAnswers,
   onRecordAnswer,
+  onResetAnswers,
 }) => {
   const [localAnswers, setLocalAnswers] = useState<Record<string, number>>(savedAnswers);
+  const [attempts, setAttempts] = useState<Record<string, number>>({});
+  const [revealedQuestions, setRevealedQuestions] = useState<Record<string, boolean>>({});
 
-  const answeredCount = Object.keys(localAnswers).length;
-  const correctCount = questions.filter(
-    (q) => localAnswers[q.id] !== undefined && localAnswers[q.id] === q.correctIndex,
-  ).length;
+  useEffect(() => {
+    setLocalAnswers(savedAnswers);
+  }, [savedAnswers]);
+
+  const status = evaluateLessonCheckpoint(questions, localAnswers);
 
   function handleSelect(question: KnowledgeCheckpointQuestion, optionIdx: number) {
     const isCorrect = optionIdx === question.correctIndex;
     setLocalAnswers((prev) => ({ ...prev, [question.id]: optionIdx }));
+    setAttempts((prev) => ({ ...prev, [question.id]: (prev[question.id] || 0) + 1 }));
+    if (isCorrect) {
+      setRevealedQuestions((prev) => ({ ...prev, [question.id]: true }));
+    }
     onRecordAnswer(question.id, optionIdx, isCorrect);
   }
 
+  function handleRevealAnswer(questionId: string) {
+    setRevealedQuestions((prev) => ({ ...prev, [questionId]: true }));
+  }
+
   function handleReset() {
-    setLocalAnswers({});
+    const questionIds = questions.map((q) => q.id);
+    setLocalAnswers((prev) => {
+      const next = { ...prev };
+      for (const id of questionIds) {
+        delete next[id];
+      }
+      return next;
+    });
+    setAttempts({});
+    setRevealedQuestions({});
+    onResetAnswers?.(questionIds);
   }
 
   if (!questions || questions.length === 0) {
@@ -47,7 +71,7 @@ export const KnowledgeCheckpoint: React.FC<KnowledgeCheckpointProps> = ({
   }
 
   return (
-    <div className="checkpoint-card">
+    <div className="checkpoint-card" id="knowledge-checkpoint-section">
       <div
         style={{
           display: "flex",
@@ -73,20 +97,23 @@ export const KnowledgeCheckpoint: React.FC<KnowledgeCheckpointProps> = ({
             <HelpCircle size={15} className="text-[#0078D4]" />
             Knowledge Checkpoints
           </h4>
-          <span style={{ fontSize: 11, color: "#64748B" }}>
-            Score: <strong>{correctCount}</strong> / {questions.length} Correct
+          <span style={{ fontSize: 11, color: status.passed ? "#137333" : "#64748B" }}>
+            Score: <strong>{status.correct}</strong> / {status.total} Correct
+            {status.passed
+              ? " · Passed"
+              : ` · Need ${status.requiredCorrect}/${status.total} to pass`}
           </span>
         </div>
-        {answeredCount > 0 && (
+        {status.answered > 0 && (
           <button
             type="button"
             className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
             style={{ padding: "2px 6px", fontSize: 10 }}
             onClick={handleReset}
-            title="Reset checkpoint answers"
+            title="Reset checkpoint answers for this lesson"
           >
             <RotateCcw size={11} />
-            Reset
+            Retry
           </button>
         )}
       </div>
@@ -96,6 +123,8 @@ export const KnowledgeCheckpoint: React.FC<KnowledgeCheckpointProps> = ({
           const selectedIdx = localAnswers[q.id];
           const hasAnswered = selectedIdx !== undefined;
           const isCorrect = selectedIdx === q.correctIndex;
+          const attemptCount = attempts[q.id] || 0;
+          const shouldRevealSolution = isCorrect || Boolean(revealedQuestions[q.id]);
 
           return (
             <div
@@ -132,13 +161,13 @@ export const KnowledgeCheckpoint: React.FC<KnowledgeCheckpointProps> = ({
                 {q.options.map((opt, optIdx) => {
                   let optClass = "checkpoint-option";
                   if (hasAnswered) {
-                    if (optIdx === q.correctIndex) {
+                    if (shouldRevealSolution && optIdx === q.correctIndex) {
                       optClass += " correct";
-                    } else if (optIdx === selectedIdx) {
+                    } else if (optIdx === selectedIdx && !isCorrect) {
                       optClass += " incorrect";
+                    } else if (optIdx === selectedIdx && isCorrect) {
+                      optClass += " correct";
                     }
-                  } else if (optIdx === selectedIdx) {
-                    optClass += " selected";
                   }
 
                   return (
@@ -159,18 +188,49 @@ export const KnowledgeCheckpoint: React.FC<KnowledgeCheckpointProps> = ({
 
               {hasAnswered && (
                 <div className={`checkpoint-feedback ${isCorrect ? "correct" : "incorrect"}`}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}>
-                    {isCorrect ? (
-                      <>
+                  {isCorrect ? (
+                    <>
+                      <div
+                        style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}
+                      >
                         <CheckCircle2 size={13} /> Correct!
-                      </>
-                    ) : (
-                      <>
-                        <XCircle size={13} /> Incorrect — Review Explanation:
-                      </>
-                    )}
-                  </div>
-                  <p style={{ margin: "4px 0 0 0" }}>{q.explanation}</p>
+                      </div>
+                      <p style={{ margin: "4px 0 0 0" }}>{q.explanation}</p>
+                    </>
+                  ) : shouldRevealSolution ? (
+                    <>
+                      <div
+                        style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}
+                      >
+                        <XCircle size={13} /> Incorrect — Review Explanation &amp; Retry:
+                      </div>
+                      <p style={{ margin: "4px 0 0 0" }}>{q.explanation}</p>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700 }}
+                      >
+                        <XCircle size={13} /> Not quite — try again
+                      </div>
+                      <p style={{ margin: "4px 0 6px 0" }}>
+                        <Lightbulb size={12} style={{ display: "inline", marginRight: 4 }} />
+                        Hint: Focus on <strong>{q.conceptTested}</strong> in this lesson and select
+                        another option.
+                        {attemptCount >= 2
+                          ? " Still stuck? Reveal the full explanation below."
+                          : ""}
+                      </p>
+                      <button
+                        type="button"
+                        className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+                        style={{ padding: "2px 8px", fontSize: 10 }}
+                        onClick={() => handleRevealAnswer(q.id)}
+                      >
+                        Reveal Explanation
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

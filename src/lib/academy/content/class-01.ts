@@ -292,18 +292,76 @@ export const CLASS_01: ClassCurriculum = {
           practicalExercise: {
             id: "ex-c01-01",
             title: "Trace PAS Component Connectivity & Audit Status",
+            objective:
+              "Verify live Vault, PVWA, CPM, and PSM operational status and trace the existing onboarding, rotation, and session audit evidence.",
             scenario:
-              "As the PAM Administrator for Global Financial Services, navigate to the Accounts and Safe management consoles to audit the 7 enterprise Safes and verify that Vault, CPM, and PSM components report online status.",
+              "As the PAM Administrator for Global Financial Services, audit the simulated enterprise control plane across Dashboard, Accounts, and Safes to confirm all 7 Safes, 12 seeded accounts, CPM history, and PSM readiness.",
+            prerequisites: [
+              "Review Section 1–3 of Lesson 1.1 and the Interactive Topology Explorer.",
+            ],
+            startingState:
+              "Baseline simulator loaded with 7 Safes, 12 seeded accounts, 1 failed CPM change (svc_backup), and 4 initial audit records.",
             instructions: [
-              "Review the top PVWA navigation bar to verify the Vault connection indicator reports 'ONLINE'.",
-              "Navigate to the Safes console and inspect the operational boundaries of WIN-SAFE and UNIX-SAFE.",
-              "Open the Learning Academy Class 01 hands-on lab tab and run the validation engine to confirm your trace.",
+              "Open the Accounts console and confirm the top header displays 'Vault: ONLINE'.",
+              "Inspect the seeded account inventory (e.g., Administrator on WIN-SRV-01 in WIN-SAFE and root on LNX-SRV-01 in UNIX-SAFE) to confirm onboarding metadata and Safe placement.",
+              "Open the Safes console and verify the 7 tier-segregated Safes (WIN-SAFE, UNIX-SAFE, DBA-SAFE, APP-SAFE, SERVICE-SAFE, DOMAIN-SAFE, EMERGENCY-SAFE).",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 7 Lab 01 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open the Accounts console and check the header status badge.",
+                explanation:
+                  "Confirms the PVWA presentation tier has an active encrypted session to the Digital Vault.",
+                expectedResult:
+                  "Top bar displays 'Vault: ONLINE' and lists the managed account grid.",
+              },
+              {
+                action:
+                  "Select Administrator (WIN-SRV-01) and inspect its Safe, Platform, and Last Verify fields.",
+                explanation:
+                  "Demonstrates how an onboarded account links Safe boundaries, platform rotation policy, and CPM health.",
+                expectedResult:
+                  "Administrator shows Safe WIN-SAFE, Platform Windows Server Local, and status Managed.",
+              },
+              {
+                action:
+                  "Open the Safes console and inspect WIN-SAFE and UNIX-SAFE member boundaries.",
+                explanation: "Verifies how Safe ACLs separate Windows and Linux operator teams.",
+                expectedResult:
+                  "Each Safe lists distinct least-privilege operator members plus pam_admin and auditor.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and run 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Evaluates live Vault, PVWA, CPM, PSM, onboarding, rotation, and session audit objectives.",
+                expectedResult: "All 7/7 Lab 01 objectives report passed (100/100).",
+              },
             ],
             targetConsole: "accounts",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-vault",
             validationCriteria:
-              "Vault component status verified online and Safe architecture inspected.",
+              "All 7 Lab 01 architecture and audit-trace objectives verified against live simulator state.",
+            troubleshootingHints: [
+              {
+                symptom: "An onboarding, rotation, or session trace objective shows pending.",
+                hint: "Check Reports & Audit to see whether CPM Verify/Change and session audit events are present in the current simulator state.",
+                correctiveAction:
+                  "If you previously cleared or altered simulator state, run a CPM Verify in CPM Operations or click Reset Simulator to restore the baseline audit trail, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Independent Control-Plane Audit Across Reports & Dashboard",
+              scenario:
+                "Without following a step-by-step walkthrough, verify which seeded account currently has a CPM rotation exception and identify the audit event timestamp documenting it.",
+              goal: "Locate the failed rotation account and its corresponding audit record across Dashboard and Reports & Audit.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Opened Reports & Audit and identified the warning event for svc_backup on WIN-SRV-02.",
+                "Confirmed the four core control-plane components (Vault, PVWA, CPM, PSM) in Dashboard platform health.",
+              ],
+            },
           },
           completionCriteria: [
             "Passed Knowledge Checkpoint questions with 100% conceptual accuracy.",
@@ -520,9 +578,80 @@ export const CLASS_01: ClassCurriculum = {
               conceptTested: "Component Operational Roles",
             },
           ],
+          practicalExercise: {
+            id: "ex-c01-02",
+            title: "Verify Four-Pillar Topology & Component Health",
+            objective:
+              "Inspect the responsibilities, directional network flows, and live health status of Vault, PVWA, CPM, and PSM in the simulator.",
+            scenario:
+              "Before onboarding production workloads at Global Financial Services, validate that all four PAS control-plane tiers are healthy and trace how PVWA, CPM, and PSM connect inbound to the Vault over TCP 1858.",
+            prerequisites: [
+              "Completed Lesson 1.1 practical trace.",
+              "Reviewed the four-pillar port matrix in Section 2.",
+            ],
+            startingState:
+              "Simulated Digital Vault, PVWA Gateway, CPM Engine, and PSM Broker are active with baseline telemetry.",
+            instructions: [
+              "Open the Dashboard console and review the Platform Health panel for Digital Vault, PVWA, CPM, and PSM.",
+              "Switch to CPM Operations and confirm the CPM worker service reports existing rotation job telemetry.",
+              "Switch to PSM Operations and confirm the PSM connection broker reports healthy status.",
+              "Return to Learning Academy and validate the live four-pillar architecture objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Dashboard and inspect all four rows in the Platform Health panel.",
+                explanation:
+                  "Each PAS component operates on an isolated tier and reports independent service telemetry.",
+                expectedResult:
+                  "Digital Vault, Web Access (PVWA), Password Manager (CPM), and Session Manager (PSM) all appear online.",
+              },
+              {
+                action:
+                  "Open CPM Operations and inspect the recorded operation queue for WIN-SRV-02 (svc_backup).",
+                explanation:
+                  "Shows that CPM initiates outbound connections to target endpoints while reporting results back to the Vault.",
+                expectedResult:
+                  "CPM operation log displays the failed Change attempt on svc_backup.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Confirms all four PAS component roles and control-flow traces are verified.",
+                expectedResult: "All 7/7 Lab 01 objectives pass (100/100).",
+              },
+            ],
+            targetConsole: "overview",
+            associatedLabId: "Lab 01 · Trace the PAM architecture",
+            validationObjectiveId: "id-cpm",
+            validationCriteria:
+              "All four PAS component tiers (Vault, PVWA, CPM, PSM) and control flows verified online.",
+            troubleshootingHints: [
+              {
+                symptom: "A component check is not satisfied after resetting or modifying state.",
+                hint: "Confirm that at least one Safe, CPM operation, and audit event exist in the simulator.",
+                correctiveAction:
+                  "Run a quick CPM Verify on Administrator (WIN-SRV-01) in CPM Operations and re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Map Component Boundaries in the Interactive Topology Explorer",
+              scenario:
+                "Use the Interactive Topology Explorer in Section 2 without step-by-step guidance to inspect every component node.",
+              goal: "Verify inbound vs. outbound TCP port directionality for Digital Vault, PVWA, CPM, and PSM.",
+              targetConsole: "overview",
+              successCriteria: [
+                "Confirmed Digital Vault listens on TCP 1858 and initiates zero outbound connections.",
+                "Confirmed CPM and PSM connect inbound to Vault (TCP 1858) and outbound to target endpoints.",
+              ],
+            },
+            simulationLimitationNote:
+              "OS-level hardening scripts, Vault.ini file editing, and multi-node HA/DR Vault cluster failover are architectural reference concepts not executed inside the browser simulator; this lab validates the live simulated four-pillar control plane.",
+          },
           completionCriteria: [
             "Understood the directional port matrix between PAS components.",
             "Explained why the Digital Vault never initiates outbound connections.",
+            "Validated four-pillar component health in the live simulator.",
           ],
           references: [
             "CyberArk PAS Architecture Overview Guide",

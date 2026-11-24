@@ -5,8 +5,8 @@
  * knowledge checkpoints, and live simulator exercise validation.
  */
 
-import React, { useState, useEffect } from "react";
-import { GraduationCap, RotateCcw } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, GraduationCap, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import {
   ADMIN_MODULES_20,
@@ -16,22 +16,39 @@ import {
 } from "@/lib/academy/content";
 import {
   DEFAULT_LEARNER_PROGRESS,
+  evaluateLessonCheckpoint,
   loadLearnerProgress,
   saveLearnerProgress,
   markLessonComplete,
   recordCheckpointAnswer,
+  resetCheckpointAnswersForQuestions,
   recordExerciseComplete,
+  recordIndependentPracticeComplete,
   resetLearnerProgress,
 } from "@/lib/academy/progress";
 import { LessonTree } from "./lesson-tree";
-import { LessonRenderer } from "./lesson-renderer";
+import { LessonRenderer, type LessonNavTarget } from "./lesson-renderer";
 import { LearningObjectivesPanel } from "./visual/LearningObjectivesPanel";
-import type { PamState } from "@/lib/pam-engine";
+import { evaluateLabObjectives, type PamState } from "@/lib/pam-engine";
 
 interface AcademyWorkspaceProps {
   state: PamState;
   onResetState: () => void;
-  onJumpConsole?: (section: any) => void;
+  onJumpConsole?: (
+    section:
+      | "accounts"
+      | "safes"
+      | "cpm"
+      | "psm"
+      | "audit"
+      | "policies"
+      | "discovery"
+      | "troubleshooting"
+      | "overview"
+      | "environment"
+      | "access"
+      | "assessments",
+  ) => void;
   onUpdateState?: (updater: (prev: PamState) => PamState) => void;
 }
 
@@ -51,12 +68,43 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
 
   // Active Class / Module / Lesson resolution
   const activeDataset = currentTrack === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
-  const currentClass = findClassById(progress.currentClassId) || activeDataset[0];
+  const currentClass =
+    activeDataset.find((c) => c.id === progress.currentClassId) ||
+    findClassById(progress.currentClassId) ||
+    activeDataset[0];
   const currentModule =
     currentClass.modules.find((m) => m.id === progress.currentModuleId) || currentClass.modules[0];
   const currentLesson =
     currentModule.lessons.find((l) => l.id === progress.currentLessonId) ||
     currentModule.lessons[0];
+
+  // Build ordered linear lesson sequence for the active track
+  const orderedTrackLessons: LessonNavTarget[] = useMemo(() => {
+    const items: LessonNavTarget[] = [];
+    for (const cls of activeDataset) {
+      for (const mod of cls.modules) {
+        for (const les of mod.lessons) {
+          items.push({
+            classId: cls.id,
+            moduleId: mod.id,
+            lessonId: les.id,
+            label: `${cls.label} · Lesson ${les.number}`,
+            title: les.title,
+          });
+        }
+      }
+    }
+    return items;
+  }, [activeDataset]);
+
+  const currentLessonIdx = orderedTrackLessons.findIndex(
+    (item) => item.lessonId === currentLesson.id,
+  );
+  const prevLesson = currentLessonIdx > 0 ? orderedTrackLessons[currentLessonIdx - 1] : null;
+  const nextLesson =
+    currentLessonIdx >= 0 && currentLessonIdx < orderedTrackLessons.length - 1
+      ? orderedTrackLessons[currentLessonIdx + 1]
+      : null;
 
   function handleSelectTrack(newTrack: "admin-20" | "intro-6") {
     const targetDataset = newTrack === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
@@ -108,10 +156,52 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
     saveLearnerProgress(nextProgress);
   }
 
+  function handleNavigateLesson(target: LessonNavTarget) {
+    handleSelectLesson(target.classId, target.moduleId, target.lessonId);
+  }
+
   function handleMarkLessonComplete() {
+    const checkpointStatus = evaluateLessonCheckpoint(
+      currentLesson.knowledgeCheck,
+      progress.checkpointAnswers,
+    );
+    const labEvaluation = currentLesson.practicalExercise
+      ? evaluateLabObjectives(state, currentLesson.practicalExercise.associatedLabId)
+      : null;
+    const exerciseValidated =
+      !currentLesson.practicalExercise ||
+      progress.completedExercises.includes(currentLesson.practicalExercise.id) ||
+      Boolean(labEvaluation?.completed);
+
+    if (!checkpointStatus.passed || !exerciseValidated) {
+      const missing: string[] = [];
+      if (!checkpointStatus.passed) {
+        missing.push(
+          `Knowledge Checkpoint (${checkpointStatus.correct}/${checkpointStatus.total}, need ${checkpointStatus.requiredCorrect})`,
+        );
+      }
+      if (!exerciseValidated && currentLesson.practicalExercise) {
+        missing.push(
+          `Practical Lab validation (${labEvaluation?.score ?? 0}/100 in ${currentLesson.practicalExercise.targetConsole.toUpperCase()} console)`,
+        );
+      }
+      toast.error(
+        `Complete required checks before finishing Lesson ${currentLesson.number}: ${missing.join(" and ")}.`,
+      );
+      return;
+    }
+
+    if (
+      currentLesson.practicalExercise &&
+      labEvaluation?.completed &&
+      !progress.completedExercises.includes(currentLesson.practicalExercise.id)
+    ) {
+      recordExerciseComplete(currentLesson.practicalExercise.id);
+    }
+
     const updated = markLessonComplete(currentLesson.id);
     setProgress(updated);
-    toast.success(`Lesson ${currentLesson.number} completed!`);
+    toast.success(`Lesson ${currentLesson.number} completed and verified!`);
   }
 
   function handleRecordAnswer(qId: string, optIdx: number, isCorrect: boolean) {
@@ -119,8 +209,18 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
     setProgress(updated);
   }
 
+  function handleResetCheckpointAnswers(questionIds: string[]) {
+    const updated = resetCheckpointAnswersForQuestions(questionIds);
+    setProgress(updated);
+  }
+
   function handleRecordExerciseComplete(exId: string) {
     const updated = recordExerciseComplete(exId);
+    setProgress(updated);
+  }
+
+  function handleRecordIndependentComplete(exId: string) {
+    const updated = recordIndependentPracticeComplete(exId);
     setProgress(updated);
   }
 
@@ -133,12 +233,20 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
     }
   }
 
-  // Aggregate curriculum metrics
+  // Track-scoped curriculum metrics
   const metrics = getCurriculumMetrics(currentTrack);
+  const trackLessonIds = useMemo(
+    () => new Set(orderedTrackLessons.map((item) => item.lessonId)),
+    [orderedTrackLessons],
+  );
   const totalLessonsCount = metrics.totalLessons;
-  const completedLessonsCount = progress.completedLessons.length;
+  const completedLessonsCount = progress.completedLessons.filter((id) =>
+    trackLessonIds.has(id),
+  ).length;
+  const remainingLessonsCount = Math.max(0, totalLessonsCount - completedLessonsCount);
   const overallPercentage =
     totalLessonsCount > 0 ? Math.round((completedLessonsCount / totalLessonsCount) * 100) : 0;
+  const isTrackCompleted = totalLessonsCount > 0 && completedLessonsCount === totalLessonsCount;
 
   return (
     <>
@@ -155,7 +263,7 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
         </div>
         <div className="pvwa-toolbar">
           <span style={{ fontSize: 12, color: "#64748B", marginRight: 8 }}>
-            Curriculum Progress:{" "}
+            {currentTrack === "admin-20" ? "Admin Track" : "Intro Track"} Progress:{" "}
             <strong>
               {completedLessonsCount}/{totalLessonsCount}
             </strong>{" "}
@@ -172,6 +280,49 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           </button>
         </div>
       </div>
+
+      {isTrackCompleted && (
+        <div
+          role="status"
+          style={{
+            background: "#F0FDF4",
+            border: "1px solid #86EFAC",
+            borderLeft: "4px solid #16A34A",
+            borderRadius: 2,
+            padding: "10px 14px",
+            marginBottom: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 8,
+            fontSize: 12,
+            color: "#166534",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <CheckCircle2 size={16} />
+            <span>
+              <strong>
+                {currentTrack === "admin-20"
+                  ? "20-Module Administrator Track Completed!"
+                  : "6-Class Foundational Track Completed!"}
+              </strong>{" "}
+              All {totalLessonsCount} lessons, checkpoints, and simulator validations have been
+              recorded.
+            </span>
+          </div>
+          {currentTrack === "intro-6" && (
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-primary pvwa-btn-sm"
+              onClick={() => handleSelectTrack("admin-20")}
+            >
+              Continue to 20-Module Admin Track
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Three-Panel Learning Layout */}
       <div className="academy-three-panel-layout">
@@ -194,8 +345,21 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           onJumpConsole={onJumpConsole}
           state={state}
           completedExercises={progress.completedExercises}
+          completedIndependentPractices={progress.completedIndependentPractices || []}
+          savedAnswers={progress.checkpointAnswers}
           onRecordExerciseComplete={handleRecordExerciseComplete}
+          onRecordIndependentComplete={handleRecordIndependentComplete}
           onUpdateState={onUpdateState}
+          prevLesson={prevLesson}
+          nextLesson={nextLesson}
+          onNavigateLesson={handleNavigateLesson}
+          trackRemainingCount={remainingLessonsCount}
+          trackTitle={
+            currentTrack === "admin-20"
+              ? "20-Module Administrator Track"
+              : "6-Class Foundational Track"
+          }
+          moduleTitle={`${currentClass.label}: ${currentClass.title}`}
         />
 
         {/* RIGHT PANEL: Objectives, Terminology, Knowledge Checkpoint & Simulator Lab */}
@@ -205,6 +369,7 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           completedExercises={progress.completedExercises}
           savedAnswers={progress.checkpointAnswers}
           onRecordAnswer={handleRecordAnswer}
+          onResetAnswers={handleResetCheckpointAnswers}
           onRecordExerciseComplete={handleRecordExerciseComplete}
           onJumpConsole={onJumpConsole}
         />

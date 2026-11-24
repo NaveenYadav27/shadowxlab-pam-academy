@@ -203,24 +203,78 @@ export const CLASS_03: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "ex-c03-01",
-            title: "Onboard Unmanaged Backup Service Account",
+            title: "Validate & Onboard Privileged Account (WIN-SRV-01 Administrator)",
+            objective:
+              "Verify platform binding, Safe placement, accountable ownership, and CPM Verify validation for Administrator on WIN-SRV-01, then practice onboarding a new account independently.",
             scenario:
-              "Onboard unmanaged account svc_backup on server WIN-SRV-02 into WIN-SAFE, configure platform WinDomain, and verify that CPM transitions the account to Managed status.",
+              "Global Financial Services requires all Windows local Administrator accounts to reside in WIN-SAFE under platform 'Windows Server Local', owned by 'windows_admin', and verified by CPM into 'Managed' state.",
+            prerequisites: ["Review Account Taxonomy and Platform Binding in Section 1–4."],
+            startingState:
+              "WIN-SAFE exists and Administrator on WIN-SRV-01 is present in Accounts inventory; CPM Verify can be triggered from Accounts or CPM Operations.",
             instructions: [
-              "Navigate to the Accounts console in PVWA.",
-              "Identify any unmanaged account or click Add Account.",
-              "Specify WIN-SAFE, username svc_backup, address WIN-SRV-02, and platform Windows Server.",
-              "Run the Learning Academy Class 03 validation engine to confirm successful onboarding.",
+              "Open the Accounts console and locate Administrator on address WIN-SRV-01.",
+              "Confirm Platform is 'Windows Server Local', Safe is 'WIN-SAFE', and Owner is 'windows_admin'.",
+              "Run CPM 'Verify' on WIN-SRV-01 Administrator (from Accounts detail actions or CPM Operations) and confirm its status is 'Managed'.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 03 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open the Accounts console and select Administrator on WIN-SRV-01.",
+                explanation:
+                  "Every onboarded account must map to an exact target address, platform plugin, and Safe boundary.",
+                expectedResult:
+                  "Account details display Username: Administrator, Address: WIN-SRV-01, Safe: WIN-SAFE.",
+              },
+              {
+                action: "Confirm Platform is 'Windows Server Local' and Owner is 'windows_admin'.",
+                explanation:
+                  "Platform selection dictates which CPM plugin and password policy govern the credential.",
+                expectedResult:
+                  "Platform matches 'Windows Server Local' and accountable owner is 'windows_admin'.",
+              },
+              {
+                action: "Click 'Verify' to execute a live CPM Verify against WIN-SRV-01.",
+                explanation:
+                  "Best practice mandates verifying vaulted credentials before handing an account over to automated rotation.",
+                expectedResult:
+                  "CPM Verify completes successfully and account status confirms 'Managed'.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Evaluates all 6 Lab 03 objectives: account presence, platform, Safe, owner, CPM Verify, and Managed state.",
+                expectedResult: "All 6/6 Lab 03 objectives pass (100/100).",
+              },
             ],
             targetConsole: "accounts",
-            associatedLabId: "Lab 03 · Onboard an unmanaged account",
-            validationObjectiveId: "id-onboard-account",
+            associatedLabId: "Lab 03 · Onboard WIN-SRV-01 Administrator",
+            validationObjectiveId: "onboard-account",
             validationCriteria:
-              "Unmanaged account onboarded into WIN-SAFE and verified in inventory.",
+              "WIN-SRV-01 Administrator verified in WIN-SAFE under Windows Server Local with owner windows_admin and Managed status.",
+            troubleshootingHints: [
+              {
+                symptom: "'Run CPM Verify against target' or 'Managed' objective is pending.",
+                hint: "Ensure you selected Administrator on WIN-SRV-01 (not svc_backup on WIN-SRV-02) and triggered Verify.",
+                correctiveAction:
+                  "Open Accounts or CPM Operations, select Administrator (WIN-SRV-01), click Verify, confirm status is Managed, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Onboard a New Windows Server Account Independently",
+              scenario:
+                "A newly provisioned application server (WIN-APP-09) needs its local Administrator account onboarded into WIN-SAFE without step-by-step instructions.",
+              goal: "Use Add Account in the Accounts console to onboard a new privileged account into WIN-SAFE and verify it with CPM.",
+              targetConsole: "accounts",
+              successCriteria: [
+                "Added a new account (e.g., local_admin on WIN-APP-09) in WIN-SAFE with platform 'Windows Server Local' and an assigned owner.",
+                "Confirmed the new account appears in the Accounts inventory and ran CPM Verify on it.",
+              ],
+            },
           },
           completionCriteria: [
             "Explained the account onboarding lifecycle and platform assignment.",
-            "Successfully onboarded an unmanaged account in the PAM simulator.",
+            "Validated WIN-SRV-01 Administrator onboarding properties and CPM Verify in the PAM simulator.",
           ],
           references: [
             "CyberArk Privileged Account Onboarding Best Practices & Platform Selection Guide",

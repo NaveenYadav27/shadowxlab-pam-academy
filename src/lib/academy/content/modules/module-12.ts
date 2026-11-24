@@ -29,7 +29,8 @@ export const MODULE_12: ClassCurriculum = {
           id: "m12-l01",
           number: "12.1",
           title: "Compliance Report Generation & SIEM Forwarding",
-          subtitle: "Generating audit-ready compliance reports and streaming real-time CEF events to enterprise SIEMs",
+          subtitle:
+            "Generating audit-ready compliance reports and streaming real-time CEF events to enterprise SIEMs",
           estimatedMinutes: 25,
           learningObjectives: [
             "Generate standardized compliance reports satisfying SOX, PCI-DSS, and ISO 27001 auditing frameworks.",
@@ -79,53 +80,69 @@ export const MODULE_12: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Audited Administrator",
-                action: "Executes an action in PVWA: checks out credential for `WIN-SRV-01\\Administrator`.",
+                action:
+                  "Executes an action in PVWA: checks out credential for `WIN-SRV-01\\Administrator`.",
                 channelOrProtocol: "PVWA Web Console",
-                verificationRule: "Vault kernel processes request and writes immutable audit record to internal database.",
+                verificationRule:
+                  "Vault kernel processes request and writes immutable audit record to internal database.",
               },
               {
                 stepNumber: 2,
                 actor: "Vault Syslog Daemon",
-                action: "Captures audit event, formats into CEF message: `CEF:0|CyberArk|Vault|12.6|7|Retrieve Password|0|src=10.0.1.15 dst=WIN-SRV-01 act=Retrieve`.",
+                action:
+                  "Captures audit event, formats into CEF message: `CEF:0|CyberArk|Vault|12.6|7|Retrieve Password|0|src=10.0.1.15 dst=WIN-SRV-01 act=Retrieve`.",
                 channelOrProtocol: "Encrypted Syslog (TCP 6514)",
-                verificationRule: "Syslog daemon transmits packet to configured enterprise SIEM collector.",
+                verificationRule:
+                  "Syslog daemon transmits packet to configured enterprise SIEM collector.",
               },
               {
                 stepNumber: 3,
                 actor: "Compliance Officer",
-                action: "In PVWA Reports, generates 'Privileged Accounts Inventory' for all production Safes over the last 90 days.",
+                action:
+                  "In PVWA Reports, generates 'Privileged Accounts Inventory' for all production Safes over the last 90 days.",
                 channelOrProtocol: "PVWA Reports Console",
-                verificationRule: "Vault compiles report; displays account status, last password change date, and platform compliance.",
+                verificationRule:
+                  "Vault compiles report; displays account status, last password change date, and platform compliance.",
               },
               {
                 stepNumber: 4,
                 actor: "Compliance Officer",
-                action: "Exports report to CSV/Excel and attaches cryptographic checksum for external regulatory submission.",
+                action:
+                  "Exports report to CSV/Excel and attaches cryptographic checksum for external regulatory submission.",
                 channelOrProtocol: "Secure Download (HTTPS)",
-                verificationRule: "Audit trail verifies report generation was logged with user identity and timestamp.",
+                verificationRule:
+                  "Audit trail verifies report generation was logged with user identity and timestamp.",
               },
             ],
           },
           terminology: [
             {
               term: "Immutable Audit Trail",
-              definition: "A record of events that cannot be modified, deleted, or overwritten by any user, including the root system administrator.",
-              enterpriseContext: "The Vault audit log is append-only; even deleting an account retains the complete historical audit log of that account forever.",
+              definition:
+                "A record of events that cannot be modified, deleted, or overwritten by any user, including the root system administrator.",
+              enterpriseContext:
+                "The Vault audit log is append-only; even deleting an account retains the complete historical audit log of that account forever.",
             },
             {
               term: "Common Event Format (CEF)",
-              definition: "An industry-standard log formatting syntax developed by ArcSight and adopted universally by modern SIEMs (Splunk, Sentinel).",
-              enterpriseContext: "Standardizes field names (e.g., `suser`, `src`, `dst`, `act`) so automated SIEM rules can parse PAM events effortlessly.",
+              definition:
+                "An industry-standard log formatting syntax developed by ArcSight and adopted universally by modern SIEMs (Splunk, Sentinel).",
+              enterpriseContext:
+                "Standardizes field names (e.g., `suser`, `src`, `dst`, `act`) so automated SIEM rules can parse PAM events effortlessly.",
             },
             {
               term: "Privileged Accounts Inventory Report",
-              definition: "A comprehensive audit report listing every vaulted account, its Safe, platform, address, owner, and last password rotation date.",
-              enterpriseContext: "The primary artifact requested by SOX and ISO auditors to verify that all privileged credentials are accounted for.",
+              definition:
+                "A comprehensive audit report listing every vaulted account, its Safe, platform, address, owner, and last password rotation date.",
+              enterpriseContext:
+                "The primary artifact requested by SOX and ISO auditors to verify that all privileged credentials are accounted for.",
             },
             {
               term: "Safe Entitlement Report",
-              definition: "A report mapping every user and security group to their explicit granular permissions across all Safes in the Vault.",
-              enterpriseContext: "Used during quarterly access certifications to identify over-privileged users and enforce least privilege.",
+              definition:
+                "A report mapping every user and security group to their explicit granular permissions across all Safes in the Vault.",
+              enterpriseContext:
+                "Used during quarterly access certifications to identify over-privileged users and enforce least privilege.",
             },
           ],
           administratorResponsibilities: [
@@ -138,47 +155,62 @@ export const MODULE_12: ClassCurriculum = {
             {
               name: "Syslog Server Configuration",
               settingOrObject: "dbparm.ini on Vault Server",
-              description: "Configures Syslog server IP, port (514/6514), protocol (UDP/TLS), and translator file (`ArcSight.sample.xsl`).",
-              productionBestPractice: "Always use TLS on TCP port 6514 with mutual certificate authentication to prevent log interception or spoofing.",
+              description:
+                "Configures Syslog server IP, port (514/6514), protocol (UDP/TLS), and translator file (`ArcSight.sample.xsl`).",
+              productionBestPractice:
+                "Always use TLS on TCP port 6514 with mutual certificate authentication to prevent log interception or spoofing.",
             },
             {
               name: "Audit Event Filtering (SyslogMessageCodeFilter)",
               settingOrObject: "dbparm.ini / SyslogMessageCodeFilter",
-              description: "Specifies which Vault action codes (e.g. 7=Retrieve, 24=Store, 355=PSM Session) are forwarded to SIEM.",
-              productionBestPractice: "Forward all critical security codes: 7, 24, 30, 31, 355, 356, 357 to avoid alert noise while catching all access.",
+              description:
+                "Specifies which Vault action codes (e.g. 7=Retrieve, 24=Store, 355=PSM Session) are forwarded to SIEM.",
+              productionBestPractice:
+                "Forward all critical security codes: 7, 24, 30, 31, 355, 356, 357 to avoid alert noise while catching all access.",
             },
             {
               name: "Report Generation Schedule",
               settingOrObject: "PVWA Reports > Scheduled Reports",
-              description: "Configures automated recurring report jobs and designated email recipient distribution lists.",
-              productionBestPractice: "Schedule heavy inventory reports to run on weekends to avoid impacting interactive PVWA daytime performance.",
+              description:
+                "Configures automated recurring report jobs and designated email recipient distribution lists.",
+              productionBestPractice:
+                "Schedule heavy inventory reports to run on weekends to avoid impacting interactive PVWA daytime performance.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Open Reports & Audit Console",
-              action: "In PVWA, navigate to Reports & Audit Console to review historical audit events.",
-              expectedResult: "Audit table loads displaying Date/Time, User, Action, Target, and Result.",
-              operatorNotes: "Filter events by Action (e.g., 'Change', 'Connect', 'Retrieve') to narrow analysis.",
+              action:
+                "In PVWA, navigate to Reports & Audit Console to review historical audit events.",
+              expectedResult:
+                "Audit table loads displaying Date/Time, User, Action, Target, and Result.",
+              operatorNotes:
+                "Filter events by Action (e.g., 'Change', 'Connect', 'Retrieve') to narrow analysis.",
             },
             {
               stepNumber: 2,
               title: "Generate Privileged Inventory Report",
-              action: "Under Reports, select 'Privileged Accounts Inventory', choose Safes: All Safes, and click 'Generate'.",
-              expectedResult: "Report compiles; shows total account count, managed percentage, and days since last rotation.",
+              action:
+                "Under Reports, select 'Privileged Accounts Inventory', choose Safes: All Safes, and click 'Generate'.",
+              expectedResult:
+                "Report compiles; shows total account count, managed percentage, and days since last rotation.",
             },
             {
               stepNumber: 3,
               title: "Verify Outbound Syslog Forwarding",
-              action: "On the enterprise SIEM (Splunk/Sentinel), query index: `index=pam sourcetype=cyberark:vault`.",
-              expectedResult: "Real-time CEF messages arrive corresponding to current administrative clicks in the PVWA.",
+              action:
+                "On the enterprise SIEM (Splunk/Sentinel), query index: `index=pam sourcetype=cyberark:vault`.",
+              expectedResult:
+                "Real-time CEF messages arrive corresponding to current administrative clicks in the PVWA.",
             },
             {
               stepNumber: 4,
               title: "Audit Password Change Failures",
-              action: "Filter audit log for Result: 'Failed' and Action: 'Change' to identify broken credentials requiring reconciliation.",
-              expectedResult: "Displays list of failed rotation events with associated CPM error codes (e.g., CACPM072E).",
+              action:
+                "Filter audit log for Result: 'Failed' and Action: 'Change' to identify broken credentials requiring reconciliation.",
+              expectedResult:
+                "Displays list of failed rotation events with associated CPM error codes (e.g., CACPM072E).",
             },
           ],
           enterpriseScenario: {
@@ -193,36 +225,47 @@ export const MODULE_12: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "SIEM stops receiving PAM audit events: 'No events from Vault in the last 60 minutes'.",
-              rootCause: "The Vault Syslog service dropped the connection due to an expired TLS certificate on the Syslog collector.",
-              securityImpact: "SOC blind to privileged access activity; potential delayed detection of active insider attacks.",
+              symptom:
+                "SIEM stops receiving PAM audit events: 'No events from Vault in the last 60 minutes'.",
+              rootCause:
+                "The Vault Syslog service dropped the connection due to an expired TLS certificate on the Syslog collector.",
+              securityImpact:
+                "SOC blind to privileged access activity; potential delayed detection of active insider attacks.",
               cyberArkCodeOrEvent: "SYSLOG-FAIL",
             },
             {
               symptom: "Report generation in PVWA times out: 'HTTP 504 Gateway Timeout'.",
-              rootCause: "Report scope was too broad (querying 20,000 accounts with 5 years of history without date filters).",
-              securityImpact: "Administrator unable to export required audit data for visiting regulators.",
+              rootCause:
+                "Report scope was too broad (querying 20,000 accounts with 5 years of history without date filters).",
+              securityImpact:
+                "Administrator unable to export required audit data for visiting regulators.",
               cyberArkCodeOrEvent: "TIMEOUT-504",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Check Vault communication log for Syslog connection and SSL errors.",
+              diagnosticAction:
+                "Check Vault communication log for Syslog connection and SSL errors.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\Server\\Logs\\italog.log",
-              remediation: "Search for 'Failed to send Syslog message'. Verify collector IP, port, and firewall reachability.",
+              remediation:
+                "Search for 'Failed to send Syslog message'. Verify collector IP, port, and firewall reachability.",
             },
             {
               stepNumber: 2,
-              diagnosticAction: "Test Syslog port reachability from Vault server (if network permits) or test from secondary node.",
+              diagnosticAction:
+                "Test Syslog port reachability from Vault server (if network permits) or test from secondary node.",
               logFileOrConsole: "italog.log / dbparm.ini",
-              remediation: "Confirm that intermediate firewalls permit outbound traffic from Vault to SIEM on TCP 6514.",
+              remediation:
+                "Confirm that intermediate firewalls permit outbound traffic from Vault to SIEM on TCP 6514.",
             },
             {
               stepNumber: 3,
-              diagnosticAction: "Scope report queries to specific Safes and shorter date windows (e.g., 30–90 days).",
+              diagnosticAction:
+                "Scope report queries to specific Safes and shorter date windows (e.g., 30–90 days).",
               logFileOrConsole: "PVWA Reports Console",
-              remediation: "Break large corporate reports into departmental batches (e.g., Windows Safes first, then Unix Safes).",
+              remediation:
+                "Break large corporate reports into departmental batches (e.g., Windows Safes first, then Unix Safes).",
             },
           ],
           diagnosticEvidence: [
@@ -254,7 +297,8 @@ export const MODULE_12: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m12-q01",
-              question: "Why is the Digital Vault audit trail described as 'cryptographically immutable'?",
+              question:
+                "Why is the Digital Vault audit trail described as 'cryptographically immutable'?",
               options: [
                 "Because audit records are stored in append-only tables encrypted with Vault master keys, and cannot be edited or deleted by any user or administrator.",
                 "Because it is written onto write-once optical CD-ROMs.",
@@ -268,7 +312,8 @@ export const MODULE_12: ClassCurriculum = {
             },
             {
               id: "m12-q02",
-              question: "Which standardized message format is recommended for streaming real-time PAM audit events to modern SIEMs such as Splunk and Microsoft Sentinel?",
+              question:
+                "Which standardized message format is recommended for streaming real-time PAM audit events to modern SIEMs such as Splunk and Microsoft Sentinel?",
               options: [
                 "Plain Unformatted ASCII",
                 "Common Event Format (CEF)",
@@ -282,7 +327,8 @@ export const MODULE_12: ClassCurriculum = {
             },
             {
               id: "m12-q03",
-              question: "Which compliance report is the primary artifact required by SOX 404 and ISO 27001 auditors to verify that all privileged credentials are accounted for and managed?",
+              question:
+                "Which compliance report is the primary artifact required by SOX 404 and ISO 27001 auditors to verify that all privileged credentials are accounted for and managed?",
               options: [
                 "Privileged Accounts Inventory Report",
                 "Network Ping Latency Report",
@@ -297,20 +343,73 @@ export const MODULE_12: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m12-ex01",
-            title: "Inspect Compliance Audit Trails and Review Operations Evidence",
+            title: "Generate & Audit Privileged Credential Rotation Evidence",
+            objective:
+              "Execute a live CPM Verify and Change on WIN-SRV-01 Administrator, inspect the resulting immutable audit records in Reports & Audit, and validate all 4 Lab 05A objectives.",
             scenario:
-              "Navigate to the Reports & Audit console to inspect historical audit events, filter credential checkouts and password change results, and verify that operational evidence is captured accurately.",
+              "SOX 404 auditors require end-to-end evidence of an automated credential rotation on WIN-SRV-01. Trigger CPM Verify and Change, then filter and verify the timestamped audit entries in Reports & Audit.",
+            prerequisites: [
+              "Review Immutable Audit Ledgers and Compliance Reporting in Section 1–4.",
+            ],
+            startingState:
+              "WIN-SRV-01 Administrator is Managed in WIN-SAFE; Reports & Audit displays live chronological audit events.",
             instructions: [
-              "Navigate to the Reports & Audit console.",
-              "Review the chronological audit trail of privileged operations.",
-              "Filter events by Action (e.g. Change, Connect, Verify) and Result (Success, Denied, Failed).",
-              "Verify that audit records contain timestamp, user identity, target asset, and result.",
+              "Open CPM Operations, select Administrator on WIN-SRV-01, and click 'Verify' followed by 'Change'.",
+              "Open the Reports & Audit console and filter the audit ledger for `Change` and `Verify` actions.",
+              "Verify each audit entry records Timestamp, Actor, Action, Target, and Result.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 4 Lab 05A objectives.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open CPM Operations, select WIN-SRV-01 Administrator, and run Verify then Change.",
+                explanation:
+                  "Generates authentic live CPM rotation events in the Vault audit ledger for compliance review.",
+                expectedResult:
+                  "CPM records Completed Verify and Change operations and keeps WIN-SRV-01 Managed.",
+              },
+              {
+                action: "Open Reports & Audit and search/filter for `Change` on `WIN-SRV-01`.",
+                explanation:
+                  "Verifies tamper-evident operational evidence required by SOX, PCI-DSS, and ISO 27001.",
+                expectedResult:
+                  "Audit table displays timestamp, actor, action, target, and Success status.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Validates all 4 Lab 05A objectives (pre-verify, change execution, audit inspection, Managed state).",
+                expectedResult: "All 4/4 Lab 05A objectives pass (100/100).",
+              },
             ],
             targetConsole: "audit",
             associatedLabId: "Lab 05A · Verify credential status",
             validationObjectiveId: "inspect-result",
             validationCriteria:
-              "The Reports & Audit console is inspected and privileged activity evidence is verified.",
+              "CPM Verify + Change executed on WIN-SRV-01 Administrator and verified in Reports & Audit (4/4 Lab 05A objectives).",
+            troubleshootingHints: [
+              {
+                symptom:
+                  "'Execute CPM password rotation' or 'Inspect operation evidence in audit log' is pending.",
+                hint: "Viewing Reports & Audit alone will not create a new CPM Change event on WIN-SRV-01.",
+                correctiveAction:
+                  "Open CPM Operations, select Administrator (WIN-SRV-01), click Verify and then Change, review the new entry in Reports & Audit, and re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Generate a Compliance Report View for Safes & Account Inventory",
+              scenario:
+                "Internal Audit requests an inventory and Safe governance breakdown from Reports & Audit.",
+              goal: "Without step-by-step guidance, switch to the Reports tab in Reports & Audit and inspect both the Account Inventory and Safes Governance reports.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Switched to the Reports view in Reports & Audit.",
+                "Reviewed both the Account Inventory and Safes Governance compliance reports.",
+              ],
+            },
+            simulationLimitationNote:
+              "External SIEM CEF Syslog forwarding is conceptual in this simulator. To satisfy live Lab 05A audit validation, execute a CPM Verify and Change on Administrator (WIN-SRV-01) in CPM Operations, then inspect the logged events in Reports & Audit.",
           },
           completionCriteria: [
             "Deconstructed compliance reporting frameworks (SOX, PCI-DSS, ISO 27001).",

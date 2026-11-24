@@ -29,7 +29,8 @@ export const MODULE_04: ClassCurriculum = {
           id: "m04-l01",
           number: "4.1",
           title: "Safe Architecture & Granular Access Control",
-          subtitle: "Configuring cryptographic containers, retention policies, and least-privilege permission matrices",
+          subtitle:
+            "Configuring cryptographic containers, retention policies, and least-privilege permission matrices",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct Safe architecture as both a logical administrative container and a cryptographic storage boundary.",
@@ -73,58 +74,76 @@ export const MODULE_04: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "PAM Administrator",
-                action: "Creates a new Safe `FINANCE-TIER0-SAFE`, specifies 90-day retention, and assigns accountable business owner.",
+                action:
+                  "Creates a new Safe `FINANCE-TIER0-SAFE`, specifies 90-day retention, and assigns accountable business owner.",
                 channelOrProtocol: "PVWA Safes Management Console",
-                verificationRule: "Vault generates a unique Safe Key, initializes encrypted directory structure, and logs creation event.",
+                verificationRule:
+                  "Vault generates a unique Safe Key, initializes encrypted directory structure, and logs creation event.",
               },
               {
                 stepNumber: 2,
                 actor: "PAM Administrator",
-                action: "Assigns the local CPM worker (`PasswordManager`) as a Safe Member with full operational permissions.",
+                action:
+                  "Assigns the local CPM worker (`PasswordManager`) as a Safe Member with full operational permissions.",
                 channelOrProtocol: "Safe Members > Add Member",
-                verificationRule: "CPM granted: Manage Safe, Add accounts, Update content, Update properties, Initiate CPM operations.",
+                verificationRule:
+                  "CPM granted: Manage Safe, Add accounts, Update content, Update properties, Initiate CPM operations.",
               },
               {
                 stepNumber: 3,
                 actor: "PAM Administrator",
-                action: "Assigns Active Directory group `AD_Finance_Operators` as Safe Members with strictly scoped permissions.",
+                action:
+                  "Assigns Active Directory group `AD_Finance_Operators` as Safe Members with strictly scoped permissions.",
                 channelOrProtocol: "Safe Members > Add Directory Group",
-                verificationRule: "Granted: `List accounts`, `Use accounts`. Denied: `Retrieve accounts`, `Delete accounts`.",
+                verificationRule:
+                  "Granted: `List accounts`, `Use accounts`. Denied: `Retrieve accounts`, `Delete accounts`.",
               },
               {
                 stepNumber: 4,
                 actor: "Finance Operator",
-                action: "Logs in to PVWA, views accounts in `FINANCE-TIER0-SAFE`, and clicks 'Connect'.",
+                action:
+                  "Logs in to PVWA, views accounts in `FINANCE-TIER0-SAFE`, and clicks 'Connect'.",
                 channelOrProtocol: "PVWA Accounts Console",
-                verificationRule: "Vault validates `Use accounts` permission; PSM establishes session. 'Show Password' button is disabled.",
+                verificationRule:
+                  "Vault validates `Use accounts` permission; PSM establishes session. 'Show Password' button is disabled.",
               },
             ],
           },
           terminology: [
             {
               term: "Safe",
-              definition: "A cryptographically isolated storage container within the Digital Vault that holds privileged accounts and files.",
-              enterpriseContext: "Safes are designed around technology boundaries, department ownership, and risk tiers (e.g. WIN-T0-SAFE, DBA-PROD-SAFE).",
+              definition:
+                "A cryptographically isolated storage container within the Digital Vault that holds privileged accounts and files.",
+              enterpriseContext:
+                "Safes are designed around technology boundaries, department ownership, and risk tiers (e.g. WIN-T0-SAFE, DBA-PROD-SAFE).",
             },
             {
               term: "Use Accounts",
-              definition: "Permission allowing a user to initiate transparent privileged sessions (via PSM) or run automated tasks without viewing plaintext.",
-              enterpriseContext: "The gold standard for least-privilege; allows users to execute their jobs while remaining completely blind to the password.",
+              definition:
+                "Permission allowing a user to initiate transparent privileged sessions (via PSM) or run automated tasks without viewing plaintext.",
+              enterpriseContext:
+                "The gold standard for least-privilege; allows users to execute their jobs while remaining completely blind to the password.",
             },
             {
               term: "Retrieve Accounts",
-              definition: "Permission allowing a user to view, copy, or extract the actual plaintext password or private key from the Vault.",
-              enterpriseContext: "High-risk permission. Must be strictly restricted to emergency break-glass operators and protected by dual-control approval.",
+              definition:
+                "Permission allowing a user to view, copy, or extract the actual plaintext password or private key from the Vault.",
+              enterpriseContext:
+                "High-risk permission. Must be strictly restricted to emergency break-glass operators and protected by dual-control approval.",
             },
             {
               term: "List Accounts",
-              definition: "Permission allowing a user to view metadata (account name, address, safe, platform) in the PVWA inventory.",
-              enterpriseContext: "Prerequisite for almost all other operations; if a user lacks 'List accounts', the Safe appears completely empty.",
+              definition:
+                "Permission allowing a user to view metadata (account name, address, safe, platform) in the PVWA inventory.",
+              enterpriseContext:
+                "Prerequisite for almost all other operations; if a user lacks 'List accounts', the Safe appears completely empty.",
             },
             {
               term: "Safe Retention Policy",
-              definition: "Configures how long the Vault retains historical password versions or deleted objects before permanent purge.",
-              enterpriseContext: "Standard production policy is 30–90 days or last 5–10 versions to satisfy compliance audit requirements.",
+              definition:
+                "Configures how long the Vault retains historical password versions or deleted objects before permanent purge.",
+              enterpriseContext:
+                "Standard production policy is 30–90 days or last 5–10 versions to satisfy compliance audit requirements.",
             },
           ],
           administratorResponsibilities: [
@@ -137,47 +156,60 @@ export const MODULE_04: ClassCurriculum = {
             {
               name: "Retention Period (Days vs Versions)",
               settingOrObject: "Safe Properties > History Retention",
-              description: "Configures whether deleted accounts and previous passwords are kept for N days or for the last N versions.",
-              productionBestPractice: "Use 'Retain versions for X days' (typically 90 days) to prevent runaway database growth from frequent CPM rotations.",
+              description:
+                "Configures whether deleted accounts and previous passwords are kept for N days or for the last N versions.",
+              productionBestPractice:
+                "Use 'Retain versions for X days' (typically 90 days) to prevent runaway database growth from frequent CPM rotations.",
             },
             {
               name: "CPM User Assignment",
               settingOrObject: "Safe Properties > Assigned CPM",
-              description: "Selects which CPM node manages the credentials within this specific Safe.",
-              productionBestPractice: "Bind Safes to the CPM located geographically closest to the target servers to avoid WAN latency and firewall traversal.",
+              description:
+                "Selects which CPM node manages the credentials within this specific Safe.",
+              productionBestPractice:
+                "Bind Safes to the CPM located geographically closest to the target servers to avoid WAN latency and firewall traversal.",
             },
             {
               name: "Permission Dependency: Retrieve vs List",
               settingOrObject: "Safe Members Permissions Dialog",
-              description: "Internal rule: granting 'Retrieve accounts' or 'Use accounts' requires 'List accounts' to be selected.",
-              productionBestPractice: "Always verify that dependent permissions are checked simultaneously to avoid unexpected permission denial errors.",
+              description:
+                "Internal rule: granting 'Retrieve accounts' or 'Use accounts' requires 'List accounts' to be selected.",
+              productionBestPractice:
+                "Always verify that dependent permissions are checked simultaneously to avoid unexpected permission denial errors.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Create Production Safe",
-              action: "In PVWA, navigate to Administration > Safes > Add Safe. Enter Safe Name `DBA-SAFE`, Description, and assign CPM.",
+              action:
+                "In PVWA, navigate to Administration > Safes > Add Safe. Enter Safe Name `DBA-SAFE`, Description, and assign CPM.",
               expectedResult: "Safe created successfully and registered in Vault storage engine.",
-              operatorNotes: "Safe names cannot contain spaces or special characters like `\\ / : * ? \" < > |`.",
+              operatorNotes:
+                'Safe names cannot contain spaces or special characters like `\\ / : * ? " < > |`.',
             },
             {
               stepNumber: 2,
               title: "Assign CPM Management Permissions",
-              action: "Add user `PasswordManager` as member of `DBA-SAFE` with full management permissions.",
+              action:
+                "Add user `PasswordManager` as member of `DBA-SAFE` with full management permissions.",
               expectedResult: "CPM is authorized to scan and rotate credentials in this Safe.",
             },
             {
               stepNumber: 3,
               title: "Configure Tier-1 Operator Access",
-              action: "Add directory group `AD_DBA_Operators`. Check `List accounts`, `Use accounts`, and `Initiate CP/PSM connections`.",
-              expectedResult: "Operators can launch sessions through PSM but cannot copy plaintext passwords.",
+              action:
+                "Add directory group `AD_DBA_Operators`. Check `List accounts`, `Use accounts`, and `Initiate CP/PSM connections`.",
+              expectedResult:
+                "Operators can launch sessions through PSM but cannot copy plaintext passwords.",
             },
             {
               stepNumber: 4,
               title: "Validate Permission Boundary",
-              action: "Log in as a member of `AD_DBA_Operators`, locate a database account, and attempt to click 'Show Password'.",
-              expectedResult: "'Show Password' button is grayed out or displays 'Action not permitted by Safe permissions'.",
+              action:
+                "Log in as a member of `AD_DBA_Operators`, locate a database account, and attempt to click 'Show Password'.",
+              expectedResult:
+                "'Show Password' button is grayed out or displays 'Action not permitted by Safe permissions'.",
             },
           ],
           enterpriseScenario: {
@@ -193,14 +225,19 @@ export const MODULE_04: ClassCurriculum = {
           failureScenarios: [
             {
               symptom: "User can log in to PVWA but sees zero Safes or accounts in the inventory.",
-              rootCause: "User or their AD group is not listed as a member of any Safe, or lacks 'List accounts' permission.",
-              securityImpact: "Staff cannot perform scheduled administrative duties; false positive ticket filed claiming Vault is down.",
+              rootCause:
+                "User or their AD group is not listed as a member of any Safe, or lacks 'List accounts' permission.",
+              securityImpact:
+                "Staff cannot perform scheduled administrative duties; false positive ticket filed claiming Vault is down.",
               cyberArkCodeOrEvent: "ITATS028E",
             },
             {
-              symptom: "CPM fails to rotate any account in the Safe: 'CACPM072E Safe access denied for PasswordManager'.",
-              rootCause: "The administrator forgot to add the `PasswordManager` service account as a member of the new Safe.",
-              securityImpact: "All accounts in the Safe fail automated rotation, violating compliance password age requirements.",
+              symptom:
+                "CPM fails to rotate any account in the Safe: 'CACPM072E Safe access denied for PasswordManager'.",
+              rootCause:
+                "The administrator forgot to add the `PasswordManager` service account as a member of the new Safe.",
+              securityImpact:
+                "All accounts in the Safe fail automated rotation, violating compliance password age requirements.",
               cyberArkCodeOrEvent: "CACPM072E",
             },
           ],
@@ -209,19 +246,22 @@ export const MODULE_04: ClassCurriculum = {
               stepNumber: 1,
               diagnosticAction: "Check Safe member list in PVWA Safes Management.",
               logFileOrConsole: "PVWA Safes Console > Select Safe > Members",
-              remediation: "Verify that `PasswordManager` is present with Add, Update, and Initiate CPM permissions. Add if missing.",
+              remediation:
+                "Verify that `PasswordManager` is present with Add, Update, and Initiate CPM permissions. Add if missing.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Verify user's effective permissions on the Safe.",
               logFileOrConsole: "Safe Members > Select User/Group > Edit Permissions",
-              remediation: "Ensure 'List accounts' is checked if the user needs to view accounts, and 'Use accounts' is checked for PSM.",
+              remediation:
+                "Ensure 'List accounts' is checked if the user needs to view accounts, and 'Use accounts' is checked for PSM.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Inspect Vault audit log for access denial events.",
               logFileOrConsole: "italog.log / Safe History Report",
-              remediation: "Search for `Action denied by Safe ACL` to identify which specific permission was withheld.",
+              remediation:
+                "Search for `Action denied by Safe ACL` to identify which specific permission was withheld.",
             },
           ],
           diagnosticEvidence: [
@@ -253,13 +293,9 @@ export const MODULE_04: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m04-q01",
-              question: "Which Safe permission allows an engineer to launch a recorded RDP session through PSM without ever seeing the plaintext password?",
-              options: [
-                "Retrieve accounts",
-                "Use accounts",
-                "Unlock accounts",
-                "Manage Safe",
-              ],
+              question:
+                "Which Safe permission allows an engineer to launch a recorded RDP session through PSM without ever seeing the plaintext password?",
+              options: ["Retrieve accounts", "Use accounts", "Unlock accounts", "Manage Safe"],
               correctIndex: 1,
               explanation:
                 "'Use accounts' allows transparent session initiation via PSM or application credential injection without exposing the plaintext password to the user. 'Retrieve accounts' allows viewing the actual password and should be restricted.",
@@ -267,7 +303,8 @@ export const MODULE_04: ClassCurriculum = {
             },
             {
               id: "m04-q02",
-              question: "A new Safe was created and accounts were onboarded, but the CPM is failing to rotate passwords with error CACPM072E. What is the most common administrator oversight?",
+              question:
+                "A new Safe was created and accounts were onboarded, but the CPM is failing to rotate passwords with error CACPM072E. What is the most common administrator oversight?",
               options: [
                 "The target servers do not have internet access.",
                 "The administrator forgot to add the CPM service user (e.g., PasswordManager) as a member of the Safe.",
@@ -281,7 +318,8 @@ export const MODULE_04: ClassCurriculum = {
             },
             {
               id: "m04-q03",
-              question: "If a user is granted 'Use accounts' permission on a Safe but NOT 'List accounts', what will they experience in the PVWA?",
+              question:
+                "If a user is granted 'Use accounts' permission on a Safe but NOT 'List accounts', what will they experience in the PVWA?",
               options: [
                 "They will see the accounts and be able to connect normally.",
                 "They will not be able to see the accounts in the inventory at all, making it impossible to click Connect.",
@@ -296,20 +334,81 @@ export const MODULE_04: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m04-ex01",
-            title: "Inspect Safe Governance and Permission Boundaries",
+            title: "Configure & Validate Least-Privilege Safe Permissions on DBA-SAFE",
+            objective:
+              "Enforce granular Safe ACLs on DBA-SAFE so dba_user can list and use accounts without viewing cleartext passwords, and record audited allowed/denied permission checks.",
             scenario:
-              "Navigate to the Safes console, inspect existing Safes (e.g. WIN-SAFE, DBA-SAFE), and verify that safe member permissions adhere to least privilege.",
+              "Global Financial Services requires DBA-SAFE to enforce strict least privilege: dba_user must hold 'List accounts' and 'Use accounts' / 'Initiate privileged sessions' while 'Retrieve accounts' remains strictly withheld.",
+            prerequisites: [
+              "Review the 10+ Safe permissions matrix and Use vs. Retrieve separation in Section 1–4.",
+            ],
+            startingState:
+              "7 Safes exist including DBA-SAFE (owner: pam_admin, members: pam_admin, dba_user, auditor).",
             instructions: [
-              "Navigate to the Safes console.",
-              "Inspect the configured Safes, their assigned CPMs, and member rosters.",
-              "Review the permission matrix for each member (confirm separation between operational users and administrators).",
-              "Validate that the CPM worker has administrative rights while operational users are scoped to least privilege.",
+              "Open the Safes console and select DBA-SAFE.",
+              "Select member dba_user and confirm 'List accounts', 'Use accounts', and 'Initiate privileged sessions' are checked while 'Retrieve accounts' is UNCHECKED, then save member permissions.",
+              "Run the Safe permission check for dba_user on DBA-SAFE: verify 'Use accounts' is Allowed and 'Retrieve accounts' is Denied.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 02 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Safes and select DBA-SAFE to inspect its owner and member roster.",
+                explanation: "Every Safe requires an accountable owner and scoped member ACLs.",
+                expectedResult:
+                  "DBA-SAFE shows owner pam_admin with members pam_admin, dba_user, and auditor.",
+              },
+              {
+                action:
+                  "Verify dba_user has 'List accounts', 'Use accounts', and 'Initiate privileged sessions' without 'Retrieve accounts', then click Save.",
+                explanation:
+                  "Enforces mediated PSM access while blocking plaintext password retrieval and logs an audited DBA-SAFE change.",
+                expectedResult:
+                  "Permissions save cleanly and a DBA-SAFE Success audit event is recorded.",
+              },
+              {
+                action:
+                  "Evaluate 'Use accounts' (Allowed) and 'Retrieve accounts' (Denied) for dba_user on DBA-SAFE.",
+                explanation:
+                  "Verifies Vault ACL enforcement for both permitted and unauthorized actions.",
+                expectedResult:
+                  "Use accounts returns Authorized; Retrieve accounts returns Denied.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Runs live Lab 02 validation across all 6 Safe governance objectives.",
+                expectedResult: "All 6/6 Lab 02 objectives pass (100/100).",
+              },
             ],
             targetConsole: "safes",
             associatedLabId: "Lab 02 · Provision DBA-SAFE access",
             validationObjectiveId: "create-safe",
             validationCriteria:
-              "The Safes console is reviewed and safe member permissions are verified.",
+              "DBA-SAFE ownership, dba_user least-privilege ACL (Retrieve withheld), and audited permission tests verified (6/6 Lab 02 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "'Enforce least privilege' fails on Lab 02 validation.",
+                hint: "Check whether 'Retrieve accounts' was enabled on dba_user.",
+                correctiveAction:
+                  "In Safes > DBA-SAFE > dba_user, uncheck 'Retrieve accounts', keep 'List accounts' and 'Use accounts' checked, click Save, and re-validate.",
+              },
+              {
+                symptom: "'Verify permitted operation for DBA team' shows pending.",
+                hint: "Lab 02 checks the audit log for a Success event targeting DBA-SAFE.",
+                correctiveAction:
+                  "Save dba_user member permissions on DBA-SAFE or run the 'Use accounts' evaluator test, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Create & Scope a New Application Safe",
+              scenario: "A new Treasury API requires an isolated Safe separate from APP-SAFE.",
+              goal: "Without step-by-step instructions, create a new Safe (e.g., TREASURY-SAFE) in the Safes console and verify its owner-only baseline membership.",
+              targetConsole: "safes",
+              successCriteria: [
+                "Created a new Safe following uppercase hyphenated naming rules with an accountable owner.",
+                "Confirmed the Safe appears in the Safe roster with owner-only initial permissions.",
+              ],
+            },
           },
           completionCriteria: [
             "Deconstructed Safe cryptographic architecture and retention policies.",

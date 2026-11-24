@@ -265,24 +265,91 @@ export const CLASS_06: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "ex-c06-01",
-            title: "Launch Brokered Session & Audit Keystrokes",
+            title: "Launch Brokered PSM Session, Execute Audited Commands & Terminate",
+            objective:
+              "Complete the full PSM brokered session lifecycle: authorize with a change ticket, launch an isolated session, execute at least two audited commands, inspect the timeline, and terminate the session to seal the recording.",
             scenario:
-              "Navigate to Accounts console or PSM Operations. Select root on LNX-SRV-01, initiate a connection citing ticket CHG-10294, open the terminal to execute 'whoami', and observe the live session recording in the audit console.",
+              "You have an approved change window (CHG-12345) to perform administrative diagnostics without exposing any cleartext password. Launch a monitored PSM session, execute two diagnostic commands ('whoami' and 'hostname'), inspect the recorded keystroke timeline, and terminate the session cleanly.",
+            prerequisites: [
+              "Review PSM Credential Injection and Session Termination in Section 1–4.",
+            ],
+            startingState:
+              "PSM connector is healthy; 0 active sessions exist in the baseline workspace.",
             instructions: [
-              "Navigate to Accounts console in PVWA.",
-              "Select account root on LNX-SRV-01 and click 'Connect (PSM)'.",
-              "Enter change ticket ID 'CHG-10294' and launch the brokered terminal.",
-              "Run command 'whoami' inside the terminal console.",
-              "Open Learning Academy Class 06 and validate completion of Lab 06A and Lab 06B.",
+              "Open the PSM Operations console and select a managed target account (e.g., Administrator on WIN-SRV-01 or root on LNX-SRV-01).",
+              "Enter change ticket reference 'CHG-12345' (and business reason) and launch the brokered PSM session.",
+              "Inside the live PSM terminal, execute at least TWO diagnostic commands: run 'whoami' and then run 'hostname'.",
+              "Inspect the captured session keystroke/event timeline, then click 'Terminate' (or type 'exit') to close the session and seal the immutable recording.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 06A objectives.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open PSM Operations, select a managed target account, and enter change ticket 'CHG-12345'.",
+                explanation:
+                  "Dual-control governance ties every privileged session to an auditable change ticket.",
+                expectedResult:
+                  "PSM preflight checks pass and the session launches through the isolated proxy.",
+              },
+              {
+                action:
+                  "Execute at least TWO commands in the brokered terminal: type 'whoami' and then 'hostname'.",
+                explanation:
+                  "Demonstrates real-time keystroke logging and command attribution under the authenticated operator identity.",
+                expectedResult:
+                  "Terminal returns simulated output for both commands and logs >= 2 commands in session telemetry.",
+              },
+              {
+                action:
+                  "Inspect the session event timeline, then click 'Terminate' to end the session.",
+                explanation:
+                  "Closing or terminating a PSM session severs target connectivity and seals the immutable recording in the Vault.",
+                expectedResult:
+                  "Session status changes to 'Terminated' and a Terminate PSM session event appears in the audit log.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Validates all 6 Lab 06A objectives: approval, ticket, PSM launch, >=2 commands, timeline capture, and termination.",
+                expectedResult: "All 6/6 Lab 06A objectives pass (100/100).",
+              },
             ],
             targetConsole: "psm",
             associatedLabId: "Lab 06A · Launch an approved session",
-            validationObjectiveId: "id-psm-launch",
-            validationCriteria: "PSM terminal session established with active recording telemetry.",
+            validationObjectiveId: "terminate-session",
+            validationCriteria:
+              "Brokered PSM session launched with valid ticket, >= 2 commands recorded, and session terminated with sealed audit record.",
+            troubleshootingHints: [
+              {
+                symptom:
+                  "'Execute simulated commands (hostname, whoami, etc.)' objective is pending.",
+                hint: "Lab 06A requires at least 2 commands inside the active session, not just 1.",
+                correctiveAction:
+                  "Run a second allowed command (such as 'hostname' or 'ipconfig') inside the active PSM terminal before terminating.",
+              },
+              {
+                symptom: "'Terminate session and seal audit record' objective is pending.",
+                hint: "Leaving the session in 'Active' state keeps the recording open.",
+                correctiveAction:
+                  "In PSM Operations, click 'Terminate' on the active session (or enter 'exit' in the terminal), then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Audit the Sealed PSM Recording in Reports & Audit",
+              scenario:
+                "A compliance auditor requests forensic proof that your brokered session was tied to a ticket and cleanly terminated.",
+              goal: "Without step-by-step guidance, locate your session launch, command execution, and termination audit trail entries in Reports & Audit.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Located the PSM session launch and termination audit entries in Reports & Audit.",
+                "Confirmed the recording/audit trail captures the operator identity and target without exposing any cleartext password.",
+              ],
+            },
           },
           completionCriteria: [
-            "Demonstrated the end-to-end PSM connection brokering lifecycle.",
-            "Executed simulated terminal commands and reviewed immutable audit records.",
+            "Demonstrated the end-to-end PSM connection brokering, command auditing, and termination lifecycle.",
+            "Validated all 6 Lab 06A objectives in the live simulator.",
           ],
           references: [
             "CyberArk Privileged Session Manager Installation & Implementation Guide",

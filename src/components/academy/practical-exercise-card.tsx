@@ -20,7 +20,7 @@ interface PracticalExerciseCardProps {
   state: PamState;
   isCompleted: boolean;
   onRecordExerciseComplete: (exerciseId: string) => void;
-  onJumpConsole?: (section: any) => void;
+  onJumpConsole?: (section: PracticalExercise["targetConsole"]) => void;
 }
 
 export const PracticalExerciseCard: React.FC<PracticalExerciseCardProps> = ({
@@ -82,37 +82,42 @@ export const PracticalExerciseCard: React.FC<PracticalExerciseCardProps> = ({
       </div>
 
       <p style={{ margin: "0 0 10px 0", fontSize: 12, color: "#475569", lineHeight: 1.45 }}>
-        {exercise.scenario}
+        {exercise.objective || exercise.scenario}
       </p>
 
-      {/* Instructions */}
-      <strong
+      <div
         style={{
-          fontSize: 11,
-          color: "#1E293B",
-          textTransform: "uppercase",
-          display: "block",
-          marginBottom: 4,
-        }}
-      >
-        Required Operational Steps:
-      </strong>
-      <ol
-        style={{
-          margin: "0 0 12px 0",
-          paddingLeft: 18,
+          background: "#F8FAFC",
+          border: "1px solid #E2E8F0",
+          borderLeft: "3px solid #0078D4",
+          padding: "8px 10px",
+          borderRadius: 2,
           fontSize: 11,
           color: "#334155",
-          lineHeight: 1.5,
+          lineHeight: 1.45,
+          marginBottom: 10,
         }}
       >
-        {exercise.instructions.map((inst, idx) => (
-          <li key={idx}>{inst}</li>
-        ))}
-      </ol>
+        <strong>Instructor-Led Concept Loop:</strong> Follow one concept at a time in the Guided Lab
+        Session below. Future steps unlock only after live simulator verification.
+      </div>
 
-      {/* Target Console Jump Action */}
-      <div style={{ marginBottom: 12 }}>
+      {/* Launch Guided Lab & Target Console Jump Actions */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+        <button
+          type="button"
+          className="pvwa-btn pvwa-btn-primary"
+          style={{ width: "100%", justifyContent: "center", fontSize: 11 }}
+          onClick={() => {
+            document
+              .getElementById("practical-lab-workbench")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          <Terminal size={13} />
+          Focus Guided Lab Session
+          <ArrowRight size={13} />
+        </button>
         <button
           type="button"
           className="pvwa-btn pvwa-btn-secondary"
@@ -150,7 +155,7 @@ export const PracticalExerciseCard: React.FC<PracticalExerciseCardProps> = ({
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
-          {evaluation.objectives.slice(0, 3).map((obj: LabObjective) => (
+          {evaluation.objectives.map((obj: LabObjective) => (
             <div
               key={obj.id}
               style={{
@@ -158,8 +163,8 @@ export const PracticalExerciseCard: React.FC<PracticalExerciseCardProps> = ({
                 alignItems: "flex-start",
                 gap: 8,
                 padding: "6px 8px",
-                background: "#F8FAFC",
-                border: "1px solid #E2E8F0",
+                background: obj.done ? "#F0FDF4" : "#F8FAFC",
+                border: obj.done ? "1px solid #BBF7D0" : "1px solid #E2E8F0",
                 borderRadius: 2,
                 fontSize: 11,
               }}

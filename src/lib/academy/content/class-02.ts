@@ -180,9 +180,82 @@ export const CLASS_02: ClassCurriculum = {
               conceptTested: "Safe Access Governance",
             },
           ],
+          practicalExercise: {
+            id: "ex-c02-00",
+            title: "Audit Tier-Segregated Safe Boundaries & Provision DBA-SAFE Access",
+            objective:
+              "Inspect Safe container isolation, verify DBA-SAFE ownership and least-privilege membership, and audit a permitted access test.",
+            scenario:
+              "Global Financial Services requires strict separation between Windows, Unix, Database, and Emergency Safes. Verify DBA-SAFE isolation and validate its least-privilege boundary in the Safes console.",
+            prerequisites: ["Review Safe tier segregation and retention concepts in Section 1–4."],
+            startingState:
+              "7 baseline Safes exist including DBA-SAFE (owner: pam_admin, members: pam_admin, dba_user, auditor).",
+            instructions: [
+              "Open the Safes console and review the 7 tier-segregated Safe containers.",
+              "Select DBA-SAFE and verify its accountable owner is assigned and dba_user is a member.",
+              "Confirm dba_user has 'List accounts' and 'Use accounts' / 'Initiate privileged sessions' WITHOUT 'Retrieve accounts', then save or run a permitted access test on DBA-SAFE.",
+              "Return to Learning Academy and validate all 6 Lab 02 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open the Safes console and select DBA-SAFE from the Safe list.",
+                explanation:
+                  "Safes act as cryptographic isolation boundaries so database operators cannot view Windows or domain credentials.",
+                expectedResult: "DBA-SAFE details display owner pam_admin and 3 assigned members.",
+              },
+              {
+                action:
+                  "Select member dba_user and verify 'Use accounts' / 'Initiate privileged sessions' are enabled while 'Retrieve accounts' remains unchecked.",
+                explanation:
+                  "Least privilege permits mediated PSM sessions while withholding cleartext credential retrieval.",
+                expectedResult:
+                  "dba_user member permissions reflect least-privilege access without Retrieve accounts.",
+              },
+              {
+                action:
+                  "Save member permissions (or run an allowed permission evaluation on DBA-SAFE) so the Vault records an audit event on DBA-SAFE.",
+                explanation:
+                  "Live validation checks the immutable Vault audit trail for verified DBA-SAFE governance activity.",
+                expectedResult:
+                  "A Success audit event targeting DBA-SAFE is written to the Vault audit log.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Confirms all 6 Lab 02 objectives (Safe exists, owner assigned, dba_user member, least privilege, allowed & denied checks).",
+                expectedResult: "All 6/6 Lab 02 objectives pass (100/100).",
+              },
+            ],
+            targetConsole: "safes",
+            associatedLabId: "Lab 02 · Provision DBA-SAFE access",
+            validationObjectiveId: "create-safe",
+            validationCriteria:
+              "DBA-SAFE isolation, accountable ownership, least-privilege membership, and audited permission verification confirmed.",
+            troubleshootingHints: [
+              {
+                symptom: "'Verify permitted operation for DBA team' shows pending.",
+                hint: "Lab 02 requires an audited Success event targeting DBA-SAFE (such as saving member permissions or running a permission check).",
+                correctiveAction:
+                  "In the Safes console with DBA-SAFE selected, click Save Member Permissions for dba_user or run the permission evaluator for 'Use accounts', then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Create a New Tier-Segregated Safe Container",
+              scenario:
+                "A new production payment microservice needs an isolated Safe for its application secrets.",
+              goal: "Create a new Safe (e.g., PAYMENTS-SAFE) with an accountable owner using the Safes console without a step-by-step walkthrough.",
+              targetConsole: "safes",
+              successCriteria: [
+                "Created a new uppercase hyphenated Safe name in the Safes console.",
+                "Assigned an accountable Safe owner and confirmed the new Safe appears in the inventory with an audit record.",
+              ],
+            },
+          },
           completionCriteria: [
             "Explained the isolation boundary of a CyberArk Safe.",
             "Understood the operational impact of Safe retention periods.",
+            "Verified DBA-SAFE ownership, isolation, and audited access boundaries in the simulator.",
           ],
           references: [
             "CyberArk Safe Administration & Design Best Practices Guide",
@@ -360,19 +433,83 @@ export const CLASS_02: ClassCurriculum = {
           practicalExercise: {
             id: "ex-c02-01",
             title: "Configure Granular Safe Permissions for DBA Team",
+            objective:
+              "Enforce least-privilege Safe ACLs on DBA-SAFE so dba_user can initiate mediated sessions without viewing cleartext passwords, and verify both permitted and denied operations in the audit trail.",
             scenario:
-              "Configure member permissions on DBA-SAFE for dba_user so they can list and use database accounts without possessing Retrieve or administrative rights.",
+              "Global Financial Services requires dba_user on DBA-SAFE to retain 'List accounts', 'Use accounts', and 'Initiate privileged sessions' while keeping 'Retrieve accounts' denied and audited.",
+            prerequisites: [
+              "Completed Lesson 2.1 Safe boundary audit.",
+              "Reviewed the Use vs. Retrieve permissions distinction in Section 2–4.",
+            ],
+            startingState:
+              "DBA-SAFE exists with pam_admin (owner), dba_user, and auditor; no DBA-SAFE access test has been recorded yet.",
             instructions: [
-              "Navigate to the Safes console in PVWA.",
-              "Select DBA-SAFE and review the current assigned members.",
-              "Ensure dba_user has List Accounts and Use Accounts permissions enabled.",
-              "Run the Learning Academy Class 02 validation engine to confirm compliance.",
+              "Open the Safes console and select DBA-SAFE.",
+              "Select member dba_user and ensure 'List accounts', 'Use accounts', and 'Initiate privileged sessions' are checked while 'Retrieve accounts' is UNCHECKED, then save permissions.",
+              "Run the Safe Permission Evaluator for dba_user on DBA-SAFE to verify an allowed action ('Use accounts') and confirm 'Retrieve accounts' is denied.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 6 Lab 02 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open the Safes console and select DBA-SAFE.",
+                explanation:
+                  "All Safe ACL assignments are scoped strictly to the selected Safe container.",
+                expectedResult: "DBA-SAFE member table displays pam_admin, dba_user, and auditor.",
+              },
+              {
+                action:
+                  "Verify dba_user permissions include 'List accounts', 'Use accounts', and 'Initiate privileged sessions' without 'Retrieve accounts', then click Save.",
+                explanation:
+                  "Saving updates the Safe ACL and logs a DBA-SAFE member governance event in the Vault audit trail.",
+                expectedResult:
+                  "Success toast confirms DBA-SAFE member permissions saved; Retrieve accounts remains disabled.",
+              },
+              {
+                action:
+                  "Test 'Use accounts' (allowed) and 'Retrieve accounts' (denied) for dba_user on DBA-SAFE.",
+                explanation:
+                  "Validates that Vault enforces least privilege atomically and records denied retrieval attempts.",
+                expectedResult:
+                  "'Use accounts' returns Authorized; 'Retrieve accounts' returns Denied.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Runs the live Lab 02 evaluator against DBA-SAFE membership, permissions, and audit events.",
+                expectedResult: "All 6/6 Lab 02 objectives pass (100/100).",
+              },
             ],
             targetConsole: "safes",
             associatedLabId: "Lab 02 · Configure Safe permissions",
             validationObjectiveId: "id-dba-safe",
             validationCriteria:
-              "DBA-SAFE member permissions validated with least-privilege scoping.",
+              "DBA-SAFE owner, dba_user least-privilege ACL (no Retrieve accounts), and audited permission verification passed.",
+            troubleshootingHints: [
+              {
+                symptom: "'Enforce least privilege' objective fails.",
+                hint: "Check whether 'Retrieve accounts' is accidentally checked on dba_user, or whether both 'Use accounts' and 'Initiate privileged sessions' were unchecked.",
+                correctiveAction:
+                  "In Safes > DBA-SAFE > dba_user, uncheck 'Retrieve accounts', ensure 'List accounts' and 'Use accounts' (or 'Initiate privileged sessions') are checked, and click Save.",
+              },
+              {
+                symptom: "'Verify permitted operation for DBA team' shows pending.",
+                hint: "The evaluator checks the Vault audit log for a Success action targeting DBA-SAFE.",
+                correctiveAction:
+                  "Click Save Member Permissions for dba_user on DBA-SAFE or run the 'Use accounts' access check, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Verify Read-Only Auditor Segregation on WIN-SAFE",
+              scenario:
+                "Compliance asks you to confirm that the 'auditor' persona can list accounts in WIN-SAFE but is strictly blocked from using or retrieving credentials.",
+              goal: "Use the Safes console without step-by-step guidance to inspect and test 'auditor' permissions on WIN-SAFE.",
+              targetConsole: "safes",
+              successCriteria: [
+                "Confirmed 'auditor' on WIN-SAFE has only 'List accounts' enabled.",
+                "Tested a prohibited permission ('Use accounts' or 'Retrieve accounts') for auditor and observed an access denial.",
+              ],
+            },
           },
           completionCriteria: [
             "Memorized the distinction between Use and Retrieve permissions.",

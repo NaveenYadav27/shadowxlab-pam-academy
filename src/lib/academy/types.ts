@@ -66,11 +66,35 @@ export interface KnowledgeCheckpointQuestion {
   conceptTested: string;
 }
 
+export interface PracticalStepDetail {
+  action: string;
+  explanation?: string;
+  expectedResult?: string;
+}
+
+export interface PracticalTroubleshootingHint {
+  symptom: string;
+  hint: string;
+  correctiveAction: string;
+}
+
+export interface IndependentPracticeTask {
+  title: string;
+  scenario: string;
+  goal: string;
+  targetConsole: PracticalExercise["targetConsole"];
+  successCriteria: string[];
+}
+
 export interface PracticalExercise {
   id: string;
   title: string;
+  objective?: string;
   scenario: string;
+  prerequisites?: string[];
+  startingState?: string;
   instructions: string[];
+  stepDetails?: PracticalStepDetail[];
   targetConsole:
     | "accounts"
     | "safes"
@@ -87,6 +111,9 @@ export interface PracticalExercise {
   associatedLabId: string;
   validationObjectiveId: string;
   validationCriteria: string;
+  troubleshootingHints?: PracticalTroubleshootingHint[];
+  independentPractice?: IndependentPracticeTask;
+  simulationLimitationNote?: string;
 }
 
 export interface Lesson {
@@ -182,5 +209,6 @@ export interface LearnerProgress {
   checkpointAnswers: Record<string, number>; // questionId -> selectedIndex
   checkpointScores: Record<string, boolean>; // questionId -> isCorrect
   completedExercises: string[]; // exercise IDs
+  completedIndependentPractices?: string[]; // exercise IDs with independent practice verified
   lastUpdated: string;
 }

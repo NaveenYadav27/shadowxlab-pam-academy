@@ -11,6 +11,7 @@ interface LearningObjectivesPanelProps {
   completedExercises: string[];
   savedAnswers: Record<string, number>;
   onRecordAnswer: (questionId: string, optionIndex: number, isCorrect: boolean) => void;
+  onResetAnswers?: (questionIds: string[]) => void;
   onRecordExerciseComplete: (exerciseId: string) => void;
   onJumpConsole?: (section: any) => void;
 }
@@ -21,6 +22,7 @@ export const LearningObjectivesPanel: React.FC<LearningObjectivesPanelProps> = (
   completedExercises,
   savedAnswers,
   onRecordAnswer,
+  onResetAnswers,
   onRecordExerciseComplete,
   onJumpConsole,
 }) => {
@@ -113,6 +115,7 @@ export const LearningObjectivesPanel: React.FC<LearningObjectivesPanelProps> = (
         questions={lesson.knowledgeCheck}
         savedAnswers={savedAnswers}
         onRecordAnswer={onRecordAnswer}
+        onResetAnswers={onResetAnswers}
       />
 
       {/* 5. Technical Terminology Dictionary Card */}

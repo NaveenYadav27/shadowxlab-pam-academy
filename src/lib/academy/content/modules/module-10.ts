@@ -29,7 +29,8 @@ export const MODULE_10: ClassCurriculum = {
           id: "m10-l01",
           number: "10.1",
           title: "PSM Session Brokering & Credential Injection",
-          subtitle: "Deploying RDS bastion farms, configuring connection components, and enforcing zero-knowledge access",
+          subtitle:
+            "Deploying RDS bastion farms, configuring connection components, and enforcing zero-knowledge access",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the proxy mechanics of PSM jump servers isolating user workstations from target production assets.",
@@ -79,53 +80,69 @@ export const MODULE_10: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Administrative Engineer",
-                action: "Locates target account in PVWA and clicks 'Connect'. Selects Connection Component `PSM-RDP`.",
+                action:
+                  "Locates target account in PVWA and clicks 'Connect'. Selects Connection Component `PSM-RDP`.",
                 channelOrProtocol: "HTTPS 443 to PVWA",
-                verificationRule: "PVWA verifies user possesses 'Use accounts' permission and valid dual-control approval.",
+                verificationRule:
+                  "PVWA verifies user possesses 'Use accounts' permission and valid dual-control approval.",
               },
               {
                 stepNumber: 2,
                 actor: "PVWA Web Tier",
-                action: "Generates an encrypted one-time session token file (`.rdp`) configured to route the client to the PSM farm.",
+                action:
+                  "Generates an encrypted one-time session token file (`.rdp`) configured to route the client to the PSM farm.",
                 channelOrProtocol: "Dynamic RDP Descriptor Download",
-                verificationRule: "Token contains session UUID, target address, and ephemeral routing ticket.",
+                verificationRule:
+                  "Token contains session UUID, target address, and ephemeral routing ticket.",
               },
               {
                 stepNumber: 3,
                 actor: "User RDP Client (mstsc.exe)",
-                action: "Launches and establishes connection to the PSM server, presenting the session token.",
+                action:
+                  "Launches and establishes connection to the PSM server, presenting the session token.",
                 channelOrProtocol: "RDP TCP 3389 to PSM Host",
-                verificationRule: "PSM validates token with Vault; creates isolated local shadow user session (`PSM-xxxx`).",
+                verificationRule:
+                  "PSM validates token with Vault; creates isolated local shadow user session (`PSM-xxxx`).",
               },
               {
                 stepNumber: 4,
                 actor: "PSM Server Engine",
-                action: "Retrieves target credential from Vault over TCP 1858, connects to target host, and injects credential without plaintext display.",
+                action:
+                  "Retrieves target credential from Vault over TCP 1858, connects to target host, and injects credential without plaintext display.",
                 channelOrProtocol: "Outbound Target Protocol (RDP / SSH)",
-                verificationRule: "Keystroke recorder and optical screen capture initialize before target GUI is rendered.",
+                verificationRule:
+                  "Keystroke recorder and optical screen capture initialize before target GUI is rendered.",
               },
             ],
           },
           terminology: [
             {
               term: "Privileged Session Manager (PSM)",
-              definition: "A dedicated jump server proxy that establishes mediated, isolated, recorded sessions to target assets without revealing secrets.",
-              enterpriseContext: "Enterprise environments deploy load-balanced PSM farms to support hundreds of concurrent administrative sessions.",
+              definition:
+                "A dedicated jump server proxy that establishes mediated, isolated, recorded sessions to target assets without revealing secrets.",
+              enterpriseContext:
+                "Enterprise environments deploy load-balanced PSM farms to support hundreds of concurrent administrative sessions.",
             },
             {
               term: "Connection Component",
-              definition: "A configuration object in the Vault defining how PSM launches a specific client tool (RDP, SSH, Web, DB) and injects credentials.",
-              enterpriseContext: "Built-in components include PSM-RDP, PSM-SSH, PSM-Telnet; administrators create custom Universal Connectors for proprietary apps.",
+              definition:
+                "A configuration object in the Vault defining how PSM launches a specific client tool (RDP, SSH, Web, DB) and injects credentials.",
+              enterpriseContext:
+                "Built-in components include PSM-RDP, PSM-SSH, PSM-Telnet; administrators create custom Universal Connectors for proprietary apps.",
             },
             {
               term: "Zero-Knowledge Access",
-              definition: "A security architecture where operational engineers execute tasks on systems without ever knowing or seeing the plaintext password.",
-              enterpriseContext: "Eliminates password sharing, shoulder surfing, and the risk of engineers memorizing root credentials.",
+              definition:
+                "A security architecture where operational engineers execute tasks on systems without ever knowing or seeing the plaintext password.",
+              enterpriseContext:
+                "Eliminates password sharing, shoulder surfing, and the risk of engineers memorizing root credentials.",
             },
             {
               term: "PSM Shadow User",
-              definition: "An ephemeral, locally generated Windows user account (`PSM-0100000000000000`) created on the PSM host to sandbox the active session.",
-              enterpriseContext: "Deleted automatically upon session termination to prevent data leakage between subsequent operators.",
+              definition:
+                "An ephemeral, locally generated Windows user account (`PSM-0100000000000000`) created on the PSM host to sandbox the active session.",
+              enterpriseContext:
+                "Deleted automatically upon session termination to prevent data leakage between subsequent operators.",
             },
           ],
           administratorResponsibilities: [
@@ -137,21 +154,30 @@ export const MODULE_10: ClassCurriculum = {
           configurationAndAdministration: [
             {
               name: "PSM Server ID & Address",
-              settingOrObject: "PVWA Administration > Options > Privileged Session Management > Configured PSM Servers",
-              description: "Defines the network FQDN and Vault user ID of each PSM node in the farm.",
-              productionBestPractice: "Deploy at least two PSM nodes behind a hardware load balancer with sticky sessions enabled.",
+              settingOrObject:
+                "PVWA Administration > Options > Privileged Session Management > Configured PSM Servers",
+              description:
+                "Defines the network FQDN and Vault user ID of each PSM node in the farm.",
+              productionBestPractice:
+                "Deploy at least two PSM nodes behind a hardware load balancer with sticky sessions enabled.",
             },
             {
               name: "Connection Component: PSM-RDP ClientApp",
-              settingOrObject: "Administration > Options > Connection Components > PSM-RDP > Target Settings",
-              description: "Specifies client binary path (e.g., `mstsc.exe`) and resolution parameters.",
-              productionBestPractice: "Enforce standard 1440x900 or 1080p display resolution to optimize optical recording compression.",
+              settingOrObject:
+                "Administration > Options > Connection Components > PSM-RDP > Target Settings",
+              description:
+                "Specifies client binary path (e.g., `mstsc.exe`) and resolution parameters.",
+              productionBestPractice:
+                "Enforce standard 1440x900 or 1080p display resolution to optimize optical recording compression.",
             },
             {
               name: "AppLocker Hardening Script",
-              settingOrObject: "C:\\Program Files (x86)\\CyberArk\\PSM\\Hardening\\PSMConfigureAppLocker.ps1",
-              description: "Locks down the PSM RDS host, permitting only whitelisted binaries (mstsc, putty, winscp) to execute.",
-              productionBestPractice: "Always re-run the AppLocker script after installing new client tools or custom Universal Connectors.",
+              settingOrObject:
+                "C:\\Program Files (x86)\\CyberArk\\PSM\\Hardening\\PSMConfigureAppLocker.ps1",
+              description:
+                "Locks down the PSM RDS host, permitting only whitelisted binaries (mstsc, putty, winscp) to execute.",
+              productionBestPractice:
+                "Always re-run the AppLocker script after installing new client tools or custom Universal Connectors.",
             },
           ],
           operationalProcedures: [
@@ -159,26 +185,34 @@ export const MODULE_10: ClassCurriculum = {
               stepNumber: 1,
               title: "Verify PSM Component Health",
               action: "In PVWA Administration > System Health, check PSM Server status pill.",
-              expectedResult: "PSM Server reports 'Connected' with green status; heartbeat under 60 seconds.",
-              operatorNotes: "If red or warning, check the CyberArk Privileged Session Manager service on the PSM Windows host.",
+              expectedResult:
+                "PSM Server reports 'Connected' with green status; heartbeat under 60 seconds.",
+              operatorNotes:
+                "If red or warning, check the CyberArk Privileged Session Manager service on the PSM Windows host.",
             },
             {
               stepNumber: 2,
               title: "Launch Brokered Session",
-              action: "In Accounts inventory, select `WIN-SRV-01\\Administrator`, click 'Connect', and enter ticket reference.",
-              expectedResult: "Browser downloads `.rdp` session descriptor file or opens HTML5 in-browser viewer.",
+              action:
+                "In Accounts inventory, select `WIN-SRV-01\\Administrator`, click 'Connect', and enter ticket reference.",
+              expectedResult:
+                "Browser downloads `.rdp` session descriptor file or opens HTML5 in-browser viewer.",
             },
             {
               stepNumber: 3,
               title: "Confirm Zero-Knowledge Injection",
-              action: "Open the downloaded RDP session; observe PSM connection banner and automatic target login.",
-              expectedResult: "Target desktop opens immediately; user is never prompted to type the Administrator password.",
+              action:
+                "Open the downloaded RDP session; observe PSM connection banner and automatic target login.",
+              expectedResult:
+                "Target desktop opens immediately; user is never prompted to type the Administrator password.",
             },
             {
               stepNumber: 4,
               title: "Inspect Active Session State",
-              action: "In PVWA, navigate to PSM Operations / Monitoring to observe the live session entry.",
-              expectedResult: "Session entry displays: User, Target Address, Connection Component (`PSM-RDP`), and duration timer.",
+              action:
+                "In PVWA, navigate to PSM Operations / Monitoring to observe the live session entry.",
+              expectedResult:
+                "Session entry displays: User, Target Address, Connection Component (`PSM-RDP`), and duration timer.",
             },
           ],
           enterpriseScenario: {
@@ -193,36 +227,48 @@ export const MODULE_10: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "User clicks Connect: 'PSMSR037E Privileged Session Manager server is unavailable'.",
-              rootCause: "The PSM service on the RDS host is stopped, or network routing from PVWA/client to PSM is down.",
-              securityImpact: "Users blocked from connecting to remote systems; operational outage.",
+              symptom:
+                "User clicks Connect: 'PSMSR037E Privileged Session Manager server is unavailable'.",
+              rootCause:
+                "The PSM service on the RDS host is stopped, or network routing from PVWA/client to PSM is down.",
+              securityImpact:
+                "Users blocked from connecting to remote systems; operational outage.",
               cyberArkCodeOrEvent: "PSMSR037E",
             },
             {
-              symptom: "Session launches but crashes immediately with 'PSMSR126E [Application] failed to start due to AppLocker rule'.",
-              rootCause: "The client executable (e.g. custom SQL tool) was not whitelisted in the PSM AppLocker configuration XML.",
-              securityImpact: "Connection component fails to execute; user cannot launch administrative tool.",
+              symptom:
+                "Session launches but crashes immediately with 'PSMSR126E [Application] failed to start due to AppLocker rule'.",
+              rootCause:
+                "The client executable (e.g. custom SQL tool) was not whitelisted in the PSM AppLocker configuration XML.",
+              securityImpact:
+                "Connection component fails to execute; user cannot launch administrative tool.",
               cyberArkCodeOrEvent: "PSMSR126E",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Inspect CyberArk Privileged Session Manager service status on the PSM server host.",
+              diagnosticAction:
+                "Inspect CyberArk Privileged Session Manager service status on the PSM server host.",
               logFileOrConsole: "services.msc / PSMTrace.log",
-              remediation: "If stopped, check Event Viewer for licensing errors or restart the PSM service.",
+              remediation:
+                "If stopped, check Event Viewer for licensing errors or restart the PSM service.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Check PSM AppLocker event logs for blocked executable paths.",
-              logFileOrConsole: "Event Viewer > Applications and Services Logs > Microsoft > Windows > AppLocker > EXE and DLL",
-              remediation: "Add the application binary path or publisher rule to PSMConfigureAppLocker.xml and re-run the PowerShell script.",
+              logFileOrConsole:
+                "Event Viewer > Applications and Services Logs > Microsoft > Windows > AppLocker > EXE and DLL",
+              remediation:
+                "Add the application binary path or publisher rule to PSMConfigureAppLocker.xml and re-run the PowerShell script.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Test target port connectivity outbound from the PSM server host.",
-              logFileOrConsole: "PowerShell: Test-NetConnection -ComputerName <TargetHost> -Port 3389 / 22",
-              remediation: "Ensure hardware firewalls allow PSM host IP to reach target subnet on destination administrative ports.",
+              logFileOrConsole:
+                "PowerShell: Test-NetConnection -ComputerName <TargetHost> -Port 3389 / 22",
+              remediation:
+                "Ensure hardware firewalls allow PSM host IP to reach target subnet on destination administrative ports.",
             },
           ],
           diagnosticEvidence: [
@@ -254,7 +300,8 @@ export const MODULE_10: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m10-q01",
-              question: "What is the primary architectural security benefit of mediating administrative access through a Privileged Session Manager (PSM) proxy?",
+              question:
+                "What is the primary architectural security benefit of mediating administrative access through a Privileged Session Manager (PSM) proxy?",
               options: [
                 "It reduces server hardware costs.",
                 "It isolates user workstations from production endpoints, injects credentials transparently without revealing plaintext, and records all activity.",
@@ -268,7 +315,8 @@ export const MODULE_10: ClassCurriculum = {
             },
             {
               id: "m10-q02",
-              question: "If a user receives error PSMSR126E when launching a session, what is the most probable cause on the PSM host?",
+              question:
+                "If a user receives error PSMSR126E when launching a session, what is the most probable cause on the PSM host?",
               options: [
                 "The target server has ran out of hard drive space.",
                 "The application binary was blocked by Windows AppLocker policies on the PSM server.",
@@ -282,7 +330,8 @@ export const MODULE_10: ClassCurriculum = {
             },
             {
               id: "m10-q03",
-              question: "What communication channel does the PSM server use to retrieve target credentials during session initialization?",
+              question:
+                "What communication channel does the PSM server use to retrieve target credentials during session initialization?",
               options: [
                 "Direct database connection to the target server",
                 "Encrypted Vault Protocol over TCP 1858 to the Digital Vault",
@@ -297,20 +346,73 @@ export const MODULE_10: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m10-ex01",
-            title: "Launch and Verify an Isolated PSM Session",
+            title: "Launch, Operate & Seal an Isolated PSM Brokered Session",
+            objective:
+              "Establish a zero-knowledge brokered PSM session to WIN-SRV-01 with ticket CHG-20412, run at least two commands, inspect keystroke telemetry, and terminate the session (Lab 06A).",
             scenario:
-              "Initiate a brokered privileged session to Windows target WIN-SRV-01 through the PSM proxy, verify zero-knowledge credential injection, and confirm session establishment.",
+              "Initiate a brokered privileged session to Windows target WIN-SRV-01 through the PSM proxy using ticket CHG-20412, execute two diagnostic commands (`whoami` and `ipconfig`), and terminate the session cleanly to seal the recording.",
+            prerequisites: [
+              "Review PSM Proxy Architecture and Credential Injection in Section 1–4.",
+            ],
+            startingState:
+              "PSM connector is healthy and WIN-SRV-01 Administrator is Managed in WIN-SAFE.",
             instructions: [
-              "Navigate to the PSM Operations console.",
-              "Verify that the PSM connection broker is reported healthy.",
-              "Launch a brokered session to WIN-SRV-01 with ticket reference `CHG-20412`.",
-              "Confirm that the session initializes and renders in the active session monitoring view.",
+              "Open the PSM Operations console and confirm the PSM connection broker reports Healthy.",
+              "Select WIN-SRV-01 Administrator, ensure approval is granted, enter ticket `CHG-20412` and a documented reason (>= 12 chars), and launch the brokered session.",
+              "In the isolated PSM terminal, run at least TWO allowed commands (`whoami` and `ipconfig`) to generate recorded session telemetry.",
+              "Inspect the session event timeline, click 'Terminate' (or type `exit`) to seal the recording, and return to Learning Academy to validate all 6 Lab 06A objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open PSM Operations and confirm connector health and target WIN-SRV-01.",
+                explanation:
+                  "PSM acts as an isolated jump proxy injecting credentials server-side so operators never see plaintext secrets.",
+                expectedResult: "PSM broker displays Healthy status and target account list.",
+              },
+              {
+                action:
+                  "Enter ticket `CHG-20412` and a 12+ character business reason, grant approval, and launch the session.",
+                explanation: "Binds the isolated proxy session to an authorized change ticket.",
+                expectedResult:
+                  "Brokered terminal opens in Active status without exposing the Administrator password.",
+              },
+              {
+                action: "Run `whoami` and `ipconfig` inside the brokered terminal.",
+                explanation:
+                  "Verifies live command capture and operator attribution in the recording timeline.",
+                expectedResult: "Both commands execute and appear in the live session command log.",
+              },
+              {
+                action:
+                  "Click 'Terminate' to close the session, then return to Learning Academy and validate Lab 06A.",
+                explanation:
+                  "Terminating seals the immutable audit record required for all 6 Lab 06A objectives.",
+                expectedResult: "All 6/6 Lab 06A objectives pass (100/100).",
+              },
             ],
             targetConsole: "psm",
             associatedLabId: "Lab 06A · Launch an approved session",
             validationObjectiveId: "launch-psm",
             validationCriteria:
-              "Brokered session is launched through PSM and appears in the active session list.",
+              "Isolated PSM session launched, >= 2 commands audited, and session terminated (6/6 Lab 06A objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "'Execute simulated commands' or 'Terminate session' fails validation.",
+                hint: "Launching the session alone only completes 3 of 6 Lab 06A objectives.",
+                correctiveAction:
+                  "Run at least two allowed commands (such as `whoami` and `ipconfig`), then click Terminate before validating.",
+              },
+            ],
+            independentPractice: {
+              title: "Launch a Brokered SSH Session to a Linux Target",
+              scenario: "Linux operations needs a quick zero-knowledge check on `LNX-SRV-01`.",
+              goal: "Without step-by-step guidance, launch a brokered PSM session for `root` on `LNX-SRV-01`, execute `hostname` and `whoami`, and terminate it cleanly.",
+              targetConsole: "psm",
+              successCriteria: [
+                "Launched a brokered session to LNX-SRV-01 with a valid CHG ticket.",
+                "Executed two commands and terminated the session cleanly.",
+              ],
+            },
           },
           completionCriteria: [
             "Deconstructed PSM RDS jump host architecture and proxy mechanics.",

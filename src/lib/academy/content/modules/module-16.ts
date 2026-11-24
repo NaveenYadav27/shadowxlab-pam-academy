@@ -29,7 +29,8 @@ export const MODULE_16: ClassCurriculum = {
           id: "m16-l01",
           number: "16.1",
           title: "Envelope Encryption, Key Hierarchies & HSM Integration",
-          subtitle: "Deconstructing AES-256 envelope encryption, HSM hardware roots of trust, and dual-custody key escrow",
+          subtitle:
+            "Deconstructing AES-256 envelope encryption, HSM hardware roots of trust, and dual-custody key escrow",
           estimatedMinutes: 25,
           learningObjectives: [
             "Deconstruct the multi-tier cryptographic key hierarchy: Master Recovery Key -> Server Key -> Safe Keys -> Object Secrets.",
@@ -79,58 +80,75 @@ export const MODULE_16: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "PrivateArk Server Service Startup",
-                action: "Service initializes on Vault host; requests Server Key from local secure store or network HSM via PKCS#11.",
+                action:
+                  "Service initializes on Vault host; requests Server Key from local secure store or network HSM via PKCS#11.",
                 channelOrProtocol: "PKCS#11 Cryptographic Call",
-                verificationRule: "HSM validates Vault client certificate and releases Server Key handle.",
+                verificationRule:
+                  "HSM validates Vault client certificate and releases Server Key handle.",
               },
               {
                 stepNumber: 2,
                 actor: "Vault Cryptographic Engine",
-                action: "Uses Server Key to decrypt the Safe Key for `FINANCE-SAFE` stored in the encrypted database catalog.",
+                action:
+                  "Uses Server Key to decrypt the Safe Key for `FINANCE-SAFE` stored in the encrypted database catalog.",
                 channelOrProtocol: "AES-256 Key Unwrap",
-                verificationRule: "Cryptographic checksum matches; Safe Key loaded into isolated memory buffer.",
+                verificationRule:
+                  "Cryptographic checksum matches; Safe Key loaded into isolated memory buffer.",
               },
               {
                 stepNumber: 3,
                 actor: "User Checkout Request",
                 action: "User requests password for `FIN-SRV-01\\Administrator`.",
                 channelOrProtocol: "TCP 1858 Request",
-                verificationRule: "Vault validates user Safe permissions; uses Safe Key to decrypt the specific account secret payload.",
+                verificationRule:
+                  "Vault validates user Safe permissions; uses Safe Key to decrypt the specific account secret payload.",
               },
               {
                 stepNumber: 4,
                 actor: "Vault Kernel",
-                action: "Transmits decrypted secret across TCP 1858 TLS session directly to PSM memory; wipes decrypted buffer immediately.",
+                action:
+                  "Transmits decrypted secret across TCP 1858 TLS session directly to PSM memory; wipes decrypted buffer immediately.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
-                verificationRule: "Memory buffer overwritten with zeros; zero cleartext residual left in storage or RAM.",
+                verificationRule:
+                  "Memory buffer overwritten with zeros; zero cleartext residual left in storage or RAM.",
               },
             ],
           },
           terminology: [
             {
               term: "Envelope Encryption",
-              definition: "A cryptographic practice of encrypting plaintext data with a data key, and then encrypting the data key with another key (key-wrapping).",
-              enterpriseContext: "Enables fast re-keying and compartmentalization: rotating a Master Key does not require re-encrypting terabytes of data.",
+              definition:
+                "A cryptographic practice of encrypting plaintext data with a data key, and then encrypting the data key with another key (key-wrapping).",
+              enterpriseContext:
+                "Enables fast re-keying and compartmentalization: rotating a Master Key does not require re-encrypting terabytes of data.",
             },
             {
               term: "Hardware Security Module (HSM)",
-              definition: "A physical computing device that safeguards and manages digital keys, performing encryption and decryption inside a tamper-resistant enclosure.",
-              enterpriseContext: "Common enterprise HSMs include Thales Luna, Entrust nShield, and AWS CloudHSM.",
+              definition:
+                "A physical computing device that safeguards and manages digital keys, performing encryption and decryption inside a tamper-resistant enclosure.",
+              enterpriseContext:
+                "Common enterprise HSMs include Thales Luna, Entrust nShield, and AWS CloudHSM.",
             },
             {
               term: "Server.key",
-              definition: "The symmetric key used by the running PrivateArk Server to decrypt Safe keys and database tables.",
-              enterpriseContext: "Must be backed up to physical media during initial Vault installation; losing this key destroys the Vault.",
+              definition:
+                "The symmetric key used by the running PrivateArk Server to decrypt Safe keys and database tables.",
+              enterpriseContext:
+                "Must be backed up to physical media during initial Vault installation; losing this key destroys the Vault.",
             },
             {
               term: "Recovery.key (Master Key)",
-              definition: "The emergency root cryptographic key used to recover a Vault when standard operating keys are damaged.",
-              enterpriseContext: "Split into physical custody shares using M-of-N algorithms; never stored on running servers.",
+              definition:
+                "The emergency root cryptographic key used to recover a Vault when standard operating keys are damaged.",
+              enterpriseContext:
+                "Split into physical custody shares using M-of-N algorithms; never stored on running servers.",
             },
             {
               term: "M-of-N Dual Custody",
-              definition: "A security control requiring M out of N authorized key custodians (e.g. 2 of 3 executives) to be present to unlock an emergency key.",
-              enterpriseContext: "Prevents a single rogue security administrator from unilaterally decrypting the entire corporate Vault.",
+              definition:
+                "A security control requiring M out of N authorized key custodians (e.g. 2 of 3 executives) to be present to unlock an emergency key.",
+              enterpriseContext:
+                "Prevents a single rogue security administrator from unilaterally decrypting the entire corporate Vault.",
             },
           ],
           administratorResponsibilities: [
@@ -143,47 +161,62 @@ export const MODULE_16: ClassCurriculum = {
             {
               name: "ServerKey Parameter in dbparm.ini",
               settingOrObject: "C:\\Program Files (x86)\\PrivateArk\\Server\\dbparm.ini",
-              description: "Points to the path of the Server Key (local file path or PKCS#11 slot reference).",
-              productionBestPractice: "In HSM environments, configure `ServerKey=PKCS11` with the slot ID and cryptographic pin.",
+              description:
+                "Points to the path of the Server Key (local file path or PKCS#11 slot reference).",
+              productionBestPractice:
+                "In HSM environments, configure `ServerKey=PKCS11` with the slot ID and cryptographic pin.",
             },
             {
               name: "Memory Dump Disablement",
               settingOrObject: "Windows Crash Control Settings on Vault Host",
-              description: "Disables automatic memory dumps (`CrashDumpEnabled = 0`) on system BSOD.",
-              productionBestPractice: "Mandatory hardening requirement: prevents unencrypted keys in RAM from being written to `MEMORY.DMP` on disk.",
+              description:
+                "Disables automatic memory dumps (`CrashDumpEnabled = 0`) on system BSOD.",
+              productionBestPractice:
+                "Mandatory hardening requirement: prevents unencrypted keys in RAM from being written to `MEMORY.DMP` on disk.",
             },
             {
               name: "FIPS 140-2 Mode Enforcement",
               settingOrObject: "dbparm.ini / FIPSMode = Yes",
-              description: "Enforces strict adherence to FIPS 140-2 approved cryptographic algorithms and cipher suites.",
-              productionBestPractice: "Enable FIPSMode = Yes to satisfy federal and defense compliance mandates.",
+              description:
+                "Enforces strict adherence to FIPS 140-2 approved cryptographic algorithms and cipher suites.",
+              productionBestPractice:
+                "Enable FIPSMode = Yes to satisfy federal and defense compliance mandates.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Inspect HSM Integration Status",
-              action: "On the Vault host, execute the PKCS#11 diagnostic utility to test communication with the HSM appliance.",
-              expectedResult: "Diagnostic utility connects, authenticates to cryptographic slot, and reports 'HSM Key Available'.",
-              operatorNotes: "If failed, verify dedicated network link to HSM appliance and check token PIN status.",
+              action:
+                "On the Vault host, execute the PKCS#11 diagnostic utility to test communication with the HSM appliance.",
+              expectedResult:
+                "Diagnostic utility connects, authenticates to cryptographic slot, and reports 'HSM Key Available'.",
+              operatorNotes:
+                "If failed, verify dedicated network link to HSM appliance and check token PIN status.",
             },
             {
               stepNumber: 2,
               title: "Verify Cryptographic Configuration",
-              action: "Review `dbparm.ini` on the Vault server to confirm ServerKey and cryptographic cipher suite parameters.",
-              expectedResult: "AES-256 configured; ServerKey properly referenced; FIPS mode enabled.",
+              action:
+                "Review `dbparm.ini` on the Vault server to confirm ServerKey and cryptographic cipher suite parameters.",
+              expectedResult:
+                "AES-256 configured; ServerKey properly referenced; FIPS mode enabled.",
             },
             {
               stepNumber: 3,
               title: "Execute Physical Key Escrow Audit",
-              action: "Inspect physical tamper-evident key storage bags in corporate safe. Verify seal numbers match log register.",
-              expectedResult: "Tamper-evident seals intact; signatures of dual custodians verified.",
+              action:
+                "Inspect physical tamper-evident key storage bags in corporate safe. Verify seal numbers match log register.",
+              expectedResult:
+                "Tamper-evident seals intact; signatures of dual custodians verified.",
             },
             {
               stepNumber: 4,
               title: "Validate Safe Key Cryptographic Integrity",
-              action: "In PrivateArk Client, run database consistency check (PASTool / CheckDatabase).",
-              expectedResult: "All Safe keys decrypt cleanly; zero cryptographic corruption or key mismatch errors reported.",
+              action:
+                "In PrivateArk Client, run database consistency check (PASTool / CheckDatabase).",
+              expectedResult:
+                "All Safe keys decrypt cleanly; zero cryptographic corruption or key mismatch errors reported.",
             },
           ],
           enterpriseScenario: {
@@ -199,35 +232,45 @@ export const MODULE_16: ClassCurriculum = {
           failureScenarios: [
             {
               symptom: "Vault service fails to start: 'ITATS001E Cannot find or open Server.key'.",
-              rootCause: "The Server Key file path in dbparm.ini is invalid, the removable key drive was not mounted, or HSM network dropped.",
-              securityImpact: "Vault completely offline; cannot decrypt database without the Server Key.",
+              rootCause:
+                "The Server Key file path in dbparm.ini is invalid, the removable key drive was not mounted, or HSM network dropped.",
+              securityImpact:
+                "Vault completely offline; cannot decrypt database without the Server Key.",
               cyberArkCodeOrEvent: "ITATS001E",
             },
             {
-              symptom: "HSM communication failure: 'PKCS#11 C_Initialize failed: Slot not available'.",
-              rootCause: "The HSM network interface went down or the HSM partition was zeroized due to consecutive bad PIN attempts.",
-              securityImpact: "Vault cannot access cryptographic hardware root; operations blocked.",
+              symptom:
+                "HSM communication failure: 'PKCS#11 C_Initialize failed: Slot not available'.",
+              rootCause:
+                "The HSM network interface went down or the HSM partition was zeroized due to consecutive bad PIN attempts.",
+              securityImpact:
+                "Vault cannot access cryptographic hardware root; operations blocked.",
               cyberArkCodeOrEvent: "HSM-ERR-01",
             },
           ],
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Inspect PrivateArk Server startup console or italog.log for cryptographic initialization errors.",
+              diagnosticAction:
+                "Inspect PrivateArk Server startup console or italog.log for cryptographic initialization errors.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\Server\\Logs\\italog.log",
-              remediation: "Search for ITATS001E or ITATS003E. Verify whether Server.key file is present or HSM token is mounted.",
+              remediation:
+                "Search for ITATS001E or ITATS003E. Verify whether Server.key file is present or HSM token is mounted.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Test HSM reachability and verify PKCS#11 library bindings.",
               logFileOrConsole: "HSM Client Management Tools / italog.log",
-              remediation: "Verify IP routing on dedicated HSM network interface and check HSM partition status.",
+              remediation:
+                "Verify IP routing on dedicated HSM network interface and check HSM partition status.",
             },
             {
               stepNumber: 3,
-              diagnosticAction: "In disaster recovery, retrieve emergency Master Recovery Keys from physical custody.",
+              diagnosticAction:
+                "In disaster recovery, retrieve emergency Master Recovery Keys from physical custody.",
               logFileOrConsole: "Physical Corporate Safe Escrow",
-              remediation: "Under dual-custody supervision, use `Recovery.key` to mount the database and generate a replacement Server Key.",
+              remediation:
+                "Under dual-custody supervision, use `Recovery.key` to mount the database and generate a replacement Server Key.",
             },
           ],
           diagnosticEvidence: [
@@ -259,7 +302,8 @@ export const MODULE_16: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m16-q01",
-              question: "What is the primary function of the 'Server.key' in the Digital Vault cryptographic hierarchy?",
+              question:
+                "What is the primary function of the 'Server.key' in the Digital Vault cryptographic hierarchy?",
               options: [
                 "It is used by end users to log into the PVWA portal.",
                 "It is the master symmetric key used by the running Vault server to encrypt and decrypt the individual Safe Keys.",
@@ -273,7 +317,8 @@ export const MODULE_16: ClassCurriculum = {
             },
             {
               id: "m16-q02",
-              question: "Why is a Hardware Security Module (HSM) used in high-assurance PAM deployments?",
+              question:
+                "Why is a Hardware Security Module (HSM) used in high-assurance PAM deployments?",
               options: [
                 "To speed up the network internet connection.",
                 "To store and execute operations with the Vault Server Key inside tamper-resistant hardware silicon, preventing the key from ever existing as a plaintext file on disk.",
@@ -287,7 +332,8 @@ export const MODULE_16: ClassCurriculum = {
             },
             {
               id: "m16-q03",
-              question: "Where should the Vault's ultimate root of trust, the Master Recovery Key (Recovery.key), be stored in production?",
+              question:
+                "Where should the Vault's ultimate root of trust, the Master Recovery Key (Recovery.key), be stored in production?",
               options: [
                 "On the desktop of the Vault server host.",
                 "On an offline physical medium (such as an encrypted USB or CD) locked in a physical fireproof safe under dual-custody control.",
@@ -302,20 +348,69 @@ export const MODULE_16: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m16-ex01",
-            title: "Inspect Vault Cryptographic Baseline and Security Metrics",
+            title: "Audit Vault Security Boundaries & Protocol Isolation",
+            objective:
+              "Inspect the Vault protection boundary, verify TCP 1858 protocol isolation and Safe segregation, and validate the simulated control-plane baseline (Lab 01).",
             scenario:
-              "Navigate to the Overview and PAM Environment console to audit the Vault security status, verify that protocol boundaries (TCP 1858) are enforced, and review security health indicators.",
+              "Security Architecture requests a baseline audit of Vault isolation, Safe cryptographic boundaries, and audit trail integrity before approving HSM integration planning.",
+            prerequisites: [
+              "Review Envelope Encryption, Key Hierarchies, and HSM Integration in Section 1–4.",
+            ],
+            startingState:
+              "Simulated Digital Vault is ONLINE with 7 isolated Safe containers and live immutable audit logging.",
             instructions: [
-              "Navigate to the Overview or PAM Environment console.",
-              "Inspect the Vault security status and component connection security.",
-              "Review the cryptographic isolation indicators across Safes and components.",
-              "Verify that audit records reflect cryptographic integrity checks.",
+              "Open the Dashboard console and verify Digital Vault reports ONLINE with active component boundaries.",
+              "Open the Safes console and confirm distinct tier-segregated Safe boundaries separate Windows, Unix, DBA, Service, and Emergency credentials.",
+              "Open Reports & Audit and verify operational events are cryptographically logged with actor, target, and result.",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 7 Lab 01 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Dashboard and verify Digital Vault health and protocol isolation.",
+                explanation:
+                  "Vault hardening restricts ingress to encrypted TCP 1858 traffic from authenticated PAS components.",
+                expectedResult: "Digital Vault reports ONLINE in Platform Health and header.",
+              },
+              {
+                action: "Open Safes and verify Safe-level isolation across all 7 containers.",
+                explanation:
+                  "Each Safe acts as an independent cryptographic key and ACL boundary inside the Vault.",
+                expectedResult:
+                  "WIN-SAFE, UNIX-SAFE, DBA-SAFE, APP-SAFE, SERVICE-SAFE, DOMAIN-SAFE, and EMERGENCY-SAFE are cleanly separated.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Validates all 7 Lab 01 Vault boundary baseline objectives.",
+                expectedResult: "All 7/7 Lab 01 objectives pass (100/100).",
+              },
             ],
             targetConsole: "overview",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-vault",
             validationCriteria:
-              "Vault cryptographic status and security indicators are reviewed in the environment console.",
+              "Vault isolation boundary, Safe segregation, and audit integrity verified (7/7 Lab 01 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "A Lab 01 baseline objective reports pending.",
+                hint: "Confirm baseline Safes, CPM operations, and audit records exist in live state.",
+                correctiveAction:
+                  "Click Reset Simulator in the top subnav if baseline records were cleared, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Least-Privilege Safe Audit Across DOMAIN-SAFE",
+              scenario:
+                "Tier-0 security policy requires verifying who holds access to DOMAIN-SAFE.",
+              goal: "Without step-by-step instructions, open Safes > DOMAIN-SAFE and verify that only authorized personas hold member rights and `auditor` is strictly read-only.",
+              targetConsole: "safes",
+              successCriteria: [
+                "Inspected DOMAIN-SAFE members and verified `auditor` holds only 'List accounts'.",
+                "Confirmed non-admin operators do not hold 'Retrieve accounts' on DOMAIN-SAFE.",
+              ],
+            },
+            simulationLimitationNote:
+              "Physical HSM PKCS#11 integration, Operator Key splits, and envelope key rotation ceremonies are architectural security concepts outside this browser simulator. Live validation verifies the simulated Vault boundary baseline (Lab 01).",
           },
           completionCriteria: [
             "Deconstructed AES-256 envelope encryption and multi-tier key hierarchies.",

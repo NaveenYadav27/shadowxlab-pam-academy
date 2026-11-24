@@ -79,58 +79,76 @@ export const MODULE_08: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Systems Engineer (Requestor)",
-                action: "Locates Tier-0 account in PVWA and clicks 'Connect'. System prompts: 'Confirmation Required'.",
+                action:
+                  "Locates Tier-0 account in PVWA and clicks 'Connect'. System prompts: 'Confirmation Required'.",
                 channelOrProtocol: "PVWA Web Console",
-                verificationRule: "Vault checks Safe ACL: user lacks 'Access without confirmation' permission.",
+                verificationRule:
+                  "Vault checks Safe ACL: user lacks 'Access without confirmation' permission.",
               },
               {
                 stepNumber: 2,
                 actor: "Systems Engineer (Requestor)",
-                action: "Submits request: Reason 'Emergency DB index rebuild', Ticket 'CHG-89211', Window 'Today 15:00 - 17:00'.",
+                action:
+                  "Submits request: Reason 'Emergency DB index rebuild', Ticket 'CHG-89211', Window 'Today 15:00 - 17:00'.",
                 channelOrProtocol: "PVWA Request Workflow",
-                verificationRule: "PVWA queries ITSM API: confirms CHG-89211 is 'Approved' and current time is within change window.",
+                verificationRule:
+                  "PVWA queries ITSM API: confirms CHG-89211 is 'Approved' and current time is within change window.",
               },
               {
                 stepNumber: 3,
                 actor: "Infrastructure Manager (Approver)",
-                action: "Receives email alert, reviews request in PVWA Request Manager, and clicks 'Approve'.",
+                action:
+                  "Receives email alert, reviews request in PVWA Request Manager, and clicks 'Approve'.",
                 channelOrProtocol: "PVWA Approvals Portal",
-                verificationRule: "Vault confirms Approver has 'Authorize account access' on Safe; request status updated to Approved.",
+                verificationRule:
+                  "Vault confirms Approver has 'Authorize account access' on Safe; request status updated to Approved.",
               },
               {
                 stepNumber: 4,
                 actor: "Systems Engineer (Requestor)",
-                action: "Re-opens account in PVWA and initiates PSM session cleanly within the authorized time window.",
+                action:
+                  "Re-opens account in PVWA and initiates PSM session cleanly within the authorized time window.",
                 channelOrProtocol: "PSM Connection Component",
-                verificationRule: "Vault confirms request is approved and current wall-clock time is <= 17:00. Access granted.",
+                verificationRule:
+                  "Vault confirms request is approved and current wall-clock time is <= 17:00. Access granted.",
               },
             ],
           },
           terminology: [
             {
               term: "Dual Control",
-              definition: "A workflow policy requiring at least two authorized individuals (Requestor and Approver) to enable access to a vaulted credential.",
-              enterpriseContext: "Mandatory for Tier-0 Domain Admins, root passwords, and financial database superusers.",
+              definition:
+                "A workflow policy requiring at least two authorized individuals (Requestor and Approver) to enable access to a vaulted credential.",
+              enterpriseContext:
+                "Mandatory for Tier-0 Domain Admins, root passwords, and financial database superusers.",
             },
             {
               term: "Access Without Confirmation",
-              definition: "A Safe permission that allows the member to check out credentials or launch sessions immediately without requiring managerial approval.",
-              enterpriseContext: "Granted for low-risk non-production Safes; strictly withheld on production Tier-0 Safes.",
+              definition:
+                "A Safe permission that allows the member to check out credentials or launch sessions immediately without requiring managerial approval.",
+              enterpriseContext:
+                "Granted for low-risk non-production Safes; strictly withheld on production Tier-0 Safes.",
             },
             {
               term: "Authorize Account Access",
-              definition: "A Safe permission that designates the member as an authorized Approver capable of granting or rejecting access requests.",
-              enterpriseContext: "Typically assigned to team managers, IT directors, or SOC security leads.",
+              definition:
+                "A Safe permission that designates the member as an authorized Approver capable of granting or rejecting access requests.",
+              enterpriseContext:
+                "Typically assigned to team managers, IT directors, or SOC security leads.",
             },
             {
               term: "Time-Windowed Access",
-              definition: "An access grant restricted to specific hours and calendar dates (e.g., Saturday between 02:00 and 06:00 UTC).",
-              enterpriseContext: "Prevents operators from using an approval granted during a daytime maintenance window to access systems off-hours.",
+              definition:
+                "An access grant restricted to specific hours and calendar dates (e.g., Saturday between 02:00 and 06:00 UTC).",
+              enterpriseContext:
+                "Prevents operators from using an approval granted during a daytime maintenance window to access systems off-hours.",
             },
             {
               term: "Break-Glass Account",
-              definition: "An emergency administrative credential configured to bypass Dual Control in the event of an outage of the ticketing system or network.",
-              enterpriseContext: "Stored in physical tamper-evident envelopes; checkout generates high-severity SIEM alarms to the CISO.",
+              definition:
+                "An emergency administrative credential configured to bypass Dual Control in the event of an outage of the ticketing system or network.",
+              enterpriseContext:
+                "Stored in physical tamper-evident envelopes; checkout generates high-severity SIEM alarms to the CISO.",
             },
           ],
           administratorResponsibilities: [
@@ -144,45 +162,58 @@ export const MODULE_08: ClassCurriculum = {
               name: "Require Dual Control Approval",
               settingOrObject: "Master Policy > Require dual control password access approval",
               description: "Enforces dual control universally or via platform exceptions.",
-              productionBestPractice: "Enable globally in Master Policy; create exceptions only for automated machine-to-machine application Safes.",
+              productionBestPractice:
+                "Enable globally in Master Policy; create exceptions only for automated machine-to-machine application Safes.",
             },
             {
               name: "Ticketing System Validation",
               settingOrObject: "Platform > UI & Workflows > Ticketing System",
-              description: "Configures mandatory ticket ID entry and regex validation (e.g. `^CHG-\\d{5,7}$`).",
-              productionBestPractice: "Enforce ticket format regex on all platforms to prevent users from entering dummy text like 'test' or '123'.",
+              description:
+                "Configures mandatory ticket ID entry and regex validation (e.g. `^CHG-\\d{5,7}$`).",
+              productionBestPractice:
+                "Enforce ticket format regex on all platforms to prevent users from entering dummy text like 'test' or '123'.",
             },
             {
               name: "Multi-Level Approvals",
               settingOrObject: "Safe Properties > Number of Approvers Required",
-              description: "Specifies whether 1, 2, or more distinct approvals are required before access is unlocked.",
-              productionBestPractice: "Require 1 approver for standard production servers; require 2 distinct approvers for core banking roots.",
+              description:
+                "Specifies whether 1, 2, or more distinct approvals are required before access is unlocked.",
+              productionBestPractice:
+                "Require 1 approver for standard production servers; require 2 distinct approvers for core banking roots.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Enable Dual Control on Safe",
-              action: "In PVWA, edit `DBA-SAFE`, check 'Require dual control password access approval', and save.",
-              expectedResult: "Dual control active. Members without confirmation rights will now be prompted for approval.",
+              action:
+                "In PVWA, edit `DBA-SAFE`, check 'Require dual control password access approval', and save.",
+              expectedResult:
+                "Dual control active. Members without confirmation rights will now be prompted for approval.",
             },
             {
               stepNumber: 2,
               title: "Assign Requestor & Approver Roles",
-              action: "For `AD_DBA_Operators`, uncheck 'Access without confirmation'. For `AD_DBA_Managers`, check 'Authorize account access'.",
-              expectedResult: "Operators cannot check out credentials without managerial sign-off; managers become authorized approvers.",
+              action:
+                "For `AD_DBA_Operators`, uncheck 'Access without confirmation'. For `AD_DBA_Managers`, check 'Authorize account access'.",
+              expectedResult:
+                "Operators cannot check out credentials without managerial sign-off; managers become authorized approvers.",
             },
             {
               stepNumber: 3,
               title: "Submit Access Request",
-              action: "Log in as an operator, select target database account, enter Reason and Ticket `CHG-10294`, and submit.",
-              expectedResult: "Request status changes to 'Pending Approval'; notification email sent to approvers.",
+              action:
+                "Log in as an operator, select target database account, enter Reason and Ticket `CHG-10294`, and submit.",
+              expectedResult:
+                "Request status changes to 'Pending Approval'; notification email sent to approvers.",
             },
             {
               stepNumber: 4,
               title: "Approve Request & Execute Session",
-              action: "Log in as manager, navigate to Requests > Pending My Approval, review ticket, click Approve.",
-              expectedResult: "Requestor refreshes console; 'Connect' button becomes active; session launches cleanly.",
+              action:
+                "Log in as manager, navigate to Requests > Pending My Approval, review ticket, click Approve.",
+              expectedResult:
+                "Requestor refreshes console; 'Connect' button becomes active; session launches cleanly.",
             },
           ],
           enterpriseScenario: {
@@ -197,15 +228,20 @@ export const MODULE_08: ClassCurriculum = {
           },
           failureScenarios: [
             {
-              symptom: "User receives error: 'Cannot connect: Request has expired or is outside approved time window'.",
-              rootCause: "The operator attempted to launch the session after the requested 'To Time' had elapsed.",
-              securityImpact: "Session correctly blocked, preventing unapproved after-hours access.",
+              symptom:
+                "User receives error: 'Cannot connect: Request has expired or is outside approved time window'.",
+              rootCause:
+                "The operator attempted to launch the session after the requested 'To Time' had elapsed.",
+              securityImpact:
+                "Session correctly blocked, preventing unapproved after-hours access.",
               cyberArkCodeOrEvent: "ITATS032E",
             },
             {
               symptom: "Approver cannot see pending requests in PVWA Requests tab.",
-              rootCause: "The approver's group lacks the 'Authorize account access' permission on the specific Safe housing the account.",
-              securityImpact: "Approval bottleneck; maintenance work stalled because managers cannot approve requests.",
+              rootCause:
+                "The approver's group lacks the 'Authorize account access' permission on the specific Safe housing the account.",
+              securityImpact:
+                "Approval bottleneck; maintenance work stalled because managers cannot approve requests.",
               cyberArkCodeOrEvent: "ITATS028E",
             },
           ],
@@ -214,19 +250,22 @@ export const MODULE_08: ClassCurriculum = {
               stepNumber: 1,
               diagnosticAction: "Verify Requestor's Safe permissions in PVWA Safes console.",
               logFileOrConsole: "PVWA Safes > Select Safe > Members > Requestor Group",
-              remediation: "Ensure 'Access without confirmation' is unchecked if Dual Control is intended, or checked if emergency direct access is required.",
+              remediation:
+                "Ensure 'Access without confirmation' is unchecked if Dual Control is intended, or checked if emergency direct access is required.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Verify Approver's Safe permissions in PVWA Safes console.",
               logFileOrConsole: "PVWA Safes > Select Safe > Members > Approver Group",
-              remediation: "Check 'Authorize account access' on the Safe. Without this specific permission, users cannot see or approve requests.",
+              remediation:
+                "Check 'Authorize account access' on the Safe. Without this specific permission, users cannot see or approve requests.",
             },
             {
               stepNumber: 3,
               diagnosticAction: "Inspect active ticket status in external ITSM system.",
               logFileOrConsole: "ServiceNow / Jira API logs",
-              remediation: "Confirm that ticket is in 'Approved' state and that system clocks between PVWA and ITSM are synchronized.",
+              remediation:
+                "Confirm that ticket is in 'Approved' state and that system clocks between PVWA and ITSM are synchronized.",
             },
           ],
           diagnosticEvidence: [
@@ -258,7 +297,8 @@ export const MODULE_08: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m08-q01",
-              question: "Which Safe permission MUST a manager possess to be an authorized approver for dual-control requests in that Safe?",
+              question:
+                "Which Safe permission MUST a manager possess to be an authorized approver for dual-control requests in that Safe?",
               options: [
                 "Manage Safe",
                 "Authorize account access",
@@ -272,7 +312,8 @@ export const MODULE_08: ClassCurriculum = {
             },
             {
               id: "m08-q02",
-              question: "An operator was granted an approved request for window 09:00 to 11:00. At 11:15, they attempt to click 'Connect'. What happens?",
+              question:
+                "An operator was granted an approved request for window 09:00 to 11:00. At 11:15, they attempt to click 'Connect'. What happens?",
               options: [
                 "The session launches normally.",
                 "The target server is rebooted.",
@@ -286,7 +327,8 @@ export const MODULE_08: ClassCurriculum = {
             },
             {
               id: "m08-q03",
-              question: "What is the primary security objective of integrating PAM dual-control workflows with an external ITSM ticketing platform like ServiceNow?",
+              question:
+                "What is the primary security objective of integrating PAM dual-control workflows with an external ITSM ticketing platform like ServiceNow?",
               options: [
                 "To automatically delete the Vault database weekly.",
                 "To ensure that privileged credentials cannot be accessed without an active, verified, and approved Change Request ticket.",
@@ -301,20 +343,83 @@ export const MODULE_08: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m08-ex01",
-            title: "Submit and Validate Dual-Control Access Workflow",
+            title: "Execute Dual-Control Approved Session Workflow (Ticket to Termination)",
+            objective:
+              "Satisfy dual-control approval and change-ticket gating, launch a brokered PSM session, execute at least two audited commands, and terminate cleanly (Lab 06A).",
             scenario:
-              "Simulate an emergency access checkout requiring managerial approval and a valid change ticket. Submit the request, verify approver evaluation, and confirm access authorization.",
+              "An emergency production maintenance window requires dual-control authorization and ticket CHG-12345 before connecting to WIN-SRV-01. Complete the ticket-gated session workflow and seal the recording.",
+            prerequisites: [
+              "Review Dual Control governance and ITSM ticket validation in Section 1–4.",
+            ],
+            startingState:
+              "PSM connector is healthy; dual-control approval and a valid CHG-##### ticket are required before launching a session.",
             instructions: [
-              "Navigate to the Accounts console or PSM Operations console.",
-              "Review the dual-control request workflow for protected production accounts.",
-              "Ensure an approved change ticket (e.g. `CHG-12345` or `CHG-20412`) is associated with the session.",
-              "Confirm that the session authorization gate is satisfied in the simulator state.",
+              "Open the PSM Operations console and select Administrator on WIN-SRV-01.",
+              "Enable/verify Dual-Control Approval, enter change ticket `CHG-12345` and a documented business reason (>= 12 characters), and launch the brokered PSM session.",
+              "Execute at least TWO allowed diagnostic commands in the terminal (`whoami` and `hostname`) and observe the live command timeline.",
+              "Click 'Terminate' (or run `exit`) to close the session and seal the audit recording, then return to Learning Academy to validate all 6 Lab 06A objectives.",
+            ],
+            stepDetails: [
+              {
+                action:
+                  "Open PSM Operations, select WIN-SRV-01 Administrator, confirm Dual-Control Approval, and enter ticket `CHG-12345` with a business reason.",
+                explanation:
+                  "Enforces separation of duties: no operator can access tier-0 targets without documented approval and a valid change ticket.",
+                expectedResult:
+                  "All preflight gates pass and an active brokered session initializes.",
+              },
+              {
+                action: "Run `whoami` and `hostname` in the active PSM terminal.",
+                explanation:
+                  "Lab 06A requires >= 2 recorded commands to demonstrate live keystroke attribution.",
+                expectedResult:
+                  "Terminal displays simulated responses and records 2+ commands in the session timeline.",
+              },
+              {
+                action: "Click 'Terminate' to end the session and seal the immutable recording.",
+                explanation:
+                  "Closing the session finalizes the audit evidence and releases the brokered proxy.",
+                expectedResult:
+                  "Session status changes to 'Terminated' and audit log records termination.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation:
+                  "Evaluates all 6 Lab 06A objectives (approval, ticket, launch, >= 2 commands, timeline, termination).",
+                expectedResult: "All 6/6 Lab 06A objectives pass (100/100).",
+              },
             ],
             targetConsole: "psm",
             associatedLabId: "Lab 06A · Launch an approved session",
             validationObjectiveId: "obtain-approval",
             validationCriteria:
-              "Dual-control approval status is validated and session is authorized.",
+              "Dual-control approval, valid CHG ticket, brokered launch, >= 2 commands, and session termination verified (6/6 Lab 06A objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "Session launch is blocked with an approval, ticket, or reason error.",
+                hint: "Verify ticket matches `CHG-12345` format, reason is at least 12 characters, and approval is granted.",
+                correctiveAction:
+                  "In PSM Operations, grant approval, enter `CHG-12345` and a 12+ character reason (e.g., 'Emergency server health check'), then launch.",
+              },
+              {
+                symptom: "'Execute simulated commands' or 'Terminate session' remains pending.",
+                hint: "Lab 06A requires at least 2 commands inside the session followed by terminating it.",
+                correctiveAction:
+                  "Run both `whoami` and `hostname` in the terminal, click Terminate, and re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Verify Ticket Rejection & Audit Traceability",
+              scenario:
+                "Compliance wants proof that invalid ticket strings are rejected before a session can open.",
+              goal: "Without guided steps, inspect Reports & Audit to confirm your approved session's ticket and termination entries, and test how PSM validates malformed ticket formats.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Verified the approved session launch and termination records appear in Reports & Audit.",
+                "Confirmed malformed ticket inputs cannot bypass PSM preflight validation.",
+              ],
+            },
           },
           completionCriteria: [
             "Deconstructed Dual Control architecture and the Four-Eyes principle.",

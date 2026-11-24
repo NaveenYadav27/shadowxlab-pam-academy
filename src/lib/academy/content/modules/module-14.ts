@@ -29,7 +29,8 @@ export const MODULE_14: ClassCurriculum = {
           id: "m14-l01",
           number: "14.1",
           title: "PARASW Backup Architecture & Granular Safe Restore",
-          subtitle: "Automating scheduled encrypted backups, managing key escrow, and executing point-in-time Safe recovery",
+          subtitle:
+            "Automating scheduled encrypted backups, managing key escrow, and executing point-in-time Safe recovery",
           estimatedMinutes: 25,
           learningObjectives: [
             "Configure the PrivateArk Scheduled Tasks backup utility (PARASW.exe) for automated daily backups.",
@@ -79,53 +80,69 @@ export const MODULE_14: ClassCurriculum = {
               {
                 stepNumber: 1,
                 actor: "Windows Task Scheduler (Backup Host)",
-                action: "Triggers scheduled daily backup script: `PARASW.exe <VaultIP> Backup User.ini <DestDir>` at 01:00 UTC.",
+                action:
+                  "Triggers scheduled daily backup script: `PARASW.exe <VaultIP> Backup User.ini <DestDir>` at 01:00 UTC.",
                 channelOrProtocol: "Local Script Execution",
-                verificationRule: "Backup host authenticates using dedicated Backup user credential file.",
+                verificationRule:
+                  "Backup host authenticates using dedicated Backup user credential file.",
               },
               {
                 stepNumber: 2,
                 actor: "Digital Vault",
-                action: "Validates Backup user identity and verifies IP address matches authorized node in dbparm.ini.",
+                action:
+                  "Validates Backup user identity and verifies IP address matches authorized node in dbparm.ini.",
                 channelOrProtocol: "Encrypted Vault Protocol (TCP 1858)",
-                verificationRule: "Vault initiates read-only snapshot of database tables and metadata.",
+                verificationRule:
+                  "Vault initiates read-only snapshot of database tables and metadata.",
               },
               {
                 stepNumber: 3,
                 actor: "Backup Utility Engine",
-                action: "Streams incremental or full Safe data across port 1858 and writes encrypted archive files to destination directory.",
+                action:
+                  "Streams incremental or full Safe data across port 1858 and writes encrypted archive files to destination directory.",
                 channelOrProtocol: "TCP 1858 Stream",
-                verificationRule: "Cryptographic SHA-256 hash calculated for each archive to ensure backup catalog integrity.",
+                verificationRule:
+                  "Cryptographic SHA-256 hash calculated for each archive to ensure backup catalog integrity.",
               },
               {
                 stepNumber: 4,
                 actor: "PAM Administrator",
-                action: "Executes granular restore of single Safe `FINANCE-SAFE` from backup archive following accidental deletion.",
+                action:
+                  "Executes granular restore of single Safe `FINANCE-SAFE` from backup archive following accidental deletion.",
                 channelOrProtocol: "PrivateArk Client Restore Wizard",
-                verificationRule: "Vault restores Safe into active database; unaffected Safes continue operating with zero downtime.",
+                verificationRule:
+                  "Vault restores Safe into active database; unaffected Safes continue operating with zero downtime.",
               },
             ],
           },
           terminology: [
             {
               term: "PARASW.exe",
-              definition: "The command-line PrivateArk Scheduled Tasks utility used to automate full and incremental Vault backups.",
-              enterpriseContext: "Executes from an authorized external backup host on a recurring nightly schedule.",
+              definition:
+                "The command-line PrivateArk Scheduled Tasks utility used to automate full and incremental Vault backups.",
+              enterpriseContext:
+                "Executes from an authorized external backup host on a recurring nightly schedule.",
             },
             {
               term: "Granular Safe Restore",
-              definition: "Restoring an individual Safe and its accounts from a backup archive without restoring or rebooting the entire Vault database.",
-              enterpriseContext: "Eliminates downtime; other departments continue using the PAM system uninterrupted.",
+              definition:
+                "Restoring an individual Safe and its accounts from a backup archive without restoring or rebooting the entire Vault database.",
+              enterpriseContext:
+                "Eliminates downtime; other departments continue using the PAM system uninterrupted.",
             },
             {
               term: "Master / Recovery Key",
-              definition: "The ultimate emergency cryptographic key used to rebuild a Vault or decrypt database volumes when standard server keys are lost.",
-              enterpriseContext: "Stored on physical media in two separate sealed tamper-evident envelopes in distinct geographic safes.",
+              definition:
+                "The ultimate emergency cryptographic key used to rebuild a Vault or decrypt database volumes when standard server keys are lost.",
+              enterpriseContext:
+                "Stored on physical media in two separate sealed tamper-evident envelopes in distinct geographic safes.",
             },
             {
               term: "Full vs Incremental Backup",
-              definition: "A full backup exports every Safe and object; an incremental backup exports only files and accounts modified since the last backup cycle.",
-              enterpriseContext: "Production environments run full backups weekly and incremental backups nightly.",
+              definition:
+                "A full backup exports every Safe and object; an incremental backup exports only files and accounts modified since the last backup cycle.",
+              enterpriseContext:
+                "Production environments run full backups weekly and incremental backups nightly.",
             },
           ],
           administratorResponsibilities: [
@@ -138,47 +155,61 @@ export const MODULE_14: ClassCurriculum = {
             {
               name: "PARASW Command Syntax",
               settingOrObject: "PARASW.exe Script on Backup Host",
-              description: "Syntax: `PARASW.exe <VaultIP> /U <User> /P <PassFile> /D <DestPath> /S <SafeList>`.",
-              productionBestPractice: "Use credential files (`user.ini`) generated by CreateCredFile utility. Never pass plaintext passwords in scripts.",
+              description:
+                "Syntax: `PARASW.exe <VaultIP> /U <User> /P <PassFile> /D <DestPath> /S <SafeList>`.",
+              productionBestPractice:
+                "Use credential files (`user.ini`) generated by CreateCredFile utility. Never pass plaintext passwords in scripts.",
             },
             {
               name: "Backup User Authorized IP",
               settingOrObject: "dbparm.ini on Vault Server",
-              description: "Restricts the `Backup` user account to authenticate exclusively from the static IP of the backup host.",
-              productionBestPractice: "Never allow the Backup user to connect from arbitrary IP addresses.",
+              description:
+                "Restricts the `Backup` user account to authenticate exclusively from the static IP of the backup host.",
+              productionBestPractice:
+                "Never allow the Backup user to connect from arbitrary IP addresses.",
             },
             {
               name: "Catalog Integrity Verification",
               settingOrObject: "Post-Backup Verification Script",
               description: "Validates checksums of backup output against Vault manifest records.",
-              productionBestPractice: "Configure alerts to notify the PAM team if backup archive size drops by more than 10% unexpectedly.",
+              productionBestPractice:
+                "Configure alerts to notify the PAM team if backup archive size drops by more than 10% unexpectedly.",
             },
           ],
           operationalProcedures: [
             {
               stepNumber: 1,
               title: "Execute Manual Backup Test",
-              action: "On the backup server, run: `PARASW.exe 10.0.1.10 /U Backup /P C:\\Keys\\backup.ini /D D:\\Backups /S ALL`.",
-              expectedResult: "Backup utility connects to Vault on port 1858 and streams encrypted Safe files into D:\\Backups.",
-              operatorNotes: "Monitor transfer log for ITATS error codes or disk write bottlenecks.",
+              action:
+                "On the backup server, run: `PARASW.exe 10.0.1.10 /U Backup /P C:\\Keys\\backup.ini /D D:\\Backups /S ALL`.",
+              expectedResult:
+                "Backup utility connects to Vault on port 1858 and streams encrypted Safe files into D:\\Backups.",
+              operatorNotes:
+                "Monitor transfer log for ITATS error codes or disk write bottlenecks.",
             },
             {
               stepNumber: 2,
               title: "Verify Backup Archive Integrity",
-              action: "Inspect the backup destination folder. Confirm presence of `Vault.dmp`, Safe `.safe` folders, and `backup.log`.",
-              expectedResult: "All production Safes are present with non-zero file sizes; backup.log reports 'Backup completed successfully'.",
+              action:
+                "Inspect the backup destination folder. Confirm presence of `Vault.dmp`, Safe `.safe` folders, and `backup.log`.",
+              expectedResult:
+                "All production Safes are present with non-zero file sizes; backup.log reports 'Backup completed successfully'.",
             },
             {
               stepNumber: 3,
               title: "Execute Granular Safe Restore",
-              action: "In PrivateArk Client, select Tools > Restore Safe. Select backup folder and choose `FINANCE-SAFE`.",
-              expectedResult: "Vault extracts Safe from archive and mounts it into the running database.",
+              action:
+                "In PrivateArk Client, select Tools > Restore Safe. Select backup folder and choose `FINANCE-SAFE`.",
+              expectedResult:
+                "Vault extracts Safe from archive and mounts it into the running database.",
             },
             {
               stepNumber: 4,
               title: "Validate Restored Accounts",
-              action: "In PVWA Accounts, verify that accounts inside `FINANCE-SAFE` are visible, intact, and functional.",
-              expectedResult: "Restored accounts display historical password versions up to the point-in-time of the backup.",
+              action:
+                "In PVWA Accounts, verify that accounts inside `FINANCE-SAFE` are visible, intact, and functional.",
+              expectedResult:
+                "Restored accounts display historical password versions up to the point-in-time of the backup.",
             },
           ],
           enterpriseScenario: {
@@ -194,13 +225,16 @@ export const MODULE_14: ClassCurriculum = {
           failureScenarios: [
             {
               symptom: "Backup job fails: 'ITATS004E Authentication failure for user Backup'.",
-              rootCause: "The stored credential file (`backup.ini`) has expired or desynchronized from the Vault user record.",
-              securityImpact: "Nightly backup fails silently; enterprise unprotected against disaster events.",
+              rootCause:
+                "The stored credential file (`backup.ini`) has expired or desynchronized from the Vault user record.",
+              securityImpact:
+                "Nightly backup fails silently; enterprise unprotected against disaster events.",
               cyberArkCodeOrEvent: "ITATS004E",
             },
             {
               symptom: "Backup job fails: 'Disk full on backup repository destination'.",
-              rootCause: "Historical backup retention was unconfigured, accumulating terabytes of unpruned daily archives.",
+              rootCause:
+                "Historical backup retention was unconfigured, accumulating terabytes of unpruned daily archives.",
               securityImpact: "Subsequent backups abort; backup catalog corrupted.",
               cyberArkCodeOrEvent: "DISK-FULL",
             },
@@ -208,21 +242,27 @@ export const MODULE_14: ClassCurriculum = {
           troubleshootingRunbook: [
             {
               stepNumber: 1,
-              diagnosticAction: "Re-generate Backup user credential file using CreateCredFile utility.",
-              logFileOrConsole: "CreateCredFile.exe C:\\Keys\\backup.ini /Password <Password> /AppType PARASW /Hostname <BackupHost>",
-              remediation: "Replaces corrupt credential file with a freshly encrypted, machine-bound authentication ticket.",
+              diagnosticAction:
+                "Re-generate Backup user credential file using CreateCredFile utility.",
+              logFileOrConsole:
+                "CreateCredFile.exe C:\\Keys\\backup.ini /Password <Password> /AppType PARASW /Hostname <BackupHost>",
+              remediation:
+                "Replaces corrupt credential file with a freshly encrypted, machine-bound authentication ticket.",
             },
             {
               stepNumber: 2,
               diagnosticAction: "Check italog.log on Vault server for rejected Backup connections.",
               logFileOrConsole: "C:\\Program Files (x86)\\PrivateArk\\Server\\Logs\\italog.log",
-              remediation: "Verify that the backup host IP is authorized in dbparm.ini under AllowNodes.",
+              remediation:
+                "Verify that the backup host IP is authorized in dbparm.ini under AllowNodes.",
             },
             {
               stepNumber: 3,
-              diagnosticAction: "Review backup archive retention scripts and purge archives older than corporate policy.",
+              diagnosticAction:
+                "Review backup archive retention scripts and purge archives older than corporate policy.",
               logFileOrConsole: "Backup Host Task Scheduler",
-              remediation: "Implement automated rotation script deleting archives older than 30 or 90 days.",
+              remediation:
+                "Implement automated rotation script deleting archives older than 30 or 90 days.",
             },
           ],
           diagnosticEvidence: [
@@ -254,7 +294,8 @@ export const MODULE_14: ClassCurriculum = {
           knowledgeCheck: [
             {
               id: "m14-q01",
-              question: "Why does the Digital Vault utilize a native backup utility (PARASW) rather than standard third-party backup agents installed on the host?",
+              question:
+                "Why does the Digital Vault utilize a native backup utility (PARASW) rather than standard third-party backup agents installed on the host?",
               options: [
                 "Because third-party agents are too cheap.",
                 "To preserve the Vault's OS hardening and isolation boundary, preventing third-party software vulnerabilities and unmonitored services from running on the bastion host.",
@@ -268,7 +309,8 @@ export const MODULE_14: ClassCurriculum = {
             },
             {
               id: "m14-q02",
-              question: "What is the primary operational advantage of 'Granular Safe-Level Restore'?",
+              question:
+                "What is the primary operational advantage of 'Granular Safe-Level Restore'?",
               options: [
                 "It restores all servers in the enterprise to factory defaults.",
                 "It allows an administrator to restore an individual accidentally deleted Safe without rolling back the rest of the Vault or interrupting other users.",
@@ -297,20 +339,69 @@ export const MODULE_14: ClassCurriculum = {
           ],
           practicalExercise: {
             id: "m14-ex01",
-            title: "Review Vault Backup Status and Audit Data Protection",
+            title: "Audit Vault Data Protection & Recovery Readiness",
+            objective:
+              "Inspect Vault audit records and Safe inventory retention posture in Reports & Audit and validate the simulated control-plane baseline (Lab 01).",
             scenario:
-              "Inspect system data protection and backup audit records in the simulator, review historical backup events, and verify that recovery points are recorded.",
+              "Before a quarterly Vault recovery drill, inspect the immutable audit trail and Safe roster to verify which Safe containers and credential states must be covered by backup retention policies.",
+            prerequisites: [
+              "Review PARASW Backup Architecture and Granular Safe Restore in Section 1–4.",
+            ],
+            startingState:
+              "7 Safes and live Vault audit trail events are populated in the simulator.",
             instructions: [
-              "Navigate to the Reports & Audit console or Overview console.",
-              "Review the audit trail for backup activity events.",
-              "Verify that cryptographic operations and Safe states are recorded cleanly.",
-              "Confirm that data protection policies align with enterprise retention mandates.",
+              "Open the Reports & Audit console and inspect the chronological Vault audit ledger.",
+              "Open the Safes console and verify all 7 production Safes and their accountable owners.",
+              "Review the PARASW restore runbook in Section 3 and confirm recovery prerequisites (Operator Key + Server Key).",
+              "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion' to verify all 7 Lab 01 objectives.",
+            ],
+            stepDetails: [
+              {
+                action: "Open Reports & Audit and review Vault transaction history.",
+                explanation:
+                  "Audit logs confirm operational continuity and verify Safe modifications prior to backup snapshots.",
+                expectedResult:
+                  "Audit trail displays timestamped CPM, Safe, and PSM records cleanly.",
+              },
+              {
+                action: "Open Safes and inventory all critical Safes requiring backup coverage.",
+                explanation: "Granular PARASW restores target individual Safes by exact Safe name.",
+                expectedResult:
+                  "All 7 tier-segregated Safes are listed with assigned owners and member rosters.",
+              },
+              {
+                action:
+                  "Return to Learning Academy and click 'Validate Simulator State & Record Lab Completion'.",
+                explanation: "Confirms the simulated Vault control-plane baseline (Lab 01).",
+                expectedResult: "All 7/7 Lab 01 objectives pass (100/100).",
+              },
             ],
             targetConsole: "audit",
             associatedLabId: "Lab 01 · Trace the PAM architecture",
             validationObjectiveId: "id-vault",
             validationCriteria:
-              "Vault data protection and audit records are inspected in the audit console.",
+              "Vault audit trail, Safe inventory, and baseline control plane verified (7/7 Lab 01 objectives).",
+            troubleshootingHints: [
+              {
+                symptom: "A Lab 01 baseline objective shows pending.",
+                hint: "Confirm baseline Safes, CPM history, and audit records are intact.",
+                correctiveAction:
+                  "Click Reset Simulator in the top subnav if baseline records were modified, then re-validate.",
+              },
+            ],
+            independentPractice: {
+              title: "Export a Safe Governance Snapshot Report",
+              scenario:
+                "Backup operations asks for a current Safes inventory list to cross-check against PARASW backup coverage.",
+              goal: "Without step-by-step instructions, open the Reports tab in Reports & Audit and review the Safes Governance report.",
+              targetConsole: "audit",
+              successCriteria: [
+                "Opened the Reports view and selected the Safes Governance report.",
+                "Confirmed all 7 enterprise Safes and their member counts appear in the report.",
+              ],
+            },
+            simulationLimitationNote:
+              "PARASW CLI backup scheduling, encrypted key escrow ceremonies, and granular Safe file restores are not executed in the browser simulator. Live validation verifies the simulated Vault audit and control-plane baseline (Lab 01).",
           },
           completionCriteria: [
             "Deconstructed PARASW backup utility architecture and remote execution.",
