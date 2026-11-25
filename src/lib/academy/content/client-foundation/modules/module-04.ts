@@ -13,7 +13,7 @@ export const CLIENT_MODULE_04: ClassCurriculum = {
   id: "client-m04",
   number: "04",
   label: "MODULE 04",
-  title: "PVWA: Web Portal Fundamentals",
+  title: "PVWA — Web Portal Fundamentals",
   subtitle: "Interface Navigation, Account Filtering, Access Workflows & Access-Denied Diagnostics",
   duration: "3 Hours",
   level: "Foundational",
@@ -25,7 +25,7 @@ export const CLIENT_MODULE_04: ClassCurriculum = {
     {
       id: "cm04-core",
       number: "M04",
-      title: "PVWA: Web Portal Fundamentals",
+      title: "PVWA — Web Portal Fundamentals",
       description:
         "Portal navigation, account inspection, access workflows, and troubleshooting access-denied events.",
       lessons: [

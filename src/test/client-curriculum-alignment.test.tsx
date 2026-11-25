@@ -14,12 +14,16 @@ import {
   getCurriculumMetrics,
   ACADEMY_CLASSES_V2,
   ADMIN_MODULES_20,
+  CONTENT_CLASSIFICATION_REGISTRY,
+  isMandatoryProgressionGate,
+  getContentClassification,
 } from "@/lib/academy/content";
 import { buildGuidedLabPlan } from "@/lib/academy/guided-lab-engine";
 import {
   DEFAULT_LEARNER_PROGRESS,
   loadLearnerProgress,
   resetLearnerProgress,
+  migrateLearnerProgress,
 } from "@/lib/academy/progress";
 import type { LearnerProgress } from "@/lib/academy/types";
 import { makeInitialPamState } from "@/lib/pam-engine";
@@ -37,7 +41,7 @@ describe("Task 07 — Strict Client Curriculum Alignment (CyberArk Basic Trainin
       "Introduction to Privileged Access Management",
       "CyberArk Platform Fundamentals",
       "Architecture and Security Concepts",
-      "PVWA: Web Portal Fundamentals",
+      "PVWA — Web Portal Fundamentals",
       "Safes and Access Control",
       "Privileged Account Onboarding",
       "Password Management and Rotation",
@@ -343,5 +347,162 @@ describe("Task 07 — Strict Client Curriculum Alignment (CyberArk Basic Trainin
     ).toBeInTheDocument();
     expect(screen.getByText(/session management and auditing \(15%\)/i)).toBeInTheDocument();
     expect(screen.getByText(/capstone project \(20%\)/i)).toBeInTheDocument();
+  });
+
+  it("10. Practical Lab Mapping Fidelity: verifies required hands-on practical assignment for M03-M10", () => {
+    // M03: Basic PAM architecture diagram and access workflow trace
+    const m03 = findClassById("client-m03")!;
+    const m03Ex = m03.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m03Ex.title).toContain("Architecture Diagram");
+    expect(m03Ex.targetConsole).toBe("overview");
+
+    // M04: PVWA navigation, account inspection and access-denied review
+    const m04 = findClassById("client-m04")!;
+    const m04Ex = m04.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m04Ex.title).toContain("PVWA Navigation");
+    expect(m04Ex.targetConsole).toBe("accounts");
+
+    // M05: Safe review/creation, permissions and access troubleshooting
+    const m05 = findClassById("client-m05")!;
+    const m05Ex = m05.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m05Ex.title).toContain("Safe Creation, Permission Matrix");
+    expect(m05Ex.targetConsole).toBe("safes");
+
+    // M06: Test Windows and Linux account onboarding
+    const m06 = findClassById("client-m06")!;
+    const m06Ex = m06.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m06Ex.title).toContain("Windows Administrator Onboarding");
+    expect(m06Ex.targetConsole).toBe("accounts");
+
+    // M07: Password policy and simulated verification/rotation failure analysis
+    const m07 = findClassById("client-m07")!;
+    const m07Ex = m07.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m07Ex.title).toContain("CPM Lifecycle Operations");
+    expect(m07Ex.targetConsole).toBe("cpm");
+
+    // M08: Privileged session workflow and sample session audit record
+    const m08 = findClassById("client-m08")!;
+    const m08Ex = m08.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m08Ex.title).toContain("Brokered PSM Session");
+    expect(m08Ex.targetConsole).toBe("psm");
+
+    // M09: PAM audit event analysis
+    const m09 = findClassById("client-m09")!;
+    const m09Ex = m09.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m09Ex.title).toContain("Audit Event Forensics");
+    expect(m09Ex.targetConsole).toBe("audit");
+
+    // M10: Three simulated support tickets
+    const m10 = findClassById("client-m10")!;
+    const m10Ex = m10.modules[0]!.lessons[0]!.practicalExercise!;
+    expect(m10Ex.title).toContain("3 CyberArk Support Tickets");
+    expect(m10Ex.targetConsole).toBe("troubleshooting");
+  });
+
+  it("11. Content Classification Registry: enforces 4 tiers and prevents enrichment from gating progress", () => {
+    expect(CONTENT_CLASSIFICATION_REGISTRY.length).toBeGreaterThanOrEqual(15);
+
+    // Required client content must be mandatory gates
+    const requiredItems = CONTENT_CLASSIFICATION_REGISTRY.filter(
+      (item) => item.classification === "REQUIRED_CLIENT_CONTENT",
+    );
+    expect(requiredItems.length).toBe(12);
+    for (const item of requiredItems) {
+      expect(isMandatoryProgressionGate(item.classification)).toBe(true);
+      expect(item.isMandatoryGate).toBe(true);
+    }
+
+    // Optional enrichment must NEVER act as a mandatory gate
+    const enrichmentItems = CONTENT_CLASSIFICATION_REGISTRY.filter(
+      (item) => item.classification === "OPTIONAL_ENRICHMENT",
+    );
+    expect(enrichmentItems.length).toBeGreaterThanOrEqual(3);
+    for (const item of enrichmentItems) {
+      expect(isMandatoryProgressionGate(item.classification)).toBe(false);
+      expect(item.isMandatoryGate).toBe(false);
+    }
+
+    // Supporting explanations must NEVER act as a mandatory gate
+    const supportingItems = CONTENT_CLASSIFICATION_REGISTRY.filter(
+      (item) => item.classification === "SUPPORTING_EXPLANATION",
+    );
+    expect(supportingItems.length).toBeGreaterThanOrEqual(2);
+    for (const item of supportingItems) {
+      expect(isMandatoryProgressionGate(item.classification)).toBe(false);
+      expect(item.isMandatoryGate).toBe(false);
+    }
+
+    // Helper function lookup test
+    expect(getContentClassification("req-m01-pam-intro")).toBe("REQUIRED_CLIENT_CONTENT");
+    expect(getContentClassification("module-13")).toBe("OUTSIDE_CLIENT_FOUNDATION_SCOPE");
+    expect(getContentClassification("enr-m01-indep-audit")).toBe("OPTIONAL_ENRICHMENT");
+  });
+
+  it("12. Safe Migration Strategy: normalizes legacy progress states without corrupting completed work", () => {
+    // Scenario 1: Malformed or undefined state falls back to default
+    const nullMigrated = migrateLearnerProgress(null);
+    expect(nullMigrated.currentTrackId).toBe("client-12");
+    expect(nullMigrated.currentClassId).toBe("client-m01");
+
+    // Scenario 2: Legacy progress with draft client-m ID and completed lessons
+    const legacyState: Partial<LearnerProgress> = {
+      currentTrackId: "client-12",
+      currentClassId: "client-m04",
+      currentModuleId: undefined,
+      currentLessonId: undefined,
+      completedLessons: ["cm01-l01", "cm02-l01", "cm03-l01"],
+      completedExercises: ["cm01-ex01", "cm02-ex01"],
+    };
+    const migrated = migrateLearnerProgress(legacyState);
+    expect(migrated.currentTrackId).toBe("client-12");
+    expect(migrated.currentClassId).toBe("client-m04");
+    expect(migrated.currentModuleId).toBe("cm04-core");
+    expect(migrated.currentLessonId).toBe("cm04-l01");
+    // Completed work is preserved
+    expect(migrated.completedLessons).toEqual(["cm01-l01", "cm02-l01", "cm03-l01"]);
+    expect(migrated.completedExercises).toEqual(["cm01-ex01", "cm02-ex01"]);
+  });
+
+  it("13. Capstone Assessment Integrity: validates 5 client tasks without requiring standalone DR Safe or CPM automation isolation", () => {
+    const simState = makeInitialPamState();
+
+    // Verify baseline simulator meets criteria through valid account, safe, and incident evidence
+    const report = evaluateCapstoneProject(simState, {
+      1: {
+        taskNumber: 1,
+        completed: true,
+        evidenceItems: ["Identified Windows and Linux accounts"],
+      },
+      2: { taskNumber: 2, completed: true, evidenceItems: ["Designed Safe structure with ACLs"] },
+      3: {
+        taskNumber: 3,
+        completed: true,
+        evidenceItems: ["Documented CPM onboarding & rotation"],
+      },
+      4: {
+        taskNumber: 4,
+        completed: true,
+        evidenceItems: ["Investigated and resolved access issue"],
+      },
+      5: {
+        taskNumber: 5,
+        completed: true,
+        evidenceItems: ["Documented Zero Trust security controls"],
+      },
+    });
+
+    expect(report.passed).toBe(true);
+    expect(report.overallScore).toBeGreaterThanOrEqual(70);
+    expect(report.completedTasks).toBe(5);
+
+    // Verify each task corresponds strictly to the 5 client project tasks
+    const taskNames = report.taskScores.map((t) => t.title);
+    expect(taskNames).toEqual([
+      "Identify Accounts and Platforms",
+      "Design a Safe Structure and Permissions",
+      "Describe Onboarding and Password Management",
+      "Review Audit Evidence and Troubleshoot an Access Issue",
+      "Document Configuration Decisions and Security Controls",
+    ]);
   });
 });

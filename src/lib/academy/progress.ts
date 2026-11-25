@@ -21,6 +21,78 @@ export const DEFAULT_LEARNER_PROGRESS: LearnerProgress = {
   lastUpdated: "2026-11-24T00:00:00.000Z",
 };
 
+/**
+ * Safely normalizes and migrates learner progress from prior iterations or draft IDs,
+ * ensuring no progress corruption when navigating the authoritative 12-module track.
+ */
+export function migrateLearnerProgress(
+  parsed: Partial<LearnerProgress> | null | undefined,
+): LearnerProgress {
+  if (!parsed) return DEFAULT_LEARNER_PROGRESS;
+
+  const track =
+    parsed.currentTrackId ||
+    (parsed.currentClassId?.startsWith("client-m")
+      ? "client-12"
+      : parsed.currentClassId?.startsWith("class-")
+        ? "intro-6"
+        : parsed.currentClassId?.startsWith("module-")
+          ? "admin-20"
+          : "client-12");
+
+  let currentClassId = parsed.currentClassId;
+  let currentModuleId = parsed.currentModuleId;
+  let currentLessonId = parsed.currentLessonId;
+
+  // Validate class ID syntax within the active track
+  if (track === "client-12") {
+    if (!currentClassId || !currentClassId.startsWith("client-m")) {
+      currentClassId = "client-m01";
+    }
+    if (!currentModuleId || !currentModuleId.startsWith("cm")) {
+      const modNum = currentClassId.replace("client-m", "");
+      currentModuleId = `cm${modNum}-core`;
+    }
+    if (!currentLessonId || !currentLessonId.startsWith("cm")) {
+      const modNum = currentClassId.replace("client-m", "");
+      currentLessonId = `cm${modNum}-l01`;
+    }
+  } else if (track === "admin-20") {
+    if (!currentClassId || !currentClassId.startsWith("module-")) {
+      currentClassId = "module-01";
+    }
+    if (!currentModuleId || !currentModuleId.startsWith("m")) {
+      currentModuleId = "m01-core";
+    }
+    if (!currentLessonId || !currentLessonId.startsWith("m")) {
+      currentLessonId = "m01-l01";
+    }
+  } else {
+    if (!currentClassId || !currentClassId.startsWith("class-")) {
+      currentClassId = "class-01";
+    }
+    if (!currentModuleId) currentModuleId = "c01-m01";
+    if (!currentLessonId) currentLessonId = "c01-m01-l01";
+  }
+
+  return {
+    currentTrackId: track,
+    currentClassId,
+    currentModuleId,
+    currentLessonId,
+    completedLessons: Array.isArray(parsed.completedLessons) ? [...parsed.completedLessons] : [],
+    checkpointAnswers: parsed.checkpointAnswers ? { ...parsed.checkpointAnswers } : {},
+    checkpointScores: parsed.checkpointScores ? { ...parsed.checkpointScores } : {},
+    completedExercises: Array.isArray(parsed.completedExercises)
+      ? [...parsed.completedExercises]
+      : [],
+    completedIndependentPractices: Array.isArray(parsed.completedIndependentPractices)
+      ? [...parsed.completedIndependentPractices]
+      : [],
+    lastUpdated: parsed.lastUpdated || new Date().toISOString(),
+  };
+}
+
 export function loadLearnerProgress(): LearnerProgress {
   if (typeof window === "undefined") {
     return DEFAULT_LEARNER_PROGRESS;
@@ -30,35 +102,7 @@ export function loadLearnerProgress(): LearnerProgress {
     const raw = window.localStorage.getItem(PROGRESS_STORAGE_KEY);
     if (!raw) return DEFAULT_LEARNER_PROGRESS;
     const parsed = JSON.parse(raw) as Partial<LearnerProgress>;
-    const track =
-      parsed.currentTrackId ||
-      (parsed.currentClassId?.startsWith("client-m")
-        ? "client-12"
-        : parsed.currentClassId?.startsWith("class-")
-          ? "intro-6"
-          : parsed.currentClassId?.startsWith("module-")
-            ? "admin-20"
-            : "client-12");
-    return {
-      currentTrackId: track,
-      currentClassId:
-        parsed.currentClassId ||
-        (track === "client-12" ? "client-m01" : track === "admin-20" ? "module-01" : "class-01"),
-      currentModuleId:
-        parsed.currentModuleId ||
-        (track === "client-12" ? "cm01-core" : track === "admin-20" ? "m01-core" : "c01-m01"),
-      currentLessonId:
-        parsed.currentLessonId ||
-        (track === "client-12" ? "cm01-l01" : track === "admin-20" ? "m01-l01" : "c01-m01-l01"),
-      completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
-      checkpointAnswers: parsed.checkpointAnswers || {},
-      checkpointScores: parsed.checkpointScores || {},
-      completedExercises: Array.isArray(parsed.completedExercises) ? parsed.completedExercises : [],
-      completedIndependentPractices: Array.isArray(parsed.completedIndependentPractices)
-        ? parsed.completedIndependentPractices
-        : [],
-      lastUpdated: parsed.lastUpdated || new Date().toISOString(),
-    };
+    return migrateLearnerProgress(parsed);
   } catch (err) {
     console.error("Failed to load learner progress from storage:", err);
     return DEFAULT_LEARNER_PROGRESS;

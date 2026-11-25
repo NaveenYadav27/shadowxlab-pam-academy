@@ -17,24 +17,18 @@ import {
   CLIENT_ASSESSMENT_FRAMEWORK,
   CLIENT_SCHEDULE_DISCREPANCIES,
   OUTSIDE_CLIENT_FOUNDATION_SCOPE_MODULES,
+  CONTENT_CLASSIFICATION_REGISTRY,
+  isMandatoryProgressionGate,
+  getContentClassification,
   evaluateClientFoundationProgress,
   evaluateCapstoneProject,
   CLIENT_CAPSTONE_PROJECT,
 } from "./client-foundation";
+
+export * from "./client-foundation";
 import type { ClassCurriculum, Lesson, Module } from "../types";
 
-export {
-  ADMIN_MODULES_20,
-  ADMIN_CATEGORIES,
-  CLIENT_FOUNDATION_MODULES_12,
-  CLIENT_FOUNDATION_SCHEDULE_5_DAYS,
-  CLIENT_ASSESSMENT_FRAMEWORK,
-  CLIENT_SCHEDULE_DISCREPANCIES,
-  OUTSIDE_CLIENT_FOUNDATION_SCOPE_MODULES,
-  evaluateClientFoundationProgress,
-  evaluateCapstoneProject,
-  CLIENT_CAPSTONE_PROJECT,
-};
+export { ADMIN_MODULES_20, ADMIN_CATEGORIES };
 
 export const ACADEMY_CLASSES_V2: ClassCurriculum[] = [
   CLASS_01,

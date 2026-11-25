@@ -64,3 +64,18 @@ export interface OutsideScopeItem {
   category: string;
   reason: string;
 }
+
+export type CurriculumContentClassification =
+  | "REQUIRED_CLIENT_CONTENT"
+  | "SUPPORTING_EXPLANATION"
+  | "OPTIONAL_ENRICHMENT"
+  | "OUTSIDE_CLIENT_FOUNDATION_SCOPE";
+
+export interface ClassifiedContentItem {
+  id: string;
+  title: string;
+  moduleId: string;
+  classification: CurriculumContentClassification;
+  isMandatoryGate: boolean;
+  rationale: string;
+}

@@ -26,10 +26,10 @@ export const CLIENT_ASSESSMENT_FRAMEWORK: {
       id: "fundamentals",
       title: "Fundamentals and Architecture",
       weightPercentage: 20,
-      moduleNumbers: [1, 2, 3],
-      moduleIds: ["client-m01", "client-m02", "client-m03"],
+      moduleNumbers: [1, 2, 3, 11],
+      moduleIds: ["client-m01", "client-m02", "client-m03", "client-m11"],
       description:
-        "Identity fundamentals, privileged risks, CyberArk core component topology (Vault, CPM, PSM, PVWA), and architectural security principles.",
+        "Identity fundamentals, privileged risks, CyberArk core component topology (Vault, CPM, PSM, PVWA), architectural security principles, and administration best practices (governance, health checks, leaver lifecycle, break-glass).",
     },
     {
       id: "safes",
@@ -53,10 +53,10 @@ export const CLIENT_ASSESSMENT_FRAMEWORK: {
       id: "sessions",
       title: "Session Management and Auditing",
       weightPercentage: 15,
-      moduleNumbers: [8, 9],
-      moduleIds: ["client-m08", "client-m09"],
+      moduleNumbers: [8, 9, 10],
+      moduleIds: ["client-m08", "client-m09", "client-m10"],
       description:
-        "PSM session isolation, remote RDP/SSH brokering, live session monitoring, termination, audit evidence analysis, and SOC alerting.",
+        "PSM session isolation, remote RDP/SSH brokering, live session monitoring, termination, audit evidence analysis, SOC alerting, and troubleshooting diagnostic protocols across support tickets.",
     },
     {
       id: "capstone",
