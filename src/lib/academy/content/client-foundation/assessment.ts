@@ -96,13 +96,26 @@ export interface ClientAssessmentEvaluation {
 
 export function evaluateClientFoundationProgress(
   progress: LearnerProgress,
-  capstoneScore: number = 0,
+  capstoneScore?: number,
 ): ClientAssessmentEvaluation {
+  const effectiveCapstoneScore =
+    typeof capstoneScore === "number"
+      ? capstoneScore
+      : (progress.capstoneReport?.overallScore ?? 0);
+  const capstonePassed =
+    typeof capstoneScore === "number"
+      ? capstoneScore >= CLIENT_ASSESSMENT_FRAMEWORK.passingScorePercentage
+      : Boolean(
+          progress.capstoneReport?.passed &&
+          progress.capstoneReport.overallScore >=
+            CLIENT_ASSESSMENT_FRAMEWORK.passingScorePercentage,
+        );
+
   const domainScores: DomainScoreResult[] = CLIENT_ASSESSMENT_FRAMEWORK.categories.map((cat) => {
-    // For capstone domain, score is driven by capstone evaluation (0-100)
+    // For capstone domain, score is driven strictly by real capstone evaluation (0-100), never hardcoded
     if (cat.id === "capstone") {
-      const isCapstoneFinished = progress.completedLessons.includes("cm12-l01");
-      const earned = isCapstoneFinished ? Math.max(capstoneScore, 85) : capstoneScore;
+      const isCapstoneLessonDone = progress.completedLessons.includes("cm12-l01");
+      const earned = Math.max(0, Math.min(100, Math.round(effectiveCapstoneScore)));
       const contribution = Math.round((earned * cat.weightPercentage) / 100);
       return {
         domainId: cat.id,
@@ -110,7 +123,7 @@ export function evaluateClientFoundationProgress(
         weightPercentage: cat.weightPercentage,
         earnedPercentage: earned,
         weightedScoreContribution: contribution,
-        completedLessonsCount: isCapstoneFinished ? 1 : 0,
+        completedLessonsCount: isCapstoneLessonDone && capstonePassed ? 1 : 0,
         totalLessonsCount: 1,
         exercisesCompletedCount: progress.completedExercises.includes("cm12-ex01") ? 1 : 0,
         totalExercisesCount: 1,
@@ -118,7 +131,7 @@ export function evaluateClientFoundationProgress(
       };
     }
 
-    // For other domains, calculate based on lessons completed + checkpoints + exercises
+    // For other domains, calculate based on completed lessons in that domain
     const totalLessons = cat.moduleIds.length; // 1 lesson per module in foundation
     let completedCount = 0;
     let exercisesCompleted = 0;
@@ -151,16 +164,19 @@ export function evaluateClientFoundationProgress(
     (sum, d) => sum + d.weightedScoreContribution,
     0,
   );
-  const isPassed = overallScorePercentage >= CLIENT_ASSESSMENT_FRAMEWORK.passingScorePercentage;
-  const capstoneCompleted = progress.completedLessons.includes("cm12-l01");
+  const capstoneCompleted =
+    capstonePassed &&
+    (progress.completedLessons.includes("cm12-l01") || Boolean(progress.capstoneReport?.passed));
+  const isPassed =
+    overallScorePercentage >= CLIENT_ASSESSMENT_FRAMEWORK.passingScorePercentage && capstonePassed;
 
   let summaryRecommendation = "";
   if (isPassed && capstoneCompleted) {
     summaryRecommendation =
       "Candidate has successfully demonstrated foundational competency across all 5 CyberArk PAM domains and completed the Capstone Project. Certificate of Completion recommended.";
-  } else if (!capstoneCompleted) {
+  } else if (!capstonePassed) {
     summaryRecommendation =
-      "Candidate has coursework in progress. Complete remaining modules and the Module 12 Capstone Project to achieve certification.";
+      "Capstone Project is incomplete or below the 70% threshold. Complete and evaluate all 5 Capstone Project tasks in Module 12 to achieve certification.";
   } else {
     summaryRecommendation = `Score is below the 70% passing threshold (${overallScorePercentage}%). Review failed domains and retake corresponding lab assessments.`;
   }

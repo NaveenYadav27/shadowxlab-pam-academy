@@ -71,6 +71,17 @@ export interface GuidedConcept {
     | "lab06b-failure-signals"
     | "lab06b-restore-prereqs"
     | "lab06b-launch"
+    | "m04-pvwa-inspect"
+    | "m04-access-denied"
+    | "m09-audit-records"
+    | "m09-suspicious-patterns"
+    | "m10-ticket-1"
+    | "m10-ticket-2"
+    | "m10-ticket-3"
+    | "m11-lifecycle-health"
+    | "m11-leaver-revocation"
+    | "m12-capstone-inventory-safes"
+    | "m12-capstone-controls-audit"
     | "generic-live-action";
   hints: ProgressiveHints;
   /** Shown when concept passes validation */
@@ -94,7 +105,12 @@ export interface IndependentChallengeSpec {
     | "ind-psm-second-session"
     | "ind-accounts-onboard"
     | "ind-discovery-onboard"
-    | "ind-audit-live-proof";
+    | "ind-audit-live-proof"
+    | "ind-m04-pvwa"
+    | "ind-m09-audit"
+    | "ind-m10-all-tickets"
+    | "ind-m11-governance"
+    | "ind-m12-capstone";
   hints: ProgressiveHints;
 }
 

@@ -18,15 +18,27 @@ import {
   isMandatoryProgressionGate,
   getContentClassification,
 } from "@/lib/academy/content";
-import { buildGuidedLabPlan } from "@/lib/academy/guided-lab-engine";
+import {
+  buildGuidedLabPlan,
+  captureSessionBaseline,
+  CLIENT_MODULE_PRACTICAL_REGISTRY,
+  evaluateConceptValidation,
+  evaluateIndependentChallenge,
+} from "@/lib/academy/guided-lab-engine";
 import {
   DEFAULT_LEARNER_PROGRESS,
   loadLearnerProgress,
+  saveLearnerProgress,
   resetLearnerProgress,
   migrateLearnerProgress,
 } from "@/lib/academy/progress";
 import type { LearnerProgress } from "@/lib/academy/types";
-import { makeInitialPamState } from "@/lib/pam-engine";
+import {
+  evaluateLabObjectives,
+  makeInitialPamState,
+  remediateIncident,
+  updateUserRole,
+} from "@/lib/pam-engine";
 import { AcademyWorkspace } from "@/components/academy/academy-workspace";
 
 describe("Task 07 — Strict Client Curriculum Alignment (CyberArk Basic Training)", () => {
@@ -504,5 +516,314 @@ describe("Task 07 — Strict Client Curriculum Alignment (CyberArk Basic Trainin
       "Review Audit Evidence and Troubleshoot an Access Issue",
       "Document Configuration Decisions and Security Controls",
     ]);
+  });
+});
+
+describe("Task 10 — Guided Lab Routing, Validation & Capstone Integration", () => {
+  beforeEach(() => {
+    resetLearnerProgress();
+  });
+
+  it("1 & 2. M04 PVWA Fundamentals: never generates Discovery Scan instructions and validates PVWA navigation & access-denied", () => {
+    const m04 = findClassById("client-m04")!;
+    const lesson = m04.modules[0]!.lessons[0]!;
+    const ex = lesson.practicalExercise!;
+    const plan = buildGuidedLabPlan(lesson, ex);
+
+    const serialized = JSON.stringify(plan).toLowerCase();
+    expect(serialized).not.toContain("discovery scan");
+    expect(serialized).not.toContain("svc_etl_sync");
+    expect(serialized).not.toContain("shadow credential");
+
+    expect(plan.concepts[0]!.validatorRule).toBe("m04-pvwa-inspect");
+    expect(plan.concepts[1]!.validatorRule).toBe("m04-access-denied");
+
+    const state = makeInitialPamState();
+    const baseline = captureSessionBaseline(state);
+    const c1 = evaluateConceptValidation(plan.concepts[0]!, state, ex, baseline);
+    const c2 = evaluateConceptValidation(plan.concepts[1]!, state, ex, baseline);
+    const ind = evaluateIndependentChallenge(plan, state, ex, baseline, state.audit.length);
+
+    expect(c1.passed).toBe(true);
+    expect(c2.passed).toBe(true);
+    expect(ind.passed).toBe(true);
+  });
+
+  it("3 & 4. M09 Monitoring & Auditing: never generates PSM launch instructions and validates audit evidence inspection", () => {
+    const m09 = findClassById("client-m09")!;
+    const lesson = m09.modules[0]!.lessons[0]!;
+    const ex = lesson.practicalExercise!;
+    const plan = buildGuidedLabPlan(lesson, ex);
+
+    const serialized = JSON.stringify(plan).toLowerCase();
+    expect(serialized).not.toContain("launch a monitored psm session");
+    expect(serialized).not.toContain("lab06a-launch");
+
+    expect(plan.concepts[0]!.validatorRule).toBe("m09-audit-records");
+    expect(plan.concepts[1]!.validatorRule).toBe("m09-suspicious-patterns");
+
+    const state = makeInitialPamState();
+    const baseline = captureSessionBaseline(state);
+    const c1 = evaluateConceptValidation(plan.concepts[0]!, state, ex, baseline);
+    const c2 = evaluateConceptValidation(plan.concepts[1]!, state, ex, baseline);
+    const ind = evaluateIndependentChallenge(plan, state, ex, baseline, state.audit.length);
+
+    expect(c1.passed).toBe(true);
+    expect(c2.passed).toBe(true);
+    expect(ind.passed).toBe(true);
+  });
+
+  it("5 & 6. M10 Three Support Tickets: contains all 3 tickets and rejects completion if any ticket remains unresolved", () => {
+    const m10 = findClassById("client-m10")!;
+    const lesson = m10.modules[0]!.lessons[0]!;
+    const ex = lesson.practicalExercise!;
+    const plan = buildGuidedLabPlan(lesson, ex);
+
+    expect(plan.concepts).toHaveLength(3);
+    expect(plan.concepts.map((c) => c.validatorRule)).toEqual([
+      "m10-ticket-1",
+      "m10-ticket-2",
+      "m10-ticket-3",
+    ]);
+
+    let state = makeInitialPamState();
+    const baseline = captureSessionBaseline(state);
+
+    // Initially all 3 tickets are Open -> all 3 fail
+    expect(evaluateConceptValidation(plan.concepts[0]!, state, ex, baseline).passed).toBe(false);
+    expect(evaluateConceptValidation(plan.concepts[1]!, state, ex, baseline).passed).toBe(false);
+    expect(evaluateConceptValidation(plan.concepts[2]!, state, ex, baseline).passed).toBe(false);
+    expect(evaluateIndependentChallenge(plan, state, ex, baseline, state.audit.length).passed).toBe(
+      false,
+    );
+
+    // Resolve Ticket 1 (INC-2043) and Ticket 2 (INC-2041), leave Ticket 3 (INC-2044) Open
+    state = remediateIncident(state, "INC-2043", "pam_admin").state;
+    state = remediateIncident(state, "INC-2041", "pam_admin").state;
+
+    expect(evaluateConceptValidation(plan.concepts[0]!, state, ex, baseline).passed).toBe(true);
+    expect(evaluateConceptValidation(plan.concepts[1]!, state, ex, baseline).passed).toBe(true);
+    expect(evaluateConceptValidation(plan.concepts[2]!, state, ex, baseline).passed).toBe(false);
+    expect(evaluateIndependentChallenge(plan, state, ex, baseline, state.audit.length).passed).toBe(
+      false,
+    );
+    expect(evaluateLabObjectives(state, ex.associatedLabId).completed).toBe(false);
+
+    // Resolve Ticket 3 (INC-2044) -> now all 3 pass
+    state = remediateIncident(state, "INC-2044", "pam_admin").state;
+    expect(evaluateConceptValidation(plan.concepts[2]!, state, ex, baseline).passed).toBe(true);
+    expect(evaluateIndependentChallenge(plan, state, ex, baseline, state.audit.length).passed).toBe(
+      true,
+    );
+    expect(evaluateLabObjectives(state, ex.associatedLabId).completed).toBe(true);
+  });
+
+  it("7 & 8. M11 Administration Best Practices: validates governance & leaver revocation and does not use DBA-SAFE as completion criterion", () => {
+    const m11 = findClassById("client-m11")!;
+    const lesson = m11.modules[0]!.lessons[0]!;
+    const ex = lesson.practicalExercise!;
+    const plan = buildGuidedLabPlan(lesson, ex);
+
+    const serialized = JSON.stringify(plan);
+    expect(serialized).not.toContain("DBA-SAFE");
+    expect(serialized).not.toContain("lab02-safe-boundary");
+
+    expect(plan.concepts[0]!.validatorRule).toBe("m11-lifecycle-health");
+    expect(plan.concepts[1]!.validatorRule).toBe("m11-leaver-revocation");
+
+    let state = makeInitialPamState();
+    const baseline = captureSessionBaseline(state);
+
+    expect(evaluateConceptValidation(plan.concepts[0]!, state, ex, baseline).passed).toBe(true);
+    expect(evaluateConceptValidation(plan.concepts[1]!, state, ex, baseline).passed).toBe(false);
+    expect(evaluateLabObjectives(state, ex.associatedLabId).completed).toBe(false);
+
+    // Perform simulated leaver access revocation via updateUserRole
+    state = updateUserRole(state, "usr-4", "Auditor", "pam_admin").state;
+    expect(evaluateConceptValidation(plan.concepts[1]!, state, ex, baseline).passed).toBe(true);
+    expect(evaluateIndependentChallenge(plan, state, ex, baseline, state.audit.length).passed).toBe(
+      true,
+    );
+    expect(evaluateLabObjectives(state, ex.associatedLabId).completed).toBe(true);
+  });
+
+  it("9 & 10. M12 Capstone: does not generate CPM reconciliation and renders real 5-task CapstoneWorkspace invoking evaluateCapstoneProject", () => {
+    const m12 = findClassById("client-m12")!;
+    const lesson = m12.modules[0]!.lessons[0]!;
+    const ex = lesson.practicalExercise!;
+    const plan = buildGuidedLabPlan(lesson, ex);
+
+    const serialized = JSON.stringify(plan).toLowerCase();
+    expect(serialized).not.toContain("lab05b");
+    expect(serialized).not.toContain("svc_backup");
+    expect(plan.concepts[0]!.validatorRule).toBe("m12-capstone-inventory-safes");
+    expect(plan.concepts[1]!.validatorRule).toBe("m12-capstone-controls-audit");
+
+    // Render AcademyWorkspace navigated directly to Module 12
+    const m12Progress: LearnerProgress = {
+      ...DEFAULT_LEARNER_PROGRESS,
+      currentTrackId: "client-12",
+      currentClassId: "client-m12",
+      currentModuleId: "cm12-core",
+      currentLessonId: "cm12-l01",
+    };
+    saveLearnerProgress(m12Progress);
+
+    const simState = makeInitialPamState();
+    render(<AcademyWorkspace state={simState} onResetState={vi.fn()} />);
+
+    expect(
+      screen.getByText(/Comprehensive PAM Workflow Design & Operational Validation/i),
+    ).toBeInTheDocument();
+    const evalBtn = screen.getByRole("button", { name: /evaluate capstone project/i });
+    fireEvent.click(evalBtn);
+
+    expect(screen.getByRole("region", { name: /capstone competency report/i })).toBeInTheDocument();
+  });
+
+  it("11, 12 & 13. Assessment Integration: incomplete/failing capstone never receives 85% and passing requires real evaluation evidence", () => {
+    // Incomplete capstone (even if cm12-l01 is in completedLessons) must score 0% for capstone domain and NOT pass
+    const incompleteCapstoneProgress: LearnerProgress = {
+      ...DEFAULT_LEARNER_PROGRESS,
+      completedLessons: CLIENT_FOUNDATION_MODULES_12.map(
+        (m) => m.id.replace("client-m", "cm") + "-l01",
+      ),
+      completedExercises: CLIENT_FOUNDATION_MODULES_12.map(
+        (m) => m.id.replace("client-m", "cm") + "-ex01",
+      ),
+    };
+    const evalIncomplete = evaluateClientFoundationProgress(incompleteCapstoneProgress);
+    const capstoneDomainIncomplete = evalIncomplete.domainScores.find(
+      (d) => d.domainId === "capstone",
+    )!;
+    expect(capstoneDomainIncomplete.earnedPercentage).toBe(0);
+    expect(capstoneDomainIncomplete.passed).toBe(false);
+    expect(evalIncomplete.capstoneCompleted).toBe(false);
+    expect(evalIncomplete.isPassed).toBe(false);
+
+    // Failing capstone (50%) must remain failing even after lesson completion
+    const failingCapstoneProgress: LearnerProgress = {
+      ...incompleteCapstoneProgress,
+      capstoneReport: {
+        projectId: "client-capstone-m12",
+        projectName: "Capstone",
+        totalTasks: 5,
+        completedTasks: 2,
+        taskScores: [],
+        overallScore: 50,
+        minimumPassingScore: 70,
+        passed: false,
+        verdict: "REMEDIATION_REQUIRED",
+        evaluatedAt: new Date().toISOString(),
+      },
+    };
+    const evalFailing = evaluateClientFoundationProgress(failingCapstoneProgress);
+    const capstoneDomainFailing = evalFailing.domainScores.find((d) => d.domainId === "capstone")!;
+    expect(capstoneDomainFailing.earnedPercentage).toBe(50);
+    expect(capstoneDomainFailing.passed).toBe(false);
+    expect(evalFailing.isPassed).toBe(false);
+
+    // Passing capstone (>= 70%) with real report passes
+    const passingCapstoneProgress: LearnerProgress = {
+      ...incompleteCapstoneProgress,
+      capstoneReport: {
+        projectId: "client-capstone-m12",
+        projectName: "Capstone",
+        totalTasks: 5,
+        completedTasks: 5,
+        taskScores: [],
+        overallScore: 90,
+        minimumPassingScore: 70,
+        passed: true,
+        verdict: "CERTIFIED",
+        evaluatedAt: new Date().toISOString(),
+      },
+    };
+    const evalPassing = evaluateClientFoundationProgress(passingCapstoneProgress);
+    expect(evalPassing.overallScorePercentage).toBe(98);
+    expect(evalPassing.capstoneCompleted).toBe(true);
+    expect(evalPassing.isPassed).toBe(true);
+  });
+
+  it("14. Capstone Persistence: submissions and report persist and reload cleanly via localStorage", () => {
+    const simState = makeInitialPamState();
+    const report = evaluateCapstoneProject(simState, {
+      1: {
+        taskNumber: 1,
+        completed: true,
+        notes: "Accounts verified",
+        evidenceItems: ["Accounts verified"],
+      },
+      2: {
+        taskNumber: 2,
+        completed: true,
+        notes: "Safes verified",
+        evidenceItems: ["Safes verified"],
+      },
+      3: { taskNumber: 3, completed: true, notes: "CPM verified", evidenceItems: ["CPM verified"] },
+      4: {
+        taskNumber: 4,
+        completed: true,
+        notes: "Audit verified",
+        evidenceItems: ["Audit verified"],
+      },
+      5: {
+        taskNumber: 5,
+        completed: true,
+        notes: "Controls verified",
+        evidenceItems: ["Controls verified"],
+      },
+    });
+
+    const saved: LearnerProgress = {
+      ...DEFAULT_LEARNER_PROGRESS,
+      capstoneSubmissions: {
+        1: {
+          taskNumber: 1,
+          completed: true,
+          notes: "Accounts verified",
+          evidenceItems: ["Accounts verified"],
+        },
+      },
+      capstoneReport: report,
+    };
+    saveLearnerProgress(saved);
+
+    const reloaded = loadLearnerProgress();
+    expect(reloaded.capstoneSubmissions?.[1]?.notes).toBe("Accounts verified");
+    expect(reloaded.capstoneReport?.overallScore).toBe(report.overallScore);
+    expect(reloaded.capstoneReport?.verdict).toBe("CERTIFIED");
+  });
+
+  it("15 & 16. Assessment Weights & Regression Check: 5 weights remain 20/20/25/15/20 and M01-M03, M05-M08 guided labs remain intact", () => {
+    const weights = CLIENT_ASSESSMENT_FRAMEWORK.categories.map((c) => c.weightPercentage);
+    expect(weights).toEqual([20, 20, 25, 15, 20]);
+    expect(Object.keys(CLIENT_MODULE_PRACTICAL_REGISTRY)).toHaveLength(12);
+
+    // M01-M03, M05-M08 must still produce their expected labs
+    expect(
+      buildGuidedLabPlan(
+        findClassById("client-m05")!.modules[0]!.lessons[0]!,
+        findClassById("client-m05")!.modules[0]!.lessons[0]!.practicalExercise!,
+      ).concepts[0]!.validatorRule,
+    ).toBe("lab02-safe-boundary");
+    expect(
+      buildGuidedLabPlan(
+        findClassById("client-m06")!.modules[0]!.lessons[0]!,
+        findClassById("client-m06")!.modules[0]!.lessons[0]!.practicalExercise!,
+      ).concepts[0]!.validatorRule,
+    ).toBe("lab03-account-platform");
+    expect(
+      buildGuidedLabPlan(
+        findClassById("client-m07")!.modules[0]!.lessons[0]!,
+        findClassById("client-m07")!.modules[0]!.lessons[0]!.practicalExercise!,
+      ).concepts[0]!.validatorRule,
+    ).toBe("lab05b-inspect-failure");
+    expect(
+      buildGuidedLabPlan(
+        findClassById("client-m08")!.modules[0]!.lessons[0]!,
+        findClassById("client-m08")!.modules[0]!.lessons[0]!.practicalExercise!,
+      ).concepts[0]!.validatorRule,
+    ).toBe("lab06a-approval");
   });
 });

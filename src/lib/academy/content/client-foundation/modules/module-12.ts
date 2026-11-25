@@ -393,7 +393,7 @@ export const CLIENT_MODULE_12: ClassCurriculum = {
               },
             ],
             targetConsole: "assessments",
-            associatedLabId: "Lab 05B · Reconcile out-of-sync credential",
+            associatedLabId: "Client M12 · Capstone Project",
             validationObjectiveId: "obj-cm12-capstone",
             validationCriteria:
               "Complete all 5 Capstone project tasks and achieve >= 70% on the Capstone Competency Report.",

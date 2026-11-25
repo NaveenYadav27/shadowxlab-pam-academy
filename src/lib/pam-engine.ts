@@ -768,6 +768,35 @@ export const INITIAL_INCIDENTS: PamIncident[] = [
     createdTime: "08:35:10",
     remediationAction: "Verify Port & Reset Connection Handshake",
   },
+  {
+    id: "INC-2043",
+    severity: "Warning",
+    component: "Vault",
+    accountUsername: "dba_user",
+    targetHost: "DBA-SAFE",
+    errorCode: "ITATS053E",
+    errorDetail:
+      "Access denied: User 'dba_user' attempted to initiate a session in DBA-SAFE without required 'Use accounts' / 'Initiate privileged sessions' permission.",
+    status: "Open",
+    assignedOperator: "pam_admin",
+    createdTime: "08:40:12",
+    remediationAction: "Restore Least-Privilege Safe ACL for dba_user on DBA-SAFE",
+  },
+  {
+    id: "INC-2044",
+    severity: "Critical",
+    component: "PSM",
+    accountId: "account-1",
+    accountUsername: "Administrator",
+    targetHost: "WIN-SRV-01",
+    errorCode: "PSMSR037E",
+    errorDetail:
+      "PSM session connection timed out on TCP 3389: Target host firewall or PSM connector preflight check failed.",
+    status: "Open",
+    assignedOperator: "windows_admin",
+    createdTime: "08:45:03",
+    remediationAction: "Restore PSM Connector Health & Verify TCP 3389 Reachability",
+  },
 ];
 
 export function makeInitialPamState(): PamState {
@@ -1884,6 +1913,29 @@ export function remediateIncident(
     });
   }
 
+  let nextSafes = state.safes;
+  if (inc.component === "Vault" && inc.targetHost) {
+    nextSafes = state.safes.map((safe) => {
+      if (safe.name !== inc.targetHost) return safe;
+      const hasUser = safe.members.some((m) => m.username === inc.accountUsername);
+      const leastPriv: SafePermission[] = [
+        "List accounts",
+        "Use accounts",
+        "Initiate privileged sessions",
+      ];
+      return {
+        ...safe,
+        members: hasUser
+          ? safe.members.map((m) =>
+              m.username === inc.accountUsername ? { ...m, permissions: leastPriv } : m,
+            )
+          : [...safe.members, { username: inc.accountUsername, permissions: leastPriv }],
+      };
+    });
+  }
+
+  const nextPsmHealthy = inc.component === "PSM" ? true : state.psmConnectorHealthy;
+
   const updatedIncidents = state.incidents.map((i) =>
     i.id === incidentId
       ? {
@@ -1899,8 +1951,10 @@ export function remediateIncident(
   return {
     state: {
       ...state,
+      safes: nextSafes,
       accounts: nextAccounts,
       incidents: updatedIncidents,
+      psmConnectorHealthy: nextPsmHealthy,
       audit: [
         auditEvent(
           actor,
@@ -2350,6 +2404,112 @@ export function evaluateLabObjectives(
           : "Launch session with ticket CHG-20412",
       },
     );
+  } else if (labId.includes("Client M04")) {
+    const hasWinSrv = state.accounts.some(
+      (a) => a.username === "Administrator" && a.address === "WIN-SRV-01" && a.safe === "WIN-SAFE",
+    );
+    const hasSafeAclDenial = !canAccessAccount(state, "DBA-SAFE", "dba_user", "Retrieve accounts");
+    const hasDenialEvidence =
+      state.incidents.some((i) => i.errorCode === "ITATS053E") ||
+      state.audit.some((a) => a.result === "Denied" || a.result === "Warning");
+    objectives.push(
+      {
+        id: "m04-pvwa-inspect",
+        description: "Locate Administrator on WIN-SRV-01 in WIN-SAFE and inspect properties",
+        done: hasWinSrv,
+        evidence: hasWinSrv
+          ? "WIN-SRV-01\\Administrator inspected in WIN-SAFE"
+          : "WIN-SRV-01\\Administrator missing",
+      },
+      {
+        id: "m04-access-denied",
+        description: "Examine simulated access-denied boundary (Retrieve withheld on DBA-SAFE)",
+        done: hasSafeAclDenial && hasDenialEvidence,
+        evidence: hasSafeAclDenial
+          ? "Access-denied boundary verified (ITATS053E / Retrieve withheld)"
+          : "Excessive Retrieve permission detected on DBA-SAFE",
+      },
+    );
+  } else if (labId.includes("Client M09")) {
+    const hasAuditHistory = state.audit.length >= 4;
+    const hasAnomalyEvent = state.audit.some(
+      (a) => a.result === "Warning" || a.result === "Denied",
+    );
+    const hasInventoryEvidence = state.accounts.length >= 8 && state.safes.length >= 7;
+    objectives.push(
+      {
+        id: "m09-audit-records",
+        description: "Inspect PAM audit journal records in Reports & Audit",
+        done: hasAuditHistory,
+        evidence: `${state.audit.length} audit events available in Vault journal`,
+      },
+      {
+        id: "m09-suspicious-patterns",
+        description: "Identify suspicious/warning activity and review compliance inventory",
+        done: hasAnomalyEvent && hasInventoryEvidence,
+        evidence: hasAnomalyEvent
+          ? "Warning/anomaly event and compliance inventory verified"
+          : "No warning/anomaly audit event found",
+      },
+    );
+  } else if (labId.includes("Client M10")) {
+    const t1 = state.incidents.find((i) => i.id === "INC-2043");
+    const t2 = state.incidents.find((i) => i.id === "INC-2041");
+    const t3 = state.incidents.find((i) => i.id === "INC-2044");
+    const t1Done = t1?.status === "Resolved";
+    const t2Done = t2?.status === "Resolved";
+    const t3Done = t3?.status === "Resolved" && state.psmConnectorHealthy;
+    objectives.push(
+      {
+        id: "m10-ticket-1",
+        description: "Resolve Ticket 1: Vault Safe ACL permission denial (INC-2043)",
+        done: t1Done,
+        evidence: t1Done ? "INC-2043 Resolved (Safe ACL restored)" : "INC-2043 still Open",
+      },
+      {
+        id: "m10-ticket-2",
+        description: "Resolve Ticket 2: CPM credential lockout on svc_backup (INC-2041)",
+        done: t2Done,
+        evidence: t2Done ? "INC-2041 Resolved (CPM reconciled)" : "INC-2041 still Open",
+      },
+      {
+        id: "m10-ticket-3",
+        description: "Resolve Ticket 3: PSM connection timeout on WIN-SRV-01 (INC-2044)",
+        done: t3Done,
+        evidence: t3Done ? "INC-2044 Resolved (PSM connector healthy)" : "INC-2044 still Open",
+      },
+    );
+  } else if (labId.includes("Client M11")) {
+    const hasEmergencySafe = state.safes.some((s) => s.name === "EMERGENCY-SAFE");
+    const hasLeaverAction = state.audit.some((a) => a.action === "Update User Role");
+    objectives.push(
+      {
+        id: "m11-lifecycle-health",
+        description: "Review EMERGENCY-SAFE break-glass governance and operational health",
+        done: hasEmergencySafe && state.psmConnectorHealthy,
+        evidence: hasEmergencySafe
+          ? "EMERGENCY-SAFE and system health verified"
+          : "EMERGENCY-SAFE missing",
+      },
+      {
+        id: "m11-leaver-revocation",
+        description: "Revoke simulated leaver access via Access Management role update",
+        done: hasLeaverAction,
+        evidence: hasLeaverAction
+          ? "Leaver role update recorded in audit trail"
+          : "Execute leaver role update in Access Management",
+      },
+    );
+  } else if (labId.includes("Client M12")) {
+    const hasAccounts = state.accounts.length >= 2;
+    const hasSafes = state.safes.length >= 2;
+    const hasAudit = state.audit.length >= 3;
+    objectives.push({
+      id: "m12-capstone-state",
+      description: "Verify live simulator accounts, Safes, and audit evidence for Capstone",
+      done: hasAccounts && hasSafes && hasAudit,
+      evidence: `${state.accounts.length} accounts, ${state.safes.length} Safes, ${state.audit.length} audit events`,
+    });
   } else {
     objectives.push({
       id: "complete-steps",

@@ -324,7 +324,7 @@ export const CLIENT_MODULE_04: ClassCurriculum = {
               },
             ],
             targetConsole: "accounts",
-            associatedLabId: "Lab 04 · Discover unmanaged accounts",
+            associatedLabId: "Client M04 · PVWA Web Portal Fundamentals",
             validationObjectiveId: "obj-cm04-pvwa",
             validationCriteria:
               "Search and inspect privileged accounts in the Accounts console and analyze access-denied controls.",

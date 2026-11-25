@@ -337,7 +337,7 @@ export const CLIENT_MODULE_10: ClassCurriculum = {
               },
             ],
             targetConsole: "troubleshooting",
-            associatedLabId: "Lab 05B · Reconcile out-of-sync credential",
+            associatedLabId: "Client M10 · Three Support Tickets",
             validationObjectiveId: "obj-cm10-troubleshoot",
             validationCriteria:
               "Investigate and resolve simulated CyberArk support tickets using structured diagnostic protocol.",

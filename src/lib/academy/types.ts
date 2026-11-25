@@ -214,5 +214,36 @@ export interface LearnerProgress {
   checkpointScores: Record<string, boolean>; // questionId -> isCorrect
   completedExercises: string[]; // exercise IDs
   completedIndependentPractices?: string[]; // exercise IDs with independent practice verified
+  capstoneSubmissions?:
+    | Record<
+        number,
+        {
+          taskNumber: 1 | 2 | 3 | 4 | 5;
+          completed: boolean;
+          notes?: string | undefined;
+          evidenceItems: string[];
+        }
+      >
+    | undefined;
+  capstoneReport?:
+    | {
+        projectId: string;
+        projectName: string;
+        totalTasks: number;
+        completedTasks: number;
+        taskScores: Array<{
+          taskNumber: number;
+          title: string;
+          score: number;
+          passed: boolean;
+          feedback: string;
+        }>;
+        overallScore: number;
+        minimumPassingScore: number;
+        passed: boolean;
+        verdict: "CERTIFIED" | "REMEDIATION_REQUIRED";
+        evaluatedAt: string;
+      }
+    | undefined;
   lastUpdated: string;
 }

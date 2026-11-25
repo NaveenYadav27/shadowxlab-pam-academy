@@ -27,6 +27,8 @@ import {
   evaluateClientFoundationProgress,
   findClassById,
   getCurriculumMetrics,
+  type CapstoneEvaluationReport,
+  type CapstoneTaskSubmission,
 } from "@/lib/academy/content";
 import {
   DEFAULT_LEARNER_PROGRESS,
@@ -205,7 +207,10 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
       progress.completedExercises.includes(currentLesson.practicalExercise.id) ||
       Boolean(labEvaluation?.completed);
 
-    if (!checkpointStatus.passed || !exerciseValidated) {
+    const capstoneValidated =
+      currentLesson.id !== "cm12-l01" || Boolean(progress.capstoneReport?.passed);
+
+    if (!checkpointStatus.passed || !exerciseValidated || !capstoneValidated) {
       const missing: string[] = [];
       if (!checkpointStatus.passed) {
         missing.push(
@@ -216,6 +221,9 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
         missing.push(
           `Practical Lab validation (${labEvaluation?.score ?? 0}/100 in ${currentLesson.practicalExercise.targetConsole.toUpperCase()} console)`,
         );
+      }
+      if (!capstoneValidated) {
+        missing.push("Capstone Project evaluation (>= 70% required)");
       }
       toast.error(
         `Complete required checks before finishing Lesson ${currentLesson.number}: ${missing.join(" and ")}.`,
@@ -254,6 +262,27 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
   function handleRecordIndependentComplete(exId: string) {
     const updated = recordIndependentPracticeComplete(exId);
     setProgress(updated);
+  }
+
+  function handleSaveCapstone(
+    submissions: Record<number, CapstoneTaskSubmission>,
+    report: CapstoneEvaluationReport,
+  ) {
+    const nextProgress: LearnerProgress = {
+      ...progress,
+      capstoneSubmissions: submissions,
+      capstoneReport: report,
+      lastUpdated: new Date().toISOString(),
+    };
+    saveLearnerProgress(nextProgress);
+    setProgress(nextProgress);
+    if (report.passed) {
+      toast.success(`Capstone passed (${report.overallScore}%)! Competency Report generated.`);
+    } else {
+      toast.error(
+        `Capstone score ${report.overallScore}% is below 70%. Review feedback and resubmit.`,
+      );
+    }
   }
 
   function handleFullReset() {
@@ -624,6 +653,9 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
                 : "6-Class Foundational Track"
           }
           moduleTitle={`${currentClass.label}: ${currentClass.title}`}
+          capstoneSubmissions={progress.capstoneSubmissions}
+          capstoneReport={progress.capstoneReport}
+          onSaveCapstone={handleSaveCapstone}
         />
 
         {/* RIGHT PANEL: Objectives, Terminology, Knowledge Checkpoint & Simulator Lab */}

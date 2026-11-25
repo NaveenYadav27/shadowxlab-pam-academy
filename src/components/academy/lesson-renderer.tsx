@@ -27,7 +27,12 @@ import { VisualLearningCard } from "./visual/VisualLearningCard";
 import { ArchitectureExplorer } from "./visual/ArchitectureExplorer";
 import { WorkflowVisualizer, type WorkflowType } from "./visual/WorkflowVisualizer";
 import { GuidedLabInstructor } from "./guided-lab-instructor";
+import { CapstoneWorkspace } from "./capstone-workspace";
 import { evaluateLabObjectives, makeInitialPamState, type PamState } from "@/lib/pam-engine";
+import type {
+  CapstoneEvaluationReport,
+  CapstoneTaskSubmission,
+} from "@/lib/academy/content/client-foundation/capstone";
 
 export interface LessonNavTarget {
   classId: string;
@@ -84,6 +89,14 @@ interface LessonRendererProps {
   trackRemainingCount?: number;
   trackTitle?: string;
   moduleTitle?: string;
+  capstoneSubmissions?: Record<number, CapstoneTaskSubmission> | undefined;
+  capstoneReport?: CapstoneEvaluationReport | undefined;
+  onSaveCapstone?:
+    | ((
+        submissions: Record<number, CapstoneTaskSubmission>,
+        report: CapstoneEvaluationReport,
+      ) => void)
+    | undefined;
 }
 
 export const LessonRenderer: React.FC<LessonRendererProps> = ({
@@ -103,6 +116,9 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
   trackRemainingCount = 0,
   trackTitle,
   moduleTitle,
+  capstoneSubmissions,
+  capstoneReport,
+  onSaveCapstone,
 }) => {
   const liveState = state || makeInitialPamState();
   const checkpointStatus = evaluateLessonCheckpoint(lesson.knowledgeCheck, savedAnswers);
@@ -113,7 +129,8 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
     !lesson.practicalExercise ||
     completedExercises.includes(lesson.practicalExercise.id) ||
     Boolean(labEvaluation?.completed);
-  const canCompleteLesson = checkpointStatus.passed && exerciseValidated;
+  const capstoneValidated = lesson.id !== "cm12-l01" || Boolean(capstoneReport?.passed);
+  const canCompleteLesson = checkpointStatus.passed && exerciseValidated && capstoneValidated;
 
   function handleScrollToArchitecture() {
     const el = document.getElementById("architecture-explorer-section");
@@ -689,6 +706,17 @@ export const LessonRenderer: React.FC<LessonRendererProps> = ({
           </ul>
         </div>
       </section>
+
+      {/* 9A. Module 12 Capstone Project Workspace */}
+      {lesson.id === "cm12-l01" && (
+        <CapstoneWorkspace
+          state={liveState}
+          savedSubmissions={capstoneSubmissions}
+          savedReport={capstoneReport}
+          onSaveCapstone={onSaveCapstone || (() => {})}
+          onJumpConsole={onJumpConsole}
+        />
+      )}
 
       {/* 9. Instructor-Led Guided Hands-On Lab Session & Live Validator */}
       {lesson.practicalExercise && (

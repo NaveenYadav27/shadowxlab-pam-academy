@@ -89,6 +89,8 @@ export function migrateLearnerProgress(
     completedIndependentPractices: Array.isArray(parsed.completedIndependentPractices)
       ? [...parsed.completedIndependentPractices]
       : [],
+    capstoneSubmissions: parsed.capstoneSubmissions ? { ...parsed.capstoneSubmissions } : undefined,
+    capstoneReport: parsed.capstoneReport ? { ...parsed.capstoneReport } : undefined,
     lastUpdated: parsed.lastUpdated || new Date().toISOString(),
   };
 }

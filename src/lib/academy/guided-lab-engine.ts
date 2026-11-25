@@ -9,6 +9,14 @@
  */
 
 import { evaluateLabObjectives, evaluatePermission, type PamState } from "@/lib/pam-engine";
+import {
+  buildClientM04PvwaConcepts,
+  buildClientM09AuditConcepts,
+  buildClientM10TicketsConcepts,
+  buildClientM11GovernanceConcepts,
+  buildClientM12CapstoneConcepts,
+  type ClientPracticalRegistryEntry,
+} from "./client-practical-registry";
 import type { Lesson, PracticalExercise } from "./types";
 import type {
   ConceptValidationResult,
@@ -1319,11 +1327,149 @@ function buildLab01AndGenericConcepts(
   };
 }
 
+export const CLIENT_MODULE_PRACTICAL_REGISTRY: Record<string, ClientPracticalRegistryEntry> = {
+  "cm01-ex01": {
+    clientModuleId: "client-m01",
+    exerciseId: "cm01-ex01",
+    practicalObjective:
+      "Inspect PAM topology and classify standard, service, and privileged accounts.",
+    targetConsole: "overview",
+    expectedOutcomes: ["Core 4 components verified", "Baseline inventory inspected"],
+    completionEvidence: "Live baseline topology and audit trace verified.",
+    buildConcepts: buildLab01AndGenericConcepts,
+  },
+  "cm02-ex01": {
+    clientModuleId: "client-m02",
+    exerciseId: "cm02-ex01",
+    practicalObjective: "Inspect CyberArk core component responsibilities and protocol boundaries.",
+    targetConsole: "environment",
+    expectedOutcomes: [
+      "Vault/PVWA/CPM/PSM roles verified",
+      "TCP 1858/443/3389 boundaries confirmed",
+    ],
+    completionEvidence: "Component topology and live operational trace verified.",
+    buildConcepts: buildLab01AndGenericConcepts,
+  },
+  "cm03-ex01": {
+    clientModuleId: "client-m03",
+    exerciseId: "cm03-ex01",
+    practicalObjective: "Trace a privileged access request through the PAM architecture diagram.",
+    targetConsole: "overview",
+    expectedOutcomes: ["3 isolation zones verified", "5-step access request flow traced"],
+    completionEvidence: "Architectural control-flow trace verified in live simulator.",
+    buildConcepts: buildLab01AndGenericConcepts,
+  },
+  "cm04-ex01": {
+    clientModuleId: "client-m04",
+    exerciseId: "cm04-ex01",
+    practicalObjective:
+      "Navigate PVWA Accounts, inspect permitted properties, and examine an access-denied scenario.",
+    targetConsole: "accounts",
+    expectedOutcomes: [
+      "WIN-SRV-01\\Administrator inspected",
+      "ITATS053E / Retrieve withheld denial analyzed",
+    ],
+    completionEvidence: "Account property inspection and Safe access-denied boundary verified.",
+    buildConcepts: buildClientM04PvwaConcepts,
+  },
+  "cm05-ex01": {
+    clientModuleId: "client-m05",
+    exerciseId: "cm05-ex01",
+    practicalObjective:
+      "Configure Safe permissions for dba_user on DBA-SAFE and troubleshoot least privilege.",
+    targetConsole: "safes",
+    expectedOutcomes: [
+      "DBA-SAFE ACL configured with List/Use/Session",
+      "Retrieve accounts withheld",
+    ],
+    completionEvidence: "Lab 02 DBA-SAFE least-privilege audit events verified.",
+    buildConcepts: buildLab02Concepts,
+  },
+  "cm06-ex01": {
+    clientModuleId: "client-m06",
+    exerciseId: "cm06-ex01",
+    practicalObjective:
+      "Onboard Windows administrator account and review simulated Linux onboarding requirements.",
+    targetConsole: "accounts",
+    expectedOutcomes: ["WIN-SRV-01\\Administrator in WIN-SAFE verified", "CPM Verify executed"],
+    completionEvidence: "Onboarded account verified and managed in Accounts/CPM.",
+    buildConcepts: buildLab03Concepts,
+  },
+  "cm07-ex01": {
+    clientModuleId: "client-m07",
+    exerciseId: "cm07-ex01",
+    practicalObjective:
+      "Review password policy and remediate simulated CPM verification/rotation failure.",
+    targetConsole: "cpm",
+    expectedOutcomes: ["svc_backup unlocked", "Reconcile, Change, and Verify executed"],
+    completionEvidence: "svc_backup restored to Managed with CPM audit trail.",
+    buildConcepts: buildLab05BConcepts,
+  },
+  "cm08-ex01": {
+    clientModuleId: "client-m08",
+    exerciseId: "cm08-ex01",
+    practicalObjective: "Execute a brokered PSM session workflow and inspect session audit record.",
+    targetConsole: "psm",
+    expectedOutcomes: ["Ticketed PSM session launched", "Commands executed and session terminated"],
+    completionEvidence: "Terminated PSM session with command timeline sealed in audit.",
+    buildConcepts: buildLab06AConcepts,
+  },
+  "cm09-ex01": {
+    clientModuleId: "client-m09",
+    exerciseId: "cm09-ex01",
+    practicalObjective:
+      "Inspect Reports & Audit records, identify suspicious patterns, and review compliance inventory.",
+    targetConsole: "audit",
+    expectedOutcomes: [
+      "Vault audit journal inspected",
+      "Warning/anomaly events and compliance inventory verified",
+    ],
+    completionEvidence: "Audit journal and compliance evidence verified in Reports & Audit.",
+    buildConcepts: buildClientM09AuditConcepts,
+  },
+  "cm10-ex01": {
+    clientModuleId: "client-m10",
+    exerciseId: "cm10-ex01",
+    practicalObjective:
+      "Investigate and resolve all three simulated support tickets (Safe ACL, CPM lockout, PSM timeout).",
+    targetConsole: "troubleshooting",
+    expectedOutcomes: ["INC-2043 Resolved", "INC-2041 Resolved", "INC-2044 Resolved"],
+    completionEvidence: "All 3 support tickets resolved with audit trail evidence.",
+    buildConcepts: buildClientM10TicketsConcepts,
+  },
+  "cm11-ex01": {
+    clientModuleId: "client-m11",
+    exerciseId: "cm11-ex01",
+    practicalObjective:
+      "Review ownership/health, inspect EMERGENCY-SAFE, and execute simulated leaver access revocation.",
+    targetConsole: "access",
+    expectedOutcomes: [
+      "EMERGENCY-SAFE & health verified",
+      "Simulated leaver role updated and audited",
+    ],
+    completionEvidence: "Leaver role update audit event and break-glass governance verified.",
+    buildConcepts: buildClientM11GovernanceConcepts,
+  },
+  "cm12-ex01": {
+    clientModuleId: "client-m12",
+    exerciseId: "cm12-ex01",
+    practicalObjective:
+      "Complete the 5-task Capstone Project and generate the Capstone Competency Report.",
+    targetConsole: "assessments",
+    expectedOutcomes: ["5 Capstone tasks evaluated >= 70%", "Competency report generated"],
+    completionEvidence: "Capstone evaluation report passed (>= 70%) with live simulator state.",
+    buildConcepts: buildClientM12CapstoneConcepts,
+  },
+};
+
 export function buildGuidedLabPlan(lesson: Lesson, exercise: PracticalExercise): GuidedLabPlan {
   const labId = exercise.associatedLabId || "";
+  const registryEntry = CLIENT_MODULE_PRACTICAL_REGISTRY[exercise.id];
   let built: { concepts: GuidedConcept[]; independent: IndependentChallengeSpec };
 
-  if (labId.includes("Lab 02")) {
+  if (registryEntry) {
+    built = registryEntry.buildConcepts(lesson, exercise);
+  } else if (labId.includes("Lab 02")) {
     built = buildLab02Concepts(lesson, exercise);
   } else if (labId.includes("Lab 05B")) {
     built = buildLab05BConcepts(lesson, exercise);
@@ -2066,6 +2212,248 @@ export function evaluateConceptValidation(
       }
       break;
     }
+
+    case "m04-pvwa-inspect": {
+      const winAdmin = state.accounts.find(
+        (a) => a.username === "Administrator" && a.address === "WIN-SRV-01",
+      );
+      const passed = Boolean(
+        winAdmin && winAdmin.safe === "WIN-SAFE" && winAdmin.platform === "Windows Server Local",
+      );
+      criteria.push({
+        id: "pvwa_account_properties",
+        label: "PVWA account listing & WIN-SRV-01\\Administrator properties verified",
+        passed,
+        expected:
+          "Account `Administrator` on `WIN-SRV-01` in `WIN-SAFE` with platform `Windows Server Local`.",
+        observed: winAdmin
+          ? `${winAdmin.username}@${winAdmin.address} in ${winAdmin.safe} (${winAdmin.platform}, ${winAdmin.status}).`
+          : "WIN-SRV-01\\Administrator not found in Accounts.",
+        possibleReason: passed ? undefined : "Baseline PVWA account inventory not initialized.",
+        diagnosticAction: "Open Accounts Console and inspect `Administrator` on `WIN-SRV-01`.",
+      });
+      if (passed && winAdmin) {
+        evidence.push(
+          `Inspected PVWA account: ${winAdmin.username}@${winAdmin.address} (${winAdmin.safe}, ${winAdmin.platform})`,
+        );
+      }
+      break;
+    }
+
+    case "m04-access-denied": {
+      const retrieveEval = evaluatePermission(state, "DBA-SAFE", "dba_user", "Retrieve accounts");
+      const hasDenialEvidence =
+        state.incidents.some((i) => i.errorCode === "ITATS053E") ||
+        state.audit.some((a) => a.result === "Denied" || a.result === "Warning");
+      const passed = !retrieveEval.allowed && hasDenialEvidence;
+      criteria.push({
+        id: "pvwa_access_denied_boundary",
+        label: "Access-denied boundary analyzed (Retrieve withheld on DBA-SAFE)",
+        passed,
+        expected:
+          "`dba_user` is denied `Retrieve accounts` on `DBA-SAFE` (`ITATS053E` / least privilege).",
+        observed: retrieveEval.allowed
+          ? "dba_user currently has Retrieve accounts permission (violates least privilege)."
+          : `Access denied enforced: ${retrieveEval.message}`,
+        possibleReason: retrieveEval.allowed
+          ? "`Retrieve accounts` was granted to `dba_user`, bypassing the access-denied boundary."
+          : undefined,
+        diagnosticAction:
+          "Open Safes → `DBA-SAFE` → inspect `dba_user` permissions and verify `Retrieve accounts` is unchecked.",
+      });
+      if (passed) {
+        evidence.push(
+          "Simulated access-denied boundary verified: Retrieve accounts blocked for dba_user",
+        );
+      }
+      break;
+    }
+
+    case "m09-audit-records": {
+      const hasEvents = state.audit.length >= 4;
+      const hasOperatorEvent = state.audit.some(
+        (a) =>
+          a.actor === "pam_operator" || a.actor === "soc_analyst" || a.actor === "windows_admin",
+      );
+      const passed = hasEvents && hasOperatorEvent;
+      criteria.push({
+        id: "audit_journal_inspected",
+        label: "Vault audit records and operator activity present in Reports & Audit",
+        passed,
+        expected: "At least 4 audit events including operator/CPM/session records.",
+        observed: `${state.audit.length} audit event(s) in Reports & Audit journal.`,
+        diagnosticAction: "Open `Reports & Audit` and review the chronological audit journal.",
+      });
+      if (passed) {
+        evidence.push(
+          `Audit journal verified (${state.audit.length} events; latest: ${state.audit[0]?.action ?? "N/A"})`,
+        );
+      }
+      break;
+    }
+
+    case "m09-suspicious-patterns": {
+      const warningOrDenied = state.audit.find(
+        (a) => a.result === "Warning" || a.result === "Denied",
+      );
+      const hasInventory = state.accounts.length >= 8 && state.safes.length >= 7;
+      const passed = Boolean(warningOrDenied) && hasInventory;
+      criteria.push({
+        id: "suspicious_audit_pattern",
+        label: "Warning/anomalous audit event identified in Reports & Audit",
+        passed: Boolean(warningOrDenied),
+        expected: "At least one `Warning` or `Denied` audit event for SOC forensic review.",
+        observed: warningOrDenied
+          ? `${warningOrDenied.result}: ${warningOrDenied.action} on ${warningOrDenied.target} (${warningOrDenied.detail})`
+          : "No Warning or Denied audit events found.",
+        diagnosticAction: "Inspect `Reports & Audit` for `Warning` / `Denied` events.",
+      });
+      criteria.push({
+        id: "compliance_inventory_evidence",
+        label: "Compliance inventory evidence (Safes & Accounts) verified",
+        passed: hasInventory,
+        expected: "At least 7 Safes and 8 Accounts available for compliance reporting.",
+        observed: `${state.safes.length} Safes and ${state.accounts.length} Accounts in compliance inventory.`,
+        diagnosticAction: "Review Compliance Inventory in `Reports & Audit`.",
+      });
+      if (passed && warningOrDenied) {
+        evidence.push(
+          `Suspicious/Warning event analyzed: ${warningOrDenied.action} (${warningOrDenied.target})`,
+        );
+      }
+      break;
+    }
+
+    case "m10-ticket-1": {
+      const inc = state.incidents.find((i) => i.id === "INC-2043");
+      const passed = inc?.status === "Resolved";
+      criteria.push({
+        id: "ticket_1_resolved",
+        label: "Ticket 1 (INC-2043 · Vault Safe ACL denial) resolved",
+        passed,
+        expected: "Incident `INC-2043` (`ITATS053E` on `DBA-SAFE`) has status `Resolved`.",
+        observed: inc ? `INC-2043 status is \`${inc.status}\`.` : "INC-2043 not found.",
+        possibleReason: "INC-2043 has not been remediated in Troubleshooting yet.",
+        diagnosticAction:
+          "Open `Troubleshooting` → select `INC-2043` → click `Execute Remediation`.",
+      });
+      if (passed) evidence.push("Ticket 1 (INC-2043 Vault Safe ACL) Resolved");
+      break;
+    }
+
+    case "m10-ticket-2": {
+      const inc = state.incidents.find((i) => i.id === "INC-2041");
+      const svcBackup = state.accounts.find((a) => a.username === "svc_backup");
+      const passed = inc?.status === "Resolved" || svcBackup?.status === "Managed";
+      criteria.push({
+        id: "ticket_2_resolved",
+        label: "Ticket 2 (INC-2041 · CPM lockout on svc_backup) resolved",
+        passed,
+        expected: "Incident `INC-2041` (`CACPM250E`) is `Resolved` (or `svc_backup` is `Managed`).",
+        observed: `INC-2041: \`${inc?.status ?? "N/A"}\`; svc_backup: \`${svcBackup?.status ?? "N/A"}\`.`,
+        possibleReason: "INC-2041 has not been remediated in Troubleshooting or CPM yet.",
+        diagnosticAction:
+          "Open `Troubleshooting` → select `INC-2041` → click `Execute Remediation`.",
+      });
+      if (passed) evidence.push("Ticket 2 (INC-2041 CPM lockout) Resolved");
+      break;
+    }
+
+    case "m10-ticket-3": {
+      const inc = state.incidents.find((i) => i.id === "INC-2044");
+      const passed = inc?.status === "Resolved" && state.psmConnectorHealthy;
+      criteria.push({
+        id: "ticket_3_resolved",
+        label: "Ticket 3 (INC-2044 · PSM connection timeout) resolved & connector healthy",
+        passed,
+        expected:
+          "Incident `INC-2044` (`PSMSR037E`) is `Resolved` and `psmConnectorHealthy` is true.",
+        observed: `INC-2044: \`${inc?.status ?? "N/A"}\`; psmConnectorHealthy: ${state.psmConnectorHealthy}.`,
+        possibleReason: "INC-2044 has not been remediated in Troubleshooting yet.",
+        diagnosticAction:
+          "Open `Troubleshooting` → select `INC-2044` → click `Execute Remediation`.",
+      });
+      if (passed) evidence.push("Ticket 3 (INC-2044 PSM connection timeout) Resolved");
+      break;
+    }
+
+    case "m11-lifecycle-health": {
+      const emergencySafe = state.safes.find((s) => s.name === "EMERGENCY-SAFE");
+      const allOwned = state.accounts.every((a) => Boolean(a.owner));
+      const passed = Boolean(emergencySafe) && allOwned && state.psmConnectorHealthy;
+      criteria.push({
+        id: "emergency_safe_ready",
+        label: "Break-glass governance (`EMERGENCY-SAFE`) & account ownership verified",
+        passed: Boolean(emergencySafe) && allOwned,
+        expected: "`EMERGENCY-SAFE` exists and 100% of accounts have accountable owners.",
+        observed: `EMERGENCY-SAFE: ${Boolean(emergencySafe)}; all accounts owned: ${allOwned}.`,
+        diagnosticAction: "Inspect `Safes` (`EMERGENCY-SAFE`) and `Accounts` ownership.",
+      });
+      criteria.push({
+        id: "operational_health",
+        label: "PAM operational health (Vault, CPM, PSM connector) verified",
+        passed: state.psmConnectorHealthy,
+        expected: "PSM connector healthy and Vault/CPM online.",
+        observed: `psmConnectorHealthy: ${state.psmConnectorHealthy}.`,
+        diagnosticAction: "Check system health indicators in the top status bar.",
+      });
+      if (passed) evidence.push("EMERGENCY-SAFE, ownership coverage, and system health verified");
+      break;
+    }
+
+    case "m11-leaver-revocation": {
+      const leaverAudit = state.audit.find((a) => a.action === "Update User Role");
+      const passed = Boolean(leaverAudit);
+      criteria.push({
+        id: "leaver_role_revoked",
+        label: "Simulated leaver access revoked via Access Management role update",
+        passed,
+        expected: "An `Update User Role` audit event is recorded in `state.audit`.",
+        observed: leaverAudit
+          ? `Recorded: ${leaverAudit.detail} (${leaverAudit.time}).`
+          : "No `Update User Role` event recorded yet.",
+        possibleReason: "No user role update has been executed in `Access` yet.",
+        diagnosticAction:
+          "Open `Access` → change a departing user's role (e.g., `windows_admin` → `Auditor` or `Learner`), then click Check My Work.",
+      });
+      if (passed && leaverAudit) evidence.push(`Leaver revocation audited: ${leaverAudit.detail}`);
+      break;
+    }
+
+    case "m12-capstone-inventory-safes": {
+      const hasAccounts = state.accounts.length >= 2;
+      const hasSafes = state.safes.length >= 2 && state.safes.some((s) => s.members.length >= 2);
+      const passed = hasAccounts && hasSafes;
+      criteria.push({
+        id: "capstone_tasks_1_2",
+        label: "Capstone Tasks 1 & 2 state (Accounts, Platforms & Safes) verified",
+        passed,
+        expected: "At least 2 accounts and 2 Safes with configured member ACLs.",
+        observed: `${state.accounts.length} accounts and ${state.safes.length} Safes present.`,
+        diagnosticAction: "Verify Accounts and Safes in the simulator and document Tasks 1 & 2.",
+      });
+      if (passed) {
+        evidence.push(
+          `Capstone Tasks 1–2 state verified (${state.accounts.length} accounts, ${state.safes.length} Safes)`,
+        );
+      }
+      break;
+    }
+
+    case "m12-capstone-controls-audit": {
+      const hasAudit = state.audit.length >= 3;
+      const passed = hasAudit;
+      criteria.push({
+        id: "capstone_tasks_3_4_5",
+        label: "Capstone audit evidence & controls state verified",
+        passed,
+        expected: "At least 3 audit events present and Capstone Workspace evaluated.",
+        observed: `${state.audit.length} audit events in Vault journal.`,
+        diagnosticAction: "Complete Tasks 3–5 in the Capstone Project Workspace and run Evaluate.",
+      });
+      if (passed) evidence.push(`Capstone audit trail verified (${state.audit.length} events)`);
+      break;
+    }
   }
 
   const passed = criteria.length > 0 && criteria.every((c) => c.passed);
@@ -2264,6 +2652,97 @@ export function evaluateIndependentChallenge(
             : `Independent operational audit recorded (${state.audit[0]?.action ?? "Action"})`,
         );
       }
+      break;
+    }
+
+    case "ind-m04-pvwa": {
+      const svcBackup = state.accounts.find(
+        (a) => a.username === "svc_backup" && a.address === "WIN-SRV-02",
+      );
+      const auditorRetrieve = evaluatePermission(state, "WIN-SAFE", "auditor", "Retrieve accounts");
+      const passed = Boolean(svcBackup) && !auditorRetrieve.allowed;
+      criteria.push({
+        id: "m04_ind_properties",
+        label: "svc_backup on WIN-SRV-02 inspected and auditor Retrieve blocked on WIN-SAFE",
+        passed,
+        expected: "svc_backup present in SERVICE-SAFE and auditor denied Retrieve on WIN-SAFE.",
+        observed: `svc_backup: ${Boolean(svcBackup)}; auditor Retrieve denied: ${!auditorRetrieve.allowed}.`,
+        diagnosticAction:
+          "Inspect `svc_backup` in `Accounts` and `auditor` in `Safes` → `WIN-SAFE`.",
+      });
+      if (passed) evidence.push("Independent PVWA property & isolation review verified");
+      break;
+    }
+
+    case "ind-m09-audit": {
+      const hasSuccess = state.audit.some((a) => a.result === "Success");
+      const hasAnomaly = state.audit.some((a) => a.result === "Warning" || a.result === "Denied");
+      const hasInventory = state.safes.length >= 7 && state.accounts.length >= 8;
+      const passed = hasSuccess && hasAnomaly && hasInventory;
+      criteria.push({
+        id: "m09_ind_audit",
+        label: "Audit attribution (Success + Warning/Denied) and compliance inventory verified",
+        passed,
+        expected: "Both Success and Warning/Denied audit records plus full Safe/Account inventory.",
+        observed: `Success: ${hasSuccess}, Anomaly: ${hasAnomaly}, Safes: ${state.safes.length}, Accounts: ${state.accounts.length}.`,
+        diagnosticAction: "Inspect `Reports & Audit` for Success/Warning events and inventory.",
+      });
+      if (passed) evidence.push("Independent SOC forensic & compliance inventory verified");
+      break;
+    }
+
+    case "ind-m10-all-tickets": {
+      const t1 = state.incidents.find((i) => i.id === "INC-2043")?.status === "Resolved";
+      const t2 = state.incidents.find((i) => i.id === "INC-2041")?.status === "Resolved";
+      const t3 =
+        state.incidents.find((i) => i.id === "INC-2044")?.status === "Resolved" &&
+        state.psmConnectorHealthy;
+      const passed = t1 && t2 && t3;
+      criteria.push({
+        id: "m10_all_three_tickets",
+        label: "All 3 support tickets (INC-2043, INC-2041, INC-2044) Resolved",
+        passed,
+        expected: "INC-2043 (Vault), INC-2041 (CPM), and INC-2044 (PSM) all Resolved.",
+        observed: `INC-2043: ${t1}, INC-2041: ${t2}, INC-2044: ${t3}.`,
+        possibleReason: !passed
+          ? "One or more of the three support tickets is still unresolved."
+          : undefined,
+        diagnosticAction: "Open `Troubleshooting` and remediate any remaining open ticket.",
+      });
+      if (passed) evidence.push("All 3 simulated support tickets resolved and audited");
+      break;
+    }
+
+    case "ind-m11-governance": {
+      const hasLeaverAudit = state.audit.some((a) => a.action === "Update User Role");
+      const hasEmergencySafe = state.safes.some((s) => s.name === "EMERGENCY-SAFE");
+      const passed = hasLeaverAudit && hasEmergencySafe && state.psmConnectorHealthy;
+      criteria.push({
+        id: "m11_ind_governance",
+        label: "Leaver role update audited and EMERGENCY-SAFE governance intact",
+        passed,
+        expected: "`Update User Role` event in audit trail and `EMERGENCY-SAFE` active.",
+        observed: `Leaver audit: ${hasLeaverAudit}, EMERGENCY-SAFE: ${hasEmergencySafe}.`,
+        diagnosticAction: "Execute a user role update in `Access` to record leaver revocation.",
+      });
+      if (passed) evidence.push("Independent governance & leaver revocation audit verified");
+      break;
+    }
+
+    case "ind-m12-capstone": {
+      const hasAccounts = state.accounts.length >= 2;
+      const hasSafes = state.safes.length >= 2;
+      const hasAudit = state.audit.length >= 3;
+      const passed = hasAccounts && hasSafes && hasAudit;
+      criteria.push({
+        id: "m12_ind_capstone",
+        label: "Capstone simulator state & audit evidence ready for Competency Report",
+        passed,
+        expected: "Accounts, Safes, and audit trail verified alongside 5-task Capstone Workspace.",
+        observed: `${state.accounts.length} accounts, ${state.safes.length} Safes, ${state.audit.length} audit events.`,
+        diagnosticAction: "Complete and evaluate all 5 tasks in the Capstone Project Workspace.",
+      });
+      if (passed) evidence.push("Capstone simulator evidence verified");
       break;
     }
   }

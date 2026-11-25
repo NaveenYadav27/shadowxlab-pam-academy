@@ -318,7 +318,7 @@ export const CLIENT_MODULE_11: ClassCurriculum = {
               },
             ],
             targetConsole: "access",
-            associatedLabId: "Lab 02 · Configure Safe permissions",
+            associatedLabId: "Client M11 · Administration Best Practices",
             validationObjectiveId: "obj-cm11-governance",
             validationCriteria:
               "Audit user entitlements, verify least-privilege boundaries, and validate governance controls in the simulator.",

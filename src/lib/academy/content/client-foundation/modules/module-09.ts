@@ -326,7 +326,7 @@ export const CLIENT_MODULE_09: ClassCurriculum = {
               },
             ],
             targetConsole: "audit",
-            associatedLabId: "Lab 06A · Launch and terminate a monitored PSM session",
+            associatedLabId: "Client M09 · Monitoring, Auditing and Reporting",
             validationObjectiveId: "obj-cm09-audit",
             validationCriteria:
               "Analyze PAM audit events, verify session audit records, and confirm understanding of SOC telemetry in the simulator.",
