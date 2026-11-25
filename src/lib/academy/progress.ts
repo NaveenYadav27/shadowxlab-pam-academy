@@ -9,16 +9,16 @@ import type { KnowledgeCheckpointQuestion, LearnerProgress } from "./types";
 const PROGRESS_STORAGE_KEY = "shadowxlab_pam_academy_progress_v4";
 
 export const DEFAULT_LEARNER_PROGRESS: LearnerProgress = {
-  currentTrackId: "admin-20",
-  currentClassId: "module-01",
-  currentModuleId: "m01-core",
-  currentLessonId: "m01-l01",
+  currentTrackId: "client-12",
+  currentClassId: "client-m01",
+  currentModuleId: "cm01-core",
+  currentLessonId: "cm01-l01",
   completedLessons: [],
   checkpointAnswers: {},
   checkpointScores: {},
   completedExercises: [],
   completedIndependentPractices: [],
-  lastUpdated: "2026-11-16T00:00:00.000Z",
+  lastUpdated: "2026-11-24T00:00:00.000Z",
 };
 
 export function loadLearnerProgress(): LearnerProgress {
@@ -32,12 +32,24 @@ export function loadLearnerProgress(): LearnerProgress {
     const parsed = JSON.parse(raw) as Partial<LearnerProgress>;
     const track =
       parsed.currentTrackId ||
-      (parsed.currentClassId?.startsWith("class-") ? "intro-6" : "admin-20");
+      (parsed.currentClassId?.startsWith("client-m")
+        ? "client-12"
+        : parsed.currentClassId?.startsWith("class-")
+          ? "intro-6"
+          : parsed.currentClassId?.startsWith("module-")
+            ? "admin-20"
+            : "client-12");
     return {
       currentTrackId: track,
-      currentClassId: parsed.currentClassId || (track === "admin-20" ? "module-01" : "class-01"),
-      currentModuleId: parsed.currentModuleId || (track === "admin-20" ? "m01-core" : "c01-m01"),
-      currentLessonId: parsed.currentLessonId || (track === "admin-20" ? "m01-l01" : "c01-m01-l01"),
+      currentClassId:
+        parsed.currentClassId ||
+        (track === "client-12" ? "client-m01" : track === "admin-20" ? "module-01" : "class-01"),
+      currentModuleId:
+        parsed.currentModuleId ||
+        (track === "client-12" ? "cm01-core" : track === "admin-20" ? "m01-core" : "c01-m01"),
+      currentLessonId:
+        parsed.currentLessonId ||
+        (track === "client-12" ? "cm01-l01" : track === "admin-20" ? "m01-l01" : "c01-m01-l01"),
       completedLessons: Array.isArray(parsed.completedLessons) ? parsed.completedLessons : [],
       checkpointAnswers: parsed.checkpointAnswers || {},
       checkpointScores: parsed.checkpointScores || {},

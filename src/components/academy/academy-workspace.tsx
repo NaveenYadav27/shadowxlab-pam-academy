@@ -6,11 +6,25 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, GraduationCap, RotateCcw } from "lucide-react";
+import {
+  CheckCircle2,
+  GraduationCap,
+  RotateCcw,
+  Calendar,
+  AlertTriangle,
+  Info,
+  X,
+  Award,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   ADMIN_MODULES_20,
   ACADEMY_CLASSES_V2,
+  CLIENT_FOUNDATION_MODULES_12,
+  CLIENT_FOUNDATION_SCHEDULE_5_DAYS,
+  CLIENT_ASSESSMENT_FRAMEWORK,
+  CLIENT_SCHEDULE_DISCREPANCIES,
+  evaluateClientFoundationProgress,
   findClassById,
   getCurriculumMetrics,
 } from "@/lib/academy/content";
@@ -59,15 +73,21 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
   onUpdateState,
 }) => {
   const [progress, setProgress] = useState(DEFAULT_LEARNER_PROGRESS);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   useEffect(() => {
     setProgress(loadLearnerProgress());
   }, []);
 
-  const currentTrack = progress.currentTrackId || "admin-20";
+  const currentTrack = progress.currentTrackId || "client-12";
 
   // Active Class / Module / Lesson resolution
-  const activeDataset = currentTrack === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
+  const activeDataset =
+    currentTrack === "client-12"
+      ? CLIENT_FOUNDATION_MODULES_12
+      : currentTrack === "admin-20"
+        ? ADMIN_MODULES_20
+        : ACADEMY_CLASSES_V2;
   const currentClass =
     activeDataset.find((c) => c.id === progress.currentClassId) ||
     findClassById(progress.currentClassId) ||
@@ -77,6 +97,11 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
   const currentLesson =
     currentModule.lessons.find((l) => l.id === progress.currentLessonId) ||
     currentModule.lessons[0];
+
+  // Client assessment evaluation
+  const clientAssessment = useMemo(() => {
+    return evaluateClientFoundationProgress(progress);
+  }, [progress]);
 
   // Build ordered linear lesson sequence for the active track
   const orderedTrackLessons: LessonNavTarget[] = useMemo(() => {
@@ -106,8 +131,13 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
       ? orderedTrackLessons[currentLessonIdx + 1]
       : null;
 
-  function handleSelectTrack(newTrack: "admin-20" | "intro-6") {
-    const targetDataset = newTrack === "admin-20" ? ADMIN_MODULES_20 : ACADEMY_CLASSES_V2;
+  function handleSelectTrack(newTrack: "client-12" | "admin-20" | "intro-6") {
+    const targetDataset =
+      newTrack === "client-12"
+        ? CLIENT_FOUNDATION_MODULES_12
+        : newTrack === "admin-20"
+          ? ADMIN_MODULES_20
+          : ACADEMY_CLASSES_V2;
     const firstClass = targetDataset[0];
     const firstModule = firstClass.modules[0];
     const firstLesson = firstModule.lessons[0];
@@ -122,9 +152,11 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
     setProgress(nextProgress);
     saveLearnerProgress(nextProgress);
     toast.info(
-      newTrack === "admin-20"
-        ? "Switched to Flagship 20-Module Administrator Track."
-        : "Switched to 6-Class Foundational Track.",
+      newTrack === "client-12"
+        ? "Switched to CyberArk Basic Training (12 Modules / 30 Hours)."
+        : newTrack === "admin-20"
+          ? "Switched to Flagship 20-Module Administrator Track."
+          : "Switched to 6-Class Foundational Track.",
     );
   }
 
@@ -258,17 +290,36 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
             Learning Academy
           </h1>
           <p>
-            SHADOWXLAB PAM ADMINISTRATOR ACADEMY · Enterprise Privileged Access Security Curriculum
+            {currentTrack === "client-12"
+              ? "SHADOWXLAB PAM ACADEMY · CyberArk Basic Training Client Version (12 Modules / 30 Hours)"
+              : "SHADOWXLAB PAM ADMINISTRATOR ACADEMY · Enterprise Privileged Access Security Curriculum"}
           </p>
         </div>
         <div className="pvwa-toolbar">
           <span style={{ fontSize: 12, color: "#64748B", marginRight: 8 }}>
-            {currentTrack === "admin-20" ? "Admin Track" : "Intro Track"} Progress:{" "}
+            {currentTrack === "client-12"
+              ? "Foundation Track"
+              : currentTrack === "admin-20"
+                ? "Admin Track"
+                : "Intro Track"}{" "}
+            Progress:{" "}
             <strong>
               {completedLessonsCount}/{totalLessonsCount}
             </strong>{" "}
             Lessons ({overallPercentage}%)
           </span>
+          {currentTrack === "client-12" && (
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+              onClick={() => setShowScheduleModal((prev) => !prev)}
+              style={{ display: "flex", alignItems: "center", gap: 4, marginRight: 8 }}
+              title="5-Day Schedule & Assessment Framework"
+            >
+              <Calendar size={13} />
+              Schedule & Assessment (30h)
+            </button>
+          )}
           <button
             type="button"
             className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
@@ -280,6 +331,206 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           </button>
         </div>
       </div>
+
+      {/* 5-Day Schedule & Assessment Framework Drawer (when open) */}
+      {showScheduleModal && (
+        <div
+          role="region"
+          aria-label="Authoritative 5-Day Schedule and Assessment Framework"
+          style={{
+            background: "#FFFFFF",
+            border: "1px solid #CBD5E1",
+            borderRadius: 4,
+            padding: 16,
+            marginBottom: 12,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+              borderBottom: "1px solid #E2E8F0",
+              paddingBottom: 8,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Calendar size={18} className="text-[#0078D4]" />
+              <strong style={{ fontSize: 14, color: "#0F172A" }}>
+                Authoritative 5-Day Training Schedule & Assessment Framework (30 Hours)
+              </strong>
+            </div>
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-secondary pvwa-btn-sm"
+              onClick={() => setShowScheduleModal(false)}
+            >
+              <X size={14} /> Close
+            </button>
+          </div>
+
+          {/* Schedule Grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
+            {CLIENT_FOUNDATION_SCHEDULE_5_DAYS.map((day) => (
+              <div
+                key={day.dayNumber}
+                style={{
+                  background: day.discrepancy ? "#FEF3C7" : "#F8FAFC",
+                  border: day.discrepancy ? "1px solid #F59E0B" : "1px solid #E2E8F0",
+                  borderRadius: 4,
+                  padding: 10,
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: 12, color: "#1E293B", marginBottom: 4 }}>
+                  Day {day.dayNumber} ({day.printedDurationHours} Hours printed)
+                </div>
+                <div style={{ fontSize: 11, color: "#475569", marginBottom: 6 }}>{day.title}</div>
+                <div style={{ fontSize: 10, color: "#64748B" }}>
+                  Modules:{" "}
+                  {day.moduleNumbers.map((n) => `M${String(n).padStart(2, "0")}`).join(", ")}
+                </div>
+                {day.discrepancy && (
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: "#B45309",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <AlertTriangle size={11} />
+                    Module sum: {day.moduleSumDurationHours}h (
+                    {day.discrepancy.discrepancyHours > 0
+                      ? `+${day.discrepancy.discrepancyHours}h`
+                      : `${day.discrepancy.discrepancyHours}h`}{" "}
+                    discrepancy surfaced)
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Schedule Discrepancies Details */}
+          <div
+            style={{
+              background: "#FFFBEB",
+              border: "1px solid #FDE68A",
+              borderLeft: "4px solid #D97706",
+              borderRadius: 3,
+              padding: "10px 14px",
+              marginBottom: 16,
+              fontSize: 11.5,
+              color: "#92400E",
+              lineHeight: 1.5,
+            }}
+          >
+            <div
+              style={{
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 4,
+              }}
+            >
+              <Info size={14} />
+              Schedule Discrepancy Notice (Surfaced Verbatim for Owner Approval)
+            </div>
+            <div>
+              <strong>Day 4: </strong>Printed day duration is 6h, while the sum of Modules 8 (3h), 9
+              (2h), and 10 (2h) is 7h (+1h).
+              <br />
+              <strong>Day 5: </strong>Printed day duration is 6h, while the sum of Module 11 (2h)
+              and Module 12 Capstone (3h) is 5h (-1h).
+              <br />
+              <strong>Net Impact: </strong>The 5-day training total remains precisely 30 hours (6 +
+              6 + 6 + 7 + 5 = 30h).
+            </div>
+          </div>
+
+          {/* Assessment Framework Breakdown */}
+          <div style={{ borderTop: "1px solid #E2E8F0", paddingTop: 12 }}>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: 12,
+                color: "#0F172A",
+                marginBottom: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <Award size={15} className="text-[#0078D4]" />
+              Weighted Assessment Framework (Total 100% · Passing Score: 70%)
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                gap: 8,
+              }}
+            >
+              {clientAssessment.domainScores.map((domain) => (
+                <div
+                  key={domain.domainId}
+                  style={{
+                    background: domain.passed ? "#F0FDF4" : "#F8FAFC",
+                    border: domain.passed ? "1px solid #86EFAC" : "1px solid #CBD5E1",
+                    borderRadius: 3,
+                    padding: 8,
+                    fontSize: 11,
+                  }}
+                >
+                  <div style={{ fontWeight: 600, color: "#1E293B" }}>
+                    {domain.title} ({domain.weightPercentage}%)
+                  </div>
+                  <div style={{ color: "#64748B", fontSize: 10, marginTop: 2 }}>
+                    Earned: {domain.earnedPercentage}% (Contribution:{" "}
+                    {domain.weightedScoreContribution} pts)
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: domain.passed ? "#16A34A" : "#D97706",
+                    }}
+                  >
+                    {domain.passed ? "Domain Passed" : "In Progress"}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 10, fontSize: 11.5, color: "#334155" }}>
+              <strong>Overall Score: </strong>
+              {clientAssessment.overallScorePercentage}% / 100% · <strong>Verdict: </strong>
+              <span
+                style={{
+                  fontWeight: 700,
+                  color: clientAssessment.isPassed ? "#16A34A" : "#D97706",
+                }}
+              >
+                {clientAssessment.isPassed
+                  ? "PASSING (>= 70%)"
+                  : "PROGRESSING (< 70% passing threshold)"}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isTrackCompleted && (
         <div
@@ -304,14 +555,25 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
             <CheckCircle2 size={16} />
             <span>
               <strong>
-                {currentTrack === "admin-20"
-                  ? "20-Module Administrator Track Completed!"
-                  : "6-Class Foundational Track Completed!"}
+                {currentTrack === "client-12"
+                  ? "CyberArk Basic Training Programme Completed!"
+                  : currentTrack === "admin-20"
+                    ? "20-Module Administrator Track Completed!"
+                    : "6-Class Foundational Track Completed!"}
               </strong>{" "}
               All {totalLessonsCount} lessons, checkpoints, and simulator validations have been
               recorded.
             </span>
           </div>
+          {currentTrack === "client-12" && (
+            <button
+              type="button"
+              className="pvwa-btn pvwa-btn-primary pvwa-btn-sm"
+              onClick={() => setShowScheduleModal(true)}
+            >
+              View Capstone & Competency Report
+            </button>
+          )}
           {currentTrack === "intro-6" && (
             <button
               type="button"
@@ -355,9 +617,11 @@ export const AcademyWorkspace: React.FC<AcademyWorkspaceProps> = ({
           onNavigateLesson={handleNavigateLesson}
           trackRemainingCount={remainingLessonsCount}
           trackTitle={
-            currentTrack === "admin-20"
-              ? "20-Module Administrator Track"
-              : "6-Class Foundational Track"
+            currentTrack === "client-12"
+              ? "CyberArk Basic Training (12 Modules / 30h)"
+              : currentTrack === "admin-20"
+                ? "20-Module Administrator Track"
+                : "6-Class Foundational Track"
           }
           moduleTitle={`${currentClass.label}: ${currentClass.title}`}
         />

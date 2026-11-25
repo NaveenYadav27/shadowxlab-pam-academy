@@ -196,12 +196,16 @@ export interface ClassCurriculum {
   level: DifficultyLevel;
   overview: string;
   modules: Module[];
-  track?: "admin-20" | "intro-6";
+  track?: "admin-20" | "intro-6" | "client-12";
   category?: string;
+  durationHours?: number;
+  dayNumber?: number;
+  assessmentDomain?: "fundamentals" | "safes" | "onboarding" | "sessions" | "capstone";
+  outsideFoundationScope?: boolean;
 }
 
 export interface LearnerProgress {
-  currentTrackId?: "admin-20" | "intro-6";
+  currentTrackId?: "admin-20" | "intro-6" | "client-12";
   currentClassId: string;
   currentModuleId: string;
   currentLessonId: string;
